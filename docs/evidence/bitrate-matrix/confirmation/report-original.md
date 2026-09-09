@@ -19,19 +19,6 @@ Explicit bitrate targets require measured payload rate within ±20%. A null targ
 
 A PASS means the configured gates passed in this sample. It does not prove absence of a smaller regression. Public latency includes scheduled arrival, queuing and callback delivery; VT latency ends at the internal decoder callback.
 
-## Decode time shown by Moonlight
-
-The native Apple adapter displays **“VT submit-to-callback mean”**: the arithmetic mean from VideoToolbox submission to its callback, in milliseconds. These values include cold/startup and warmup outputs, matching the adapter’s cumulative counter; they are not the steady-state medians in the table above. Case means below sum durations and divide by eligible output counts across all captured timed trials, so trials with different output counts are weighted correctly. Each trial includes its own startup. Per-trial means appear below each case.
-
-The regular Qt/FFmpeg **“Average decoding time”** includes input-queue and decoder delivery time and uses recent statistics windows. The queue-inclusive proxy below uses recorded complete-frame arrival to the harness output callback. It approximates that broader boundary; it is not an actual live overlay reading and does not include the app’s output wrapping or rendering. The native column matches this repository’s native Apple overlay formula.
-
-Dropped/cancelled frames add no decode sample, so a low mean does not imply smooth delivery. Original PASS/FAIL, bitrate coverage and latency gates are unchanged. A dash means the necessary trace-derived values are unavailable. Machine-readable means and sample counts: [moonlight-decode-times.json](moonlight-decode-times.json).
-
-| Case | Result | Native Moonlight mean ms (baseline / candidate) | Queue-inclusive proxy ms (baseline / candidate) | Native samples (baseline / candidate) |
-|---|---|---:|---:|---:|
-| ultrawide-3440x1440p240-hevc-hdr10-50mbps | REGRESSION | 2.128 / 2.115 | 2.540 / 2.503 | 28800 / 28740 |
-| ultrawide-3440x1440p240-hevc-hdr10-250mbps | BASELINE_FAILURE | 2.738 / 2.764 | 3.502 / 3.590 | 28463 / 28577 |
-
 ## ultrawide-3440x1440p240-hevc-hdr10-50mbps
 
 Status: REGRESSION
@@ -42,20 +29,20 @@ Stream: 3440×1440 at 240 fps; HEVC, HDR10. Measured bitrate: 50.947 Mbps. Encod
 
 - timed / candidate / 3: native FAIL: accounting/hardware gate failed; process FINISHED, exit 1; not every offered frame produced an output; scheduler_drops=59; failed_or_cancelled_or_dropped=1; expected_display_mismatches=1; resets=3; CSV contains a non-output terminal completion; delivered frame rate below configured ratio
 
-| Build / run | Outputs / offered | FPS | Drops / failed | First output ms | Moonlight VT mean ms | Queue-inclusive proxy ms |
-|---|---:|---:|---:|---:|---:|---:|
-| baseline / 1 | 4800 / 4800 | 240.024 | 0 / 0 | 63.642 | 2.136 | 2.519 |
-| candidate / 1 | 4800 / 4800 | 240.023 | 0 / 0 | 71.427 | 2.142 | 2.557 |
-| candidate / 2 | 4800 / 4800 | 240.024 | 0 / 0 | 69.680 | 2.155 | 2.560 |
-| baseline / 2 | 4800 / 4800 | 240.023 | 0 / 0 | 69.635 | 2.222 | 2.621 |
-| baseline / 3 | 4800 / 4800 | 240.026 | 0 / 0 | 74.013 | 2.106 | 2.538 |
-| candidate / 3 | 4740 / 4800 | 237.023 | 59 / 1 | 264.278 | 2.107 | 2.358 |
-| candidate / 4 | 4800 / 4800 | 240.023 | 0 / 0 | 69.443 | 2.058 | 2.478 |
-| baseline / 4 | 4800 / 4800 | 240.022 | 0 / 0 | 68.668 | 2.095 | 2.507 |
-| baseline / 5 | 4800 / 4800 | 240.023 | 0 / 0 | 70.651 | 2.083 | 2.505 |
-| candidate / 5 | 4800 / 4800 | 240.025 | 0 / 0 | 72.860 | 2.087 | 2.515 |
-| candidate / 6 | 4800 / 4800 | 240.024 | 0 / 0 | 70.118 | 2.139 | 2.551 |
-| baseline / 6 | 4800 / 4800 | 240.024 | 0 / 0 | 72.680 | 2.127 | 2.550 |
+| Build / run | Outputs / offered | FPS | Drops / failed | First output ms |
+|---|---:|---:|---:|---:|
+| baseline / 1 | 4800 / 4800 | 240.024 | 0 / 0 | 63.642 |
+| candidate / 1 | 4800 / 4800 | 240.023 | 0 / 0 | 71.427 |
+| candidate / 2 | 4800 / 4800 | 240.024 | 0 / 0 | 69.680 |
+| baseline / 2 | 4800 / 4800 | 240.023 | 0 / 0 | 69.635 |
+| baseline / 3 | 4800 / 4800 | 240.026 | 0 / 0 | 74.013 |
+| candidate / 3 | 4740 / 4800 | 237.023 | 59 / 1 | 264.278 |
+| candidate / 4 | 4800 / 4800 | 240.023 | 0 / 0 | 69.443 |
+| baseline / 4 | 4800 / 4800 | 240.022 | 0 / 0 | 68.668 |
+| baseline / 5 | 4800 / 4800 | 240.023 | 0 / 0 | 70.651 |
+| candidate / 5 | 4800 / 4800 | 240.025 | 0 / 0 | 72.860 |
+| candidate / 6 | 4800 / 4800 | 240.024 | 0 / 0 | 70.118 |
+| baseline / 6 | 4800 / 4800 | 240.024 | 0 / 0 | 72.680 |
 
 ## ultrawide-3440x1440p240-hevc-hdr10-250mbps
 
@@ -78,18 +65,18 @@ baseline failed; latency is descriptive and cannot establish a clean regression 
 - timed / baseline / 6: native FAIL: accounting/hardware gate failed; process FINISHED, exit 1; not every offered frame produced an output; scheduler_drops=55; failed_or_cancelled_or_dropped=2; expected_display_mismatches=2; resets=2; CSV contains a non-output terminal completion; delivered frame rate below configured ratio
 - timed / candidate / 6: native FAIL: accounting/hardware gate failed; process FINISHED, exit 1; not every offered frame produced an output; scheduler_drops=54; failed_or_cancelled_or_dropped=2; expected_display_mismatches=2; resets=2; CSV contains a non-output terminal completion; delivered frame rate below configured ratio
 
-| Build / run | Outputs / offered | FPS | Drops / failed | First output ms | Moonlight VT mean ms | Queue-inclusive proxy ms |
-|---|---:|---:|---:|---:|---:|---:|
-| candidate / 1 | 4800 / 4800 | 240.006 | 0 / 0 | 65.783 | 2.738 | 3.676 |
-| baseline / 1 | 4742 / 4800 | 237.111 | 56 / 2 | 71.941 | 2.766 | 3.503 |
-| baseline / 2 | 4745 / 4800 | 237.263 | 54 / 1 | 66.981 | 2.569 | 3.360 |
-| candidate / 2 | 4745 / 4800 | 237.259 | 54 / 1 | 67.467 | 2.830 | 3.620 |
-| candidate / 3 | 4744 / 4800 | 237.209 | 55 / 1 | 68.414 | 2.737 | 3.495 |
-| baseline / 3 | 4744 / 4800 | 237.216 | 55 / 1 | 68.646 | 2.740 | 3.505 |
-| baseline / 4 | 4745 / 4800 | 237.265 | 54 / 1 | 67.518 | 2.774 | 3.553 |
-| candidate / 4 | 4800 / 4800 | 240.022 | 0 / 0 | 65.758 | 2.757 | 3.691 |
-| candidate / 5 | 4744 / 4800 | 237.203 | 55 / 1 | 68.391 | 2.713 | 3.482 |
-| baseline / 5 | 4744 / 4800 | 237.218 | 54 / 2 | 68.036 | 2.781 | 3.538 |
-| baseline / 6 | 4743 / 4800 | 237.165 | 55 / 2 | 69.117 | 2.799 | 3.550 |
-| candidate / 6 | 4744 / 4800 | 237.205 | 54 / 2 | 68.099 | 2.809 | 3.575 |
+| Build / run | Outputs / offered | FPS | Drops / failed | First output ms |
+|---|---:|---:|---:|---:|
+| candidate / 1 | 4800 / 4800 | 240.006 | 0 / 0 | 65.783 |
+| baseline / 1 | 4742 / 4800 | 237.111 | 56 / 2 | 71.941 |
+| baseline / 2 | 4745 / 4800 | 237.263 | 54 / 1 | 66.981 |
+| candidate / 2 | 4745 / 4800 | 237.259 | 54 / 1 | 67.467 |
+| candidate / 3 | 4744 / 4800 | 237.209 | 55 / 1 | 68.414 |
+| baseline / 3 | 4744 / 4800 | 237.216 | 55 / 1 | 68.646 |
+| baseline / 4 | 4745 / 4800 | 237.265 | 54 / 1 | 67.518 |
+| candidate / 4 | 4800 / 4800 | 240.022 | 0 / 0 | 65.758 |
+| candidate / 5 | 4744 / 4800 | 237.203 | 55 / 1 | 68.391 |
+| baseline / 5 | 4744 / 4800 | 237.218 | 54 / 2 | 68.036 |
+| baseline / 6 | 4743 / 4800 | 237.165 | 55 / 2 | 69.117 |
+| candidate / 6 | 4744 / 4800 | 237.205 | 54 / 2 | 68.099 |
 

@@ -252,6 +252,12 @@ case's requested and measured bitrate, bitrate-coverage result, status, and
 decode-latency comparison; the JSON retains the structured settings,
 measurements, and comparison gates, including bitrate deviation and the applied
 tolerance.
+
+The report also includes Moonlight decode-time means, per trial and per case.
+`moonlight-decode-times.json` supplies their sums, sample counts, stream settings,
+and baseline/candidate values; new runs also retain per-trial means under
+`cases[].runs[].derived.moonlight_decode_time` in `results.json`.
+
 `--dry-run` only validates and expands configuration, and `--prepare-only`
 prepares fixtures; neither produces a timed comparison report. Invalid command
 arguments or configuration fail before a comparison starts.
@@ -285,6 +291,43 @@ The report separates these questions:
 Warmup excludes early frames from steady-state latency statistics. It does not
 erase startup loss, change total output accounting, or make a failed run pass.
 Cold-start timing and sustained decode latency answer different questions.
+
+The [native Apple adapter](../integration/moonlight-qt/apple_video.cpp) displays
+**VT submit-to-callback mean**, rounded to three decimal milliseconds. It
+accumulates `callback_ns - vt_submit_ns` for successful new, single-sample
+outputs with both trace timestamps. The report uses that same arithmetic mean,
+including cold/startup, warmup, and recovery outputs. A case mean pools integer
+duration sums and eligible output counts across its trials; every trial includes
+its own startup, so this is not one continuous client session. Dropped or
+cancelled frames contribute no decode sample and remain failures in the delivery
+accounting. This supplemental mean does not replace the steady-state latency
+gates.
+
+The regular Qt/FFmpeg overlay's **Average decoding time** has a broader boundary
+and uses recent statistics windows. The report's separately labeled
+**queue-inclusive proxy** averages recorded complete-frame scheduled arrival to
+the harness output callback, including startup. It approximates that boundary
+but does not measure the app's queue, output wrapping, or live statistics window.
+Neither replay value establishes actual network or presentation latency.
+
+To add these columns to an existing native comparison **without rerunning any
+tests, builds, fixture generation, or decoding**, use the offline report command:
+
+```sh
+.local/benchmark-venv/bin/python scripts/refresh-decode-report.py \
+  --results-dir results/comparison-001
+```
+
+The source directory must retain its original `results.json`, `report.md`, and
+raw timed JSON/CSV files. The command verifies recorded hashes and native
+results before deriving means. It preserves `results.json`, existing verdicts,
+correctness evidence, and raw files byte for byte; it saves `report-original.md`
+and writes an enhanced `report.md` plus `moonlight-decode-times.json`. The
+companion records source/report hashes and derivation provenance. Optional
+`--report-dir docs/evidence/comparison-001` writes the reports separately while
+leaving the source directory untouched. Archived summaries without raw traces
+cannot be refreshed this way. Unlike `--analyze-only`, this command does not
+reapply comparison gates or replace the original analysis.
 
 For VT submit-to-callback and caller-visible arrival-to-output latency, the
 runner compares median, p95, and p99 separately. Each repetition supplies one
@@ -371,8 +414,8 @@ workflow-wide concurrency group prevents overlapping jobs from this workflow;
 keep unrelated workloads off the same device as well. Results, fixture bytes,
 JUnit output, build logs, CMake caches, and compile commands upload even when
 the comparison fails. Reference provenance sidecars are retained; temporary raw
-references are removed after correctness validation. Both `report.md` and
-`results.json` are included in the
+references are removed after correctness validation. `report.md`, `results.json`,
+and `moonlight-decode-times.json` are included in the
 artifact, and the Markdown report is also copied into the job summary.
 Artifacts are retained for 30 days; download or archive evidence that must last
 longer. A missing runner or unsupported hardware leaves this job unable to

@@ -17,8 +17,9 @@ and one was flagged by an isolated candidate startup failure.
 
 Read the [generated Markdown report](evidence/bitrate-matrix/full/report.md) or
 the [machine-readable results](evidence/bitrate-matrix/full/results.json).
-The original report is preserved; follow-up measurements do not replace its
-statuses or failed trials.
+The [original report](evidence/bitrate-matrix/full/report-original.md) is
+preserved byte for byte. The enhanced report adds Moonlight decode-time means
+from saved traces; its original statuses and failed trials are unchanged.
 
 | Mode | PASS | INCONCLUSIVE | BASELINE_FAILURE | REGRESSION |
 |---|---:|---:|---:|---:|
@@ -42,6 +43,53 @@ and 122 failed: 227 passes and 61 failures per build. The run offered 691,200
 frames and delivered 627,370, with 61,308 scheduler drops and 2,522
 failed/cancelled/dropped completions. No failures were removed as warmup.
 All 576 timed trials recorded nominal thermal state.
+
+## Decode time in Moonlight
+
+The native Apple adapter displays **VT submit-to-callback mean**: the arithmetic
+mean of VideoToolbox submission-to-callback durations, including startup and
+warmup. The enhanced [full report](evidence/bitrate-matrix/full/report.md#decode-time-shown-by-moonlight)
+and [confirmation report](evidence/bitrate-matrix/confirmation/report.md#decode-time-shown-by-moonlight)
+now include this metric for both builds, per trial and pooled per workload.
+They also include a separately labeled queue-inclusive proxy for the regular
+Qt/FFmpeg overlay's broader **Average decoding time** metric. Neither is a live
+Moonlight session measurement; the native column applies the adapter's actual
+formula to the recorded replay outputs.
+
+For example, these are the full-run native means for **HEVC SDR with a 100 Mbps
+encoder target**, in milliseconds:
+
+| Mode | Measured Mbps | C++17 baseline | C++23 candidate | Original status |
+|---|---:|---:|---:|---|
+| 1920×1080 at 60 fps | 85.816 | 2.990 | 2.971 | PASS |
+| 1920×1080 at 120 fps | 101.643 | 2.205 | 2.212 | PASS |
+| 3440×1440 at 120 fps | 98.189 | 2.518 | 2.359 | PASS |
+| 3440×1440 at 240 fps | 95.374 | 2.218 | 2.207 | PASS |
+| 3840×2160 at 60 fps | 92.471 | 3.650 | 3.675 | PASS |
+| 3840×2160 at 120 fps | 122.563 | 3.305 | 3.301 | INCONCLUSIVE |
+
+The last fixture exceeded the allowed bitrate tolerance; its otherwise clean
+decoding does not establish coverage at the requested target. All 96 workloads,
+including AV1, HDR10, and the other bitrate targets, remain in the full report.
+
+The new columns were derived offline from **600 existing timed CSVs** after
+verifying their hashes and native JSON against the original results. They cover
+627,370 eligible output samples in the full run and 114,580 in confirmation.
+Each case mean divides the sum of durations by the number of eligible outputs
+across separate trials, including each trial's startup. It does not average
+medians or give unequal-sized trials equal weight. Failed/cancelled outputs add
+no decode sample, and the original delivery and latency gates remain unchanged.
+**No tests, benchmarks, builds, or decoding were rerun for this report update.**
+
+Machine-readable supplemental means, counts, integer duration sums, and
+provenance are available for the
+[full run](evidence/bitrate-matrix/full/moonlight-decode-times.json) and
+[confirmation](evidence/bitrate-matrix/confirmation/moonlight-decode-times.json).
+The original `results.json`, plans, traces, and audit results remain unchanged;
+the [archive manifest](evidence/bitrate-matrix/archive.json) distinguishes
+original evidence from enhanced reports. Existing audit hashes for `report.md`
+refer to the preserved `report-original.md` copies. See the
+[offline refresh command](testing-framework.md#reading-the-evidence) for reuse.
 
 ## Startup follow-up
 

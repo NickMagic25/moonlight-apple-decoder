@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "description": "Unmodified generated reports, plans, and audits. Compressed payloads, raw traces and logs remain in the complete local results directories and physical CI artifacts.",
+  "description": "Original generated results, plans, configurations and audits remain unmodified. Full and confirmation report.md files add Moonlight means derived offline from saved timed traces; report-original.md preserves each original report and its audit hash. Companion moonlight-decode-times.json files record the means and derivation provenance. No tests, builds, decoding or benchmarks were rerun. Compressed payloads, raw traces and logs remain in the complete local results directories and physical CI artifacts.",
   "files": {
     "full/config.yaml": {
       "source": "results/bitrate-matrix-paired-full/config.yaml",
@@ -16,11 +16,6 @@
       "source": "results/bitrate-matrix-paired-full/plan.json",
       "bytes": 2130535,
       "sha256": "e40d440e225bdc47387fe1c5715e228dc113f66f8e4cba5604c6b73e8bc1455e"
-    },
-    "full/report.md": {
-      "source": "results/bitrate-matrix-paired-full/report.md",
-      "bytes": 134741,
-      "sha256": "28c8e02c3d5126bbc7129245f789835f74f32eca84a60a7054932971a6067327"
     },
     "full/results.json": {
       "source": "results/bitrate-matrix-paired-full/results.json",
@@ -41,11 +36,6 @@
       "source": "results/bitrate-isolated-confirmation/plan.json",
       "bytes": 74453,
       "sha256": "d00359525eac60b0d09f0e7d040a95ffb9a5c97848ce9166c2b10897a14b5527"
-    },
-    "confirmation/report.md": {
-      "source": "results/bitrate-isolated-confirmation/report.md",
-      "bytes": 8079,
-      "sha256": "566ed35471ac8d9c7ee3b1afafd0603eae4cf133e5ba9d51e3520da0cbaf712a"
     },
     "confirmation/results.json": {
       "source": "results/bitrate-isolated-confirmation/results.json",
@@ -81,6 +71,44 @@
       "source": "results/bitrate-confirmation-audit/summary.json",
       "bytes": 2966,
       "sha256": "f89b08bc060b13afecdc1b54900cd6a3842600365156b82e3ccd9de4d4271e45"
+    },
+    "full/report-original.md": {
+      "source": "results/bitrate-matrix-paired-full/report.md",
+      "bytes": 134741,
+      "sha256": "28c8e02c3d5126bbc7129245f789835f74f32eca84a60a7054932971a6067327"
+    },
+    "full/report.md": {
+      "source": "Offline derivation from verified saved timed CSV/JSON; see moonlight-decode-times.json",
+      "bytes": 161203,
+      "sha256": "0679c0843524b8cc4cbce80daf2850c3b3c7c5140f530d761c224a86c6af03de",
+      "source_results_sha256": "83051d25e546583a32f2212f1bd624925f401384d758fa40ecb713e73f1b3682",
+      "original_report_sha256": "28c8e02c3d5126bbc7129245f789835f74f32eca84a60a7054932971a6067327"
+    },
+    "full/moonlight-decode-times.json": {
+      "source": "Offline derivation from verified saved timed CSV/JSON; see moonlight-decode-times.json",
+      "bytes": 606879,
+      "sha256": "dea36f703da6eb97ff0a253e64db15699693d71b354e3215c87e806c3a3c8c15",
+      "source_results_sha256": "83051d25e546583a32f2212f1bd624925f401384d758fa40ecb713e73f1b3682",
+      "original_report_sha256": "28c8e02c3d5126bbc7129245f789835f74f32eca84a60a7054932971a6067327"
+    },
+    "confirmation/report-original.md": {
+      "source": "results/bitrate-isolated-confirmation/report.md",
+      "bytes": 8079,
+      "sha256": "566ed35471ac8d9c7ee3b1afafd0603eae4cf133e5ba9d51e3520da0cbaf712a"
+    },
+    "confirmation/report.md": {
+      "source": "Offline derivation from verified saved timed CSV/JSON; see moonlight-decode-times.json",
+      "bytes": 10367,
+      "sha256": "d906a337882de66363035b590a10671e8a17a574ffa7bf9661cd1d1c55391219",
+      "source_results_sha256": "293148150d337547e10f679d7aaf9babac864f5b0580c34427fa912a56ae69b0",
+      "original_report_sha256": "566ed35471ac8d9c7ee3b1afafd0603eae4cf133e5ba9d51e3520da0cbaf712a"
+    },
+    "confirmation/moonlight-decode-times.json": {
+      "source": "Offline derivation from verified saved timed CSV/JSON; see moonlight-decode-times.json",
+      "bytes": 25356,
+      "sha256": "1785be5f62f5ed3e3986aec6978b5f950ad05b9b647f6bd633b62427a3723992",
+      "source_results_sha256": "293148150d337547e10f679d7aaf9babac864f5b0580c34427fa912a56ae69b0",
+      "original_report_sha256": "566ed35471ac8d9c7ee3b1afafd0603eae4cf133e5ba9d51e3520da0cbaf712a"
     }
   }
 }

@@ -621,9 +621,53 @@ def analyze(plan, out):
     return result
 
 
+def moonlight_report_data(result):
+    """Summarize overlay means without changing any comparison or gate."""
+    cases = []
+    for case in result['cases']:
+        timed = [r for r in case['runs'] if r['phase'] == 'timed']
+        builds = {}
+        for setting in result['builds']:
+            runs = [r for r in timed if r['setting'] == setting]
+            metrics = {}
+            for key in ('native_vt', 'public_queue_proxy'):
+                values = [r.get('derived', {}).get('moonlight_decode_time', {}).get(key) for r in runs]
+                valid = bool(values) and all(isinstance(v, dict)
+                    and type(v.get('sample_count')) is int and v['sample_count'] >= 0
+                    and type(v.get('total_ns')) is int and v['total_ns'] >= 0
+                    and (v['sample_count'] > 0 or v['total_ns'] == 0) for v in values)
+                count = sum(v['sample_count'] for v in values) if valid else None
+                total = sum(v['total_ns'] for v in values) if valid else None
+                metrics[key] = dict(sample_count=count, total_ns=total,
+                                    mean_ms=total / count / 1e6 if count else None)
+            builds[setting] = dict(trials=len(runs), **metrics)
+        cases.append(dict(name=case['name'], status=case['status'], bitrate=case['bitrate'],
+            stream={key: case['settings'][key] for key in ('width', 'height', 'fps', 'codec', 'dynamic_range')},
+            builds=builds,
+            runs=[dict(setting=r['setting'], repetition=r['repetition'], passed=r['passed'],
+                       result_file=r['result_file'], result_file_sha256=r.get('result_file_sha256'),
+                       csv_file=r['csv_file'], csv_file_sha256=r.get('csv_file_sha256'),
+                       means=r.get('derived', {}).get('moonlight_decode_time')) for r in timed]))
+    return dict(schema_version=1, status=result['status'],
+                report_generator_sha256=sha(pathlib.Path(__file__)),
+                moonlight_report_derivation=result.get('moonlight_report_derivation'),
+                native_label='VT submit-to-callback mean',
+                native_formula='sum(callback_ns - vt_submit_ns) / eligible outputs / 1000000',
+                native_source='integration/moonlight-qt/apple_video.cpp:254-268,476-499',
+                population='All eligible timed outputs, including cold/warmup and recovery generations; '
+                    'not medians. Case means pool duration sums/counts across separate trials. '
+                    'Dropped/cancelled frames contribute no decode sample; failure gates remain unchanged.',
+                public_proxy_formula='sum(sink_entry_ns - scheduled_arrival_ns) / valid outputs / 1000000',
+                limitation='Native means reproduce the adapter formula on captured replay outputs, not a live '
+                    'Moonlight session. Public means are a queue-inclusive proxy, not the Qt/FFmpeg rolling-window '
+                    'measurement; app output wrapping, pacing, rendering and network are not measured.',
+                cases=cases)
+
+
 def report_markdown(result, path):
     def number(value):
         return '—' if value is None else f'{value:.3f}'
+    moonlight = moonlight_report_data(result)
     run_settings = result['config']['run']
     lines = ['# Decoder comparison', '', f"Overall: **{result['status']}** ({result['comparison']}).", '',
              f"Cases: {len(result['cases'])}; repetitions per build: {run_settings['repetitions']}; "
@@ -656,6 +700,34 @@ def report_markdown(result, path):
               'A null target retains the legacy encoder policy and does not impose a bitrate coverage gate.', '',
               'A PASS means the configured gates passed in this sample. It does not prove absence of a smaller regression. '
               'Public latency includes scheduled arrival, queuing and callback delivery; VT latency ends at the internal decoder callback.', '']
+    lines += ['## Decode time shown by Moonlight', '',
+              'The native Apple adapter displays **“VT submit-to-callback mean”**: the arithmetic mean from '
+              'VideoToolbox submission to its callback, in milliseconds. These values include cold/startup and '
+              'warmup outputs, matching the adapter’s cumulative counter; they are not the steady-state medians '
+              'in the table above. Case means below sum durations and divide by eligible output counts across '
+              'all captured timed trials, so trials with different output counts are weighted correctly. '
+              'Each trial includes its own startup. Per-trial means appear below each case.', '',
+              'The regular Qt/FFmpeg **“Average decoding time”** includes input-queue and decoder delivery time '
+              'and uses recent statistics windows. The queue-inclusive proxy below uses recorded complete-frame '
+              'arrival to the harness output callback. It approximates that broader boundary; it is not an actual '
+              'live overlay reading and does not include the app’s output wrapping or rendering. The native '
+              'column matches this repository’s native Apple overlay formula.', '',
+              'Dropped/cancelled frames add no decode sample, so a low mean does not imply smooth delivery. '
+              'Original PASS/FAIL, bitrate coverage and latency gates are unchanged. A dash means the necessary '
+              'trace-derived values are unavailable. Machine-readable means and sample counts: '
+              '[moonlight-decode-times.json](moonlight-decode-times.json).', '',
+              '| Case | Result | Native Moonlight mean ms (baseline / candidate) | Queue-inclusive proxy ms (baseline / candidate) | Native samples (baseline / candidate) |',
+              '|---|---|---:|---:|---:|']
+    for case in moonlight['cases']:
+        cells = []
+        for key in ('native_vt', 'public_queue_proxy'):
+            cells.append(' / '.join(number(case['builds'].get(setting, {}).get(key, {}).get('mean_ms'))
+                                    for setting in ('baseline', 'candidate')))
+        counts = ' / '.join(str(case['builds'].get(setting, {}).get('native_vt', {}).get('sample_count'))
+                            if case['builds'].get(setting, {}).get('native_vt', {}).get('sample_count') is not None
+                            else '—' for setting in ('baseline', 'candidate'))
+        lines.append(f"| {case['name']} | {case['status']} | {cells[0]} | {cells[1]} | {counts} |")
+    lines.append('')
     for case in result['cases']:
         lines += [f"## {case['name']}", '', f"Status: {case['status']}", '']
         settings = case['settings']
@@ -686,20 +758,26 @@ def report_markdown(result, path):
                 lines += [f"- {run['phase']} / {run['setting']} / {run['repetition']}: " + '; '.join(run['errors'])]
         if any(run['errors'] for run in case['runs']):
             lines.append('')
-        lines += ['| Build / run | Outputs / offered | FPS | Drops / failed | First output ms |', '|---|---:|---:|---:|---:|']
+        lines += ['| Build / run | Outputs / offered | FPS | Drops / failed | First output ms | Moonlight VT mean ms | Queue-inclusive proxy ms |',
+                  '|---|---:|---:|---:|---:|---:|---:|']
         for run in case['runs']:
             if run['phase'] != 'timed':
                 continue
             native = run.get('native', {})
+            means = run.get('derived', {}).get('moonlight_decode_time', {})
             lines.append(f"| {run['setting']} / {run['repetition']} | {native.get('displayed_outputs', '—')} / {native.get('offered', '—')} | "
                          f"{number(native.get('decoded_fps'))} | {native.get('scheduler_drops', '—')} / "
-                         f"{native.get('failed_or_cancelled_or_dropped', '—')} | {number(run.get('first_output_ms'))} |")
+                         f"{native.get('failed_or_cancelled_or_dropped', '—')} | {number(run.get('first_output_ms'))} | "
+                         f"{number(means.get('native_vt', {}).get('mean_ms'))} | "
+                         f"{number(means.get('public_queue_proxy', {}).get('mean_ms'))} |")
         for name, metric in case['comparisons'].items():
             if metric['threshold_exceeded']:
                 lines += ['', f"Observed threshold breach: {name}: {metric['median_paired_delta_ms']:+.3f} ms "
                           f"({metric['median_paired_delta_pct']:+.2f}%)."]
         lines.append('')
     path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+    moonlight['report_sha256'] = sha(path)
+    write_json(path.parent / 'moonlight-decode-times.json', moonlight)
 
 
 def main(argv=None):

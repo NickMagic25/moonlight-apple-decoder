@@ -2,6 +2,26 @@
 import csv
 
 
+def moonlight_timings(rows):
+    """Whole-trial arithmetic means, including cold/warmup outputs.
+
+    Match AppleVideoDecoder::receive/updateOverlay for the native metric.
+    The public metric is only a proxy for the regular Qt/FFmpeg overlay: the
+    benchmark does not measure the app's queue, frame wrapping or live window.
+    Keep integer sums/counts so repetitions can be weighted by actual outputs.
+    """
+    outputs = [r for r in rows if r['status'] == 0 and r['displayed_outputs'] == 1]
+    native = [r['callback_ns'] - r['vt_submit_ns'] for r in outputs
+              if r['internal_samples'] == 1 and not r['show_existing']
+              and (r['trace_valid'] & 10) == 10 and r['callback_ns'] >= r['vt_submit_ns']]
+    public = [r['sink_entry_ns'] - r['scheduled_arrival_ns'] for r in outputs
+              if r['trace_valid'] & 16 and r['sink_entry_ns'] >= r['scheduled_arrival_ns']]
+    def mean(values):
+        count, total = len(values), sum(values)
+        return dict(sample_count=count, total_ns=total, mean_ms=total / count / 1e6 if count else None)
+    return dict(native_vt=mean(native), public_queue_proxy=mean(public))
+
+
 def distribution(values):
     values = sorted(values)
     if not values:
@@ -47,6 +67,7 @@ def caller_timings(path, result):
             and r['sink_entry_ns'] >= r['scheduled_arrival_ns']]
     initial = min(rows, key=lambda r: r['admission_ns'])
     return dict(
+        moonlight_decode_time=moonlight_timings(rows),
         public_complete_au_to_output_ns=distribution([r['sink_entry_ns']-r['scheduled_arrival_ns'] for r in steady]),
         public_output_boundary='Native public completion callback entry in harness',
         cold_public_complete_au_to_output_ns=distribution([r['sink_entry_ns']-r['scheduled_arrival_ns'] for r in cold]),
@@ -59,5 +80,6 @@ def caller_timings(path, result):
             if r['trace_valid'] & 2 and r['vt_submit_ns'] >= r['admission_ns']]),
         post_parser_to_vt_submit_ns=distribution([r['vt_submit_ns']-r['preparation_end_ns'] for r in steady
             if r['trace_valid'] & 3 == 3 and r['vt_submit_ns'] >= r['preparation_end_ns']]),
-        derivation='Supplemental distributions from raw CSV; warmup and first output per generation excluded. '
+        derivation='Supplemental distributions from raw CSV; warmup and first output per generation excluded '
+                   'from steady distributions. Moonlight arithmetic means include all eligible outputs. '
                    'Original totals and internal VT callback endpoint remain unchanged.')
