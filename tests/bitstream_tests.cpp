@@ -174,5 +174,60 @@ void malformed_properties() {
         }
     }
 }
+void hevc_annex_b_properties() {
+    Bitstream parser(Codec::HEVC);accept(parser,hevc_key());
+    auto append_expected=[](std::vector<uint8_t>& out,const std::vector<uint8_t>& nal,size_t prefix) {
+        size_t size=nal.size()-prefix;
+        for(int shift:{24,16,8,0})out.push_back(uint8_t(size>>shift));
+        out.insert(out.end(),nal.begin()+prefix,nal.end());
+    };
+    std::mt19937 random(0x414e4e58);
+    for(unsigned trial=0;trial<1000;++trial) {
+        // Preserve escaped arbitrary NAL bytes while varying every kind of
+        // boundary. In particular, isolated 1/00-01 candidates are not codes.
+        std::vector<uint8_t> input(random()%32,0),expected;
+        unsigned count=1+random()%8;
+        for(unsigned unit=0;unit<count;++unit) {
+            std::vector<uint8_t> payload{1,0,1,0,0,3,1,0,0,0,1};
+            for(unsigned i=0,n=random()%128;i<n;++i)payload.push_back(uint8_t(random()));
+            payload.push_back(0x80); // trailing payload zeros are tested separately
+            unsigned prefix=3+random()%2;
+            auto nal=hevc_nal(62,payload,prefix); // unspecified non-VCL, preserved
+            append(input,nal);append_expected(expected,nal,prefix);
+            input.insert(input.end(),random()%32,0);
+        }
+        auto picture=slice();append(input,picture);append_expected(expected,picture,3);
+        input.insert(input.end(),random()%32,0);
+        auto parsed=accept(parser,input);
+        check(parsed.bytes==expected&&parsed.samples.size()==1,"HEVC candidate scan preserves randomized escaped NALs and boundaries");
+        check(parsed.compressed_copy_count==1&&parsed.compressed_copy_bytes==expected.size(),"HEVC reserved normalization copy accounting");
+        if(trial<20)for(size_t boundary=0;boundary<=input.size();++boundary) {
+            Span spans[]={{input.data(),boundary},{input.data()+boundary,input.size()-boundary}};
+            Prepared out;std::string error;
+            check(parser.prepare(spans,2,out,error)==ParseResult::Ok&&out.bytes==expected,"HEVC candidate scan is independent of span split");
+        }
+    }
+    for(uint8_t fill:{uint8_t(0),uint8_t(1),uint8_t(0xff)}) {
+        std::vector<uint8_t> payload(65536,fill);payload.push_back(0x80);
+        auto opaque=hevc_nal(62,payload,3);auto picture=slice();
+        std::vector<uint8_t> input(65536,0),expected;
+        append(input,opaque);input.insert(input.end(),65536,0);append(input,picture);input.insert(input.end(),65536,0);
+        append_expected(expected,opaque,3);append_expected(expected,picture,3);
+        check(accept(parser,input).bytes==expected,"HEVC long zero and candidate runs remain bounded and byte-exact");
+    }
+    Prepared out;std::string error;
+    for(const auto& invalid:std::vector<std::vector<uint8_t>>{{0},{0,0},{0,0,1},{0,0,1,0},{1,0,0,1,0,1,128},{0,0,1,0,0,1,0,1,128}})
+        check(parser.prepare(invalid.data(),invalid.size(),out,error)==ParseResult::Malformed,"HEVC truncated code/header or nonzero leading bytes rejected");
+    auto picture=slice();
+    for(const auto& suffix:std::vector<std::vector<uint8_t>>{{0,0,1},{0,0,0,1},{0,0,1,0}}) {
+        auto invalid=picture;append(invalid,suffix);
+        check(parser.prepare(invalid.data(),invalid.size(),out,error)==ParseResult::Malformed,"HEVC empty final NAL rejected at exact input end");
+    }
+    std::vector<uint8_t> maximum;
+    auto opaque=hevc_nal(62,{128},3);
+    for(unsigned i=0;i<4095;++i)append(maximum,opaque);
+    append(maximum,picture);check(accept(parser,maximum).samples.size()==1,"HEVC maximum NAL count accepted");
+    append(maximum,opaque);check(parser.prepare(maximum.data(),maximum.size(),out,error)==ParseResult::Malformed,"HEVC NAL count over limit rejected before normalization allocation");
 }
-int main() {av1_tests();hevc_tests();malformed_properties();std::cout<<"PASS bitstream "<<checks<<" checks\n";}
+}
+int main() {av1_tests();hevc_tests();hevc_annex_b_properties();malformed_properties();std::cout<<"PASS bitstream "<<checks<<" checks\n";}
