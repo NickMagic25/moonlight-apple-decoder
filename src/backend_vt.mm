@@ -1,4 +1,5 @@
 #include "apple.hpp"
+#include "cold_diagnostics.hpp"
 #include <map>
 #include <mutex>
 namespace mav {
@@ -6,6 +7,7 @@ class VideoToolboxBackend final:public Backend {
     VTDecompressionSessionRef session_=nullptr;CMVideoFormatDescriptionRef format_=nullptr;
     BackendInfo info_;mav_color color_{};Format parsed_;
     std::mutex mutex_;std::map<Work*,std::shared_ptr<Work>> pending_;
+    ColdDiagnostics cold_;
     static void callback(void* context,void* source,OSStatus status,VTDecodeInfoFlags flags,CVImageBufferRef image,CMTime,CMTime) {
         // First instruction measuring callback ENTRY, before ownership/map work.
         uint64_t entry=mav_monotonic_time_ns();
@@ -42,31 +44,52 @@ public:
     ~VideoToolboxBackend()override{invalidate();}
     mav_result configure(const Format& f,const mav_config& c,const mav_color& color)override {
         invalidate();info_=BackendInfo{};color_=color;parsed_=f;
+        cold_.beginSession(c.codec,f.width,f.height,f.bit_depth);
+        auto done=[&](mav_result result,bool cleanup=false){
+            cold_.hardware=info_.hardware;cold_.realtime_status=info_.realtime_status;
+            cold_.realtime_effective=info_.realtime_effective;cold_.power_status=info_.power_status;
+            cold_.power_effective=info_.power_effective;cold_.configured(result,info_.last_status);
+            if(cleanup)invalidate();return result;
+        };
+        if(!cold_.valid)return done(MAV_INVALID_ARGUMENT,true);
         mav_capability cap{};cap.struct_size=sizeof(cap);cap.version=MAV_ABI_VERSION;
+        cold_.begin(ColdDiagnostics::Capability);
         auto available=backend_capability(c.codec,cap);
-        if(available!=MAV_OK)return available;
-        if(c.hardware_policy==MAV_HARDWARE_REQUIRED&&!cap.hardware_decode_candidate)return MAV_UNSUPPORTED;
-        OSStatus status=create_format(f,c.codec,color,&format_);info_.last_status=status;if(status)return vt_result(status);
+        cold_.end(ColdDiagnostics::Capability,available);
+        if(available!=MAV_OK)return done(available);
+        if(c.hardware_policy==MAV_HARDWARE_REQUIRED&&!cap.hardware_decode_candidate)return done(MAV_UNSUPPORTED);
+        cold_.begin(ColdDiagnostics::FormatCreation);
+        OSStatus status=create_format(f,c.codec,color,&format_);
+        cold_.end(ColdDiagnostics::FormatCreation,status);
+        info_.last_status=status;if(status)return done(vt_result(status));
         auto dimensions=CMVideoFormatDescriptionGetDimensions(format_);
-        if(dimensions.width!=static_cast<int32_t>(f.width)||dimensions.height!=static_cast<int32_t>(f.height)){invalidate();return MAV_MALFORMED_INPUT;}
+        if(dimensions.width!=static_cast<int32_t>(f.width)||dimensions.height!=static_cast<int32_t>(f.height))return done(MAV_MALFORMED_INPUT,true);
         uint32_t pixel=f.bit_depth==10?(color.full_range?kCVPixelFormatType_420YpCbCr10BiPlanarFullRange:kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange):(color.full_range?kCVPixelFormatType_420YpCbCr8BiPlanarFullRange:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange);
-        if(c.pixel_format_count){bool found=false;for(uint32_t i=0;i<c.pixel_format_count;++i)found|=c.pixel_formats[i]==pixel;if(!found){invalidate();return MAV_UNSUPPORTED;}}
+        if(c.pixel_format_count){bool found=false;for(uint32_t i=0;i<c.pixel_format_count;++i)found|=c.pixel_formats[i]==pixel;if(!found)return done(MAV_UNSUPPORTED,true);}
         CFHolder<CFMutableDictionaryRef> spec(dictionary()),attrs(dictionary()),surface(dictionary());
         if(@available(macOS 10.9,iOS 17.0,tvOS 17.0,*)) {
             CFDictionarySetValue(spec,c.hardware_policy==MAV_HARDWARE_REQUIRED?kVTVideoDecoderSpecification_RequireHardwareAcceleratedVideoDecoder:kVTVideoDecoderSpecification_EnableHardwareAcceleratedVideoDecoder,kCFBooleanTrue);
-        } else {invalidate();return MAV_API_UNAVAILABLE;}
+        } else return done(MAV_API_UNAVAILABLE,true);
         number(attrs,kCVPixelBufferPixelFormatTypeKey,static_cast<int>(pixel));
         CFDictionarySetValue(attrs,kCVPixelBufferIOSurfacePropertiesKey,surface);
         CFDictionarySetValue(attrs,kCVPixelBufferMetalCompatibilityKey,kCFBooleanTrue);
         VTDecompressionOutputCallbackRecord cb{callback,this};
-        status=VTDecompressionSessionCreate(kCFAllocatorDefault,format_,spec,attrs,&cb,&session_);info_.last_status=status;
-        if(status){invalidate();return vt_result(status);}
+        cold_.begin(ColdDiagnostics::SessionCreation);
+        status=VTDecompressionSessionCreate(kCFAllocatorDefault,format_,spec,attrs,&cb,&session_);
+        cold_.end(ColdDiagnostics::SessionCreation,status);info_.last_status=status;
+        if(status)return done(vt_result(status),true);
         CFHolder<CFTypeRef> hardware;
+        cold_.begin(ColdDiagnostics::HardwareQuery);
         if(@available(macOS 10.9,iOS 17.0,tvOS 17.0,*))status=VTSessionCopyProperty(session_,kVTDecompressionPropertyKey_UsingHardwareAcceleratedVideoDecoder,kCFAllocatorDefault,hardware.out());
+        cold_.end(ColdDiagnostics::HardwareQuery,status);
         if(!status&&hardware.value&&CFGetTypeID(hardware)==CFBooleanGetTypeID())info_.hardware=CFBooleanGetValue(static_cast<CFBooleanRef>(hardware.value));
-        if(c.hardware_policy==MAV_HARDWARE_REQUIRED&&(!info_.hardware||status)){info_.last_status=status;invalidate();return MAV_UNSUPPORTED;}
+        if(c.hardware_policy==MAV_HARDWARE_REQUIRED&&(!info_.hardware||status)){info_.last_status=status;return done(MAV_UNSUPPORTED,true);}
         info_.pixel_format=pixel;
-        CFHolder<CFDictionaryRef> properties;status=VTSessionCopySupportedPropertyDictionary(session_,properties.out());
+        CFHolder<CFDictionaryRef> properties;
+        cold_.begin(ColdDiagnostics::SupportedProperties);
+        status=VTSessionCopySupportedPropertyDictionary(session_,properties.out());
+        cold_.end(ColdDiagnostics::SupportedProperties,status);
+        cold_.begin(ColdDiagnostics::PropertyHints);
         if(status){info_.realtime_status=status;info_.power_status=status;info_.thread_status=status;}
         else {
             info_.realtime_status=property(properties,kVTDecompressionPropertyKey_RealTime,c.realtime?kCFBooleanTrue:kCFBooleanFalse,info_.realtime_effective);
@@ -74,17 +97,44 @@ public:
             else {CFHolder<CFTypeRef> v;auto s=VTSessionCopyProperty(session_,kVTDecompressionPropertyKey_MaximizePowerEfficiency,kCFAllocatorDefault,v.out());info_.power_status=s;if(!s&&v.value&&CFGetTypeID(v)==CFBooleanGetTypeID())info_.power_effective=CFBooleanGetValue(static_cast<CFBooleanRef>(v.value));}
             if(c.thread_count){int n=c.thread_count;CFHolder<CFNumberRef> value(CFNumberCreate(kCFAllocatorDefault,kCFNumberIntType,&n));info_.thread_status=property(properties,kVTDecompressionPropertyKey_ThreadCount,value,info_.thread_effective);}
         }
-        return MAV_OK;
+        cold_.end(ColdDiagnostics::PropertyHints,status);
+        if(cold_.enabled()) {
+            cold_.begin(ColdDiagnostics::PoolExperiment);
+            cold_.pool_supported=properties.value?CFDictionaryContainsKey(properties,kVTDecompressionPropertyKey_OutputPoolRequestedMinimumBufferCount):-1;
+            if(cold_.pool_requested) {
+                if(cold_.pool_supported!=1){cold_.end(ColdDiagnostics::PoolExperiment,kVTPropertyNotSupportedErr);return done(MAV_UNSUPPORTED,true);}
+                int count=cold_.pool_requested;
+                CFHolder<CFNumberRef> value(CFNumberCreate(kCFAllocatorDefault,kCFNumberIntType,&count));
+                if(!value.value)return done(MAV_OUT_OF_MEMORY,true);
+                cold_.pool_set_attempted=true;
+                cold_.pool_set_status=VTSessionSetProperty(session_,kVTDecompressionPropertyKey_OutputPoolRequestedMinimumBufferCount,value);
+                if(cold_.pool_set_status){cold_.end(ColdDiagnostics::PoolExperiment,cold_.pool_set_status);return done(vt_result(cold_.pool_set_status),true);}
+            }
+            CFHolder<CFTypeRef> count,shared;
+            cold_.pool_read_attempted=true;
+            cold_.pool_read_status=VTSessionCopyProperty(session_,kVTDecompressionPropertyKey_OutputPoolRequestedMinimumBufferCount,kCFAllocatorDefault,count.out());
+            if(!cold_.pool_read_status&&count.value&&CFGetTypeID(count)==CFNumberGetTypeID())CFNumberGetValue(static_cast<CFNumberRef>(count.value),kCFNumberIntType,&cold_.pool_effective);
+            cold_.shared_read_attempted=true;
+            cold_.shared_read_status=VTSessionCopyProperty(session_,kVTDecompressionPropertyKey_PixelBufferPoolIsShared,kCFAllocatorDefault,shared.out());
+            if(!cold_.shared_read_status&&shared.value&&CFGetTypeID(shared)==CFBooleanGetTypeID())cold_.pool_shared=CFBooleanGetValue(static_cast<CFBooleanRef>(shared.value));
+            cold_.end(ColdDiagnostics::PoolExperiment);
+        }
+        return done(MAV_OK);
     }
     void submit(std::shared_ptr<Work> w)override {
         try {
+            const bool first=cold_.active&&!cold_.first_attempt;
+            if(first){cold_.first_attempt=true;cold_.begin(ColdDiagnostics::FirstSample);}
             CFHolder<CMSampleBufferRef> sample;auto status=create_sample(w,format_,sample.out());
+            if(first)cold_.end(ColdDiagnostics::FirstSample,status);
             if(status){BackendOutput o;o.result=vt_result(status);o.status=status;w->complete(o);return;}
             {std::lock_guard<std::mutex> l(mutex_);pending_.emplace(w.get(),w);}
             VTDecodeInfoFlags flags=0;
             w->submit_ns.store(mav_monotonic_time_ns());
+            if(first)cold_.first_submit=w->submit_ns.load();
             status=VTDecompressionSessionDecodeFrame(session_,sample,kVTDecodeFrame_EnableAsynchronousDecompression,w.get(),&flags);
             w->return_ns.store(mav_monotonic_time_ns());
+            if(first)cold_.first_return=w->return_ns.load();
             // SDK guarantees no callback for a synchronous error. Map removal
             // is idempotent and ownership also survives an inline success.
             if(status)finish(w.get(),status,flags,nullptr,0);
@@ -106,6 +156,7 @@ public:
     void invalidate()override {
         if(session_){drain();VTDecompressionSessionInvalidate(session_);CFRelease(session_);session_=nullptr;}
         if(format_){CFRelease(format_);format_=nullptr;}
+        cold_.emitOnce(); // Controlled teardown, never the VT callback or steady frame path.
     }
     BackendInfo info()const override{return info_;}
 };
