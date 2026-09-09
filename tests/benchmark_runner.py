@@ -257,6 +257,28 @@ class RunnerTests(unittest.TestCase):
             self.assertTrue(all(metric["threshold_exceeded"] == exceeded for metric in result.values()))
 
     def plan(self, repetitions=1, baseline=True):
+        # Real archived test files exercise analysis integrity checks. Their
+        # bytes are synthetic; these portable tests never invoke a native parser.
+        directory = self.out / "fixtures"
+        directory.mkdir(exist_ok=True)
+        payload = directory / "payload.bin"
+        payload.write_bytes(bytes(range(self.case["frames"])))
+        manifest = dict(schema_version=1, codec=self.case["codec"], variant="sdr8", bit_depth=8,
+                        width=self.case["width"], height=self.case["height"], chroma="420",
+                        frame_rate=dict(num=self.case["fps"], den=1),
+                        timebase=dict(num=1, den=self.case["fps"]), payload_file=payload.name,
+                        payload_sha256=RUNNER.sha(payload),
+                        generator=dict(pattern="moving-gradient-detail-square-frame-id-v1",
+                                       requested_bitrate_kbps=self.case["bitrate_kbps"]),
+                        access_units=[dict(frame_id=index, expected_visible_frame_id=index,
+                                           expected_display_count=1, pts=index, dts=index, duration=1,
+                                           discontinuity=False, random_access=index % self.case["gop"] == 0,
+                                           offset=index, length=1)
+                                      for index in range(self.case["frames"])])
+        path = directory / "manifest.json"
+        path.write_text(json.dumps(manifest))
+        self.case["fixture_info"].update(manifest_sha256=RUNNER.sha(path),
+                                         payload_sha256=RUNNER.sha(payload))
         builds = {key: dict(binary_sha256=key, environment={})
                   for key in (("baseline", "candidate") if baseline else ("candidate",))}
         runs = []

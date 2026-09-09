@@ -5,6 +5,13 @@
 #include <mutex>
 #include <iostream>
 #include <cstring>
+#include <cerrno>
+#include <csignal>
+#include <fcntl.h>
+#include <spawn.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <crt_externs.h>
 
 using namespace fixture;
 struct Encoded {uint64_t id;std::vector<uint8_t> data;};
@@ -67,11 +74,41 @@ static std::vector<Encoded> hevc(uint32_t w,uint32_t h,uint32_t depth,uint32_t f
     return state.units;
 }
 static std::string run(NSString* executable,NSArray<NSString*>* args){
-    NSTask*task=[NSTask new];task.executableURL=[NSURL fileURLWithPath:executable];task.arguments=args;
-    NSPipe* pipe=[NSPipe pipe];task.standardOutput=pipe;task.standardError=pipe;NSError* e=nil;
-    if(![task launchAndReturnError:&e])throw std::runtime_error("BLOCKED launching encoder: "+utf(e.description));
-    NSData*d=[pipe.fileHandleForReading readDataToEndOfFile];[task waitUntilExit];std::string result=utf([[NSString alloc]initWithData:d encoding:NSUTF8StringEncoding]);
-    if(task.terminationStatus)throw std::runtime_error("encoder failed: "+result);return result;
+    auto check=[](int status,const char* operation){if(status)throw std::runtime_error(std::string(operation)+": "+std::strerror(status));};
+    struct Child {
+        int output[2]={-1,-1};pid_t pid=-1;
+        ~Child(){for(auto fd:output)if(fd>=0)close(fd);if(pid>0){kill(pid,SIGKILL);while(waitpid(pid,nullptr,0)<0&&errno==EINTR){}}}
+        void close_output(unsigned index){if(output[index]>=0){close(output[index]);output[index]=-1;}}
+    } child;
+    if(pipe(child.output))check(errno,"encoder pipe");
+    for(auto&fd:child.output){
+        // Keep descriptors away from stdio so the spawn close actions cannot
+        // close an output that was just duplicated to stdout or stderr.
+        if(fd<3){int replacement=fcntl(fd,F_DUPFD_CLOEXEC,3);if(replacement<0)check(errno,"encoder pipe duplication");close(fd);fd=replacement;}
+        if(fcntl(fd,F_SETFD,FD_CLOEXEC)<0)check(errno,"encoder pipe flags");
+    }
+    struct Actions {
+        posix_spawn_file_actions_t value;
+        Actions(){int status=posix_spawn_file_actions_init(&value);if(status)throw std::runtime_error(std::string("encoder spawn actions: ")+std::strerror(status));}
+        ~Actions(){posix_spawn_file_actions_destroy(&value);}
+    } actions;
+    check(posix_spawn_file_actions_adddup2(&actions.value,child.output[1],STDOUT_FILENO),"encoder stdout action");
+    check(posix_spawn_file_actions_adddup2(&actions.value,child.output[1],STDERR_FILENO),"encoder stderr action");
+    check(posix_spawn_file_actions_addclose(&actions.value,child.output[0]),"encoder read-pipe action");
+    check(posix_spawn_file_actions_addclose(&actions.value,child.output[1]),"encoder write-pipe action");
+    std::vector<std::string> storage={utf(executable)};for(NSString*argument in args)storage.push_back(utf(argument));
+    std::vector<char*> argv;for(auto&argument:storage)argv.push_back(argument.data());argv.push_back(nullptr);
+    // No POSIX_SPAWN_SETPGROUP: inherit mav-fixture's group so the benchmark
+    // runner's isolated-group timeout also terminates its aomenc child.
+    pid_t spawned=-1;check(posix_spawn(&spawned,storage.front().c_str(),&actions.value,nullptr,argv.data(),*_NSGetEnviron()),"BLOCKED launching encoder");child.pid=spawned;
+    child.close_output(1);
+    std::string result;char buffer[8192];
+    for(;;){ssize_t size=read(child.output[0],buffer,sizeof(buffer));if(size>0)result.append(buffer,size);else if(!size)break;else if(errno!=EINTR)check(errno,"encoder output read");}
+    child.close_output(0);
+    int status=0;pid_t waited;do{waited=waitpid(child.pid,&status,0);}while(waited<0&&errno==EINTR);
+    if(waited<0){int error=errno;if(error==ECHILD)child.pid=-1;check(error,"encoder wait");}
+    child.pid=-1;
+    if(!WIFEXITED(status)||WEXITSTATUS(status))throw std::runtime_error("encoder failed: "+result);return result;
 }
 static uint64_t le(const uint8_t*p,unsigned n){uint64_t v=0;for(unsigned i=0;i<n;++i)v|=uint64_t(p[i])<<(i*8);return v;}
 static std::vector<Encoded> ivf(const std::string& path,uint32_t w,uint32_t h){

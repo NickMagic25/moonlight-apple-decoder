@@ -97,6 +97,12 @@ def build_info(build, label, revision, out):
 def verify_fixture(path, case):
     """Check requested settings and byte identity before the native parser gate."""
     manifest = read_json(path)
+    if not isinstance(manifest, dict):
+        raise ValueError('fixture manifest must be an object')
+    generator = manifest.get('generator')
+    if (not isinstance(generator, dict)
+            or generator.get('pattern') != 'moving-gradient-detail-square-frame-id-v1'):
+        raise ValueError('fixture must use the supported visible-frame-ID pattern for correctness validation')
     expected = dict(width=case['width'], height=case['height'], codec=case['codec'],
                     variant='sdr8' if case['dynamic_range'] == 'sdr' else 'hdr10',
                     bit_depth=8 if case['dynamic_range'] == 'sdr' else 10, chroma='420')
@@ -118,30 +124,32 @@ def verify_fixture(path, case):
     # The headless pattern correctness sink requires sequential visible IDs.
     for index, unit in enumerate(units):
         if (unit.get('frame_id') != index or unit.get('expected_display_count') != 1
+                or type(unit.get('expected_visible_frame_id')) is not int
+                or unit['expected_visible_frame_id'] != index
                 or unit.get('pts') != index or unit.get('duration') != 1
                 or unit.get('discontinuity') or bool(unit.get('random_access')) != (index % case['gop'] == 0)):
             raise ValueError('fixture must use sequential one-output frames and the requested GOP')
     if manifest['timebase'] != dict(num=1, den=case['fps']):
         raise ValueError('fixture timebase differs from requested frame rate')
-    requested = manifest.get('generator', {}).get('requested_bitrate_kbps')
+    requested = generator.get('requested_bitrate_kbps')
     if requested != case['bitrate_kbps']:
         raise ValueError('fixture requested bitrate differs from YAML; regenerate with matching settings')
     return dict(manifest_sha256=sha(path), payload_sha256=sha(payload),
                 payload_file=manifest['payload_file'], frames=len(units),
                 requested_bitrate_kbps=requested,
                 measured_bitrate_kbps=payload.stat().st_size * 8 * case['fps'] / len(units) / 1000,
-                generator=manifest.get('generator')), payload
+                generator=generator), payload
 
 
 def run_encoder(command, log, timeout):
-    """Bound the whole fixture/encoder process tree before any decode timing."""
+    """Bound fixture execution and clean up children that inherit its group."""
     process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT,
                                start_new_session=True)
     try:
         return subprocess.CompletedProcess(command, process.wait(timeout=timeout))
     except BaseException:
-        # NSTask launches aomenc in the fixture's process group. Killing only
-        # mav-fixture could leave its encoder consuming CPU during later runs.
+        # Kill inheriting children as well as mav-fixture. A launcher may create
+        # separate child groups, so preparation failure must also prevent timing.
         try:
             os.killpg(process.pid, signal.SIGKILL)
         except ProcessLookupError:
@@ -413,15 +421,29 @@ def analyze(plan, out):
     settings = list(plan['builds'])
     cases = []
     for case in plan['cases']:
+        fixture_error = None
+        try:
+            archived, _ = verify_fixture(out / case['fixture_info']['manifest'], case)
+            for field in ('manifest_sha256', 'payload_sha256'):
+                if archived[field] != case['fixture_info'][field]:
+                    raise ValueError('archived fixture ' + field + ' changed after preparation')
+        except (OSError, ValueError, TypeError, KeyError, UnicodeError) as error:
+            fixture_error = 'fixture evidence invalid: ' + str(error)
         records = [inspect_run(record, case, out, thresholds) for record in plan['runs'] if record['case'] == case['name']]
         report = dict(name=case['name'], settings=case, runs=records, comparisons={}, issues=[])
         expected_runs = {(phase, setting, rep) for setting in settings
                          for phase, reps in [('correctness', [1]), ('timed', range(1, plan['config']['run']['repetitions'] + 1))]
                          for rep in reps}
         unique = {(r['phase'], r['setting'], r['repetition']) for r in records}
-        if case.get('error') or len(records) != len(expected_runs) or unique != expected_runs or plan['state'] != 'FINISHED':
+        if (case.get('error') or fixture_error or len(records) != len(expected_runs)
+                or unique != expected_runs or plan['state'] != 'FINISHED'):
             report.update(status='INCOMPLETE')
-            report['issues'].append(case.get('error', plan.get('error', 'not all planned correctness and timed runs completed')))
+            if case.get('error'):
+                report['issues'].append(case['error'])
+            if fixture_error:
+                report['issues'].append(fixture_error)
+            if not report['issues']:
+                report['issues'].append(plan.get('error', 'not all planned correctness and timed runs completed'))
         else:
             passed = {setting: all(r['passed'] for r in records if r['setting'] == setting) for setting in settings}
             timed = {setting: sorted([r for r in records if r['phase'] == 'timed' and r['setting'] == setting],

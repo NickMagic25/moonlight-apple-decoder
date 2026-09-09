@@ -42,11 +42,24 @@ jobs:
             python scripts/compare-decoders.py --config "$configuration" --dry-run
           done
       - name: Configure portable native tests with assertions enabled
-        run: cmake -S . -B build-ci -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON -DMAV_BUILD_TOOLS=OFF -DMAV_VT_EXPERIMENTS=OFF
+        shell: bash
+        run: |
+          MAV_TOOLS_ENABLED=OFF
+          if [[ "$RUNNER_OS" == macOS ]]; then
+            MAV_TOOLS_ENABLED=ON
+          fi
+          cmake -S . -B build-ci -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON \
+            -DMAV_BUILD_TOOLS="$MAV_TOOLS_ENABLED" -DMAV_VT_EXPERIMENTS=OFF
       - name: Build portable native tests
         run: cmake --build build-ci --parallel 3
       - name: Run portable native tests
         run: ctest --test-dir build-ci --output-on-failure --output-junit "$PWD/build-ci/ctest.xml"
+      - name: Verify native fixture encoder timeout cleanup without decode hardware
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          MAV_FIXTURE_TOOL=build-ci/mav-fixture python tests/benchmark_process_tests.py \
+            2>&1 | tee build-ci/encoder-timeout.log
       - name: Verify Swift 6.3 package and Swift 6 C ABI smoke
         if: runner.os == 'macOS'
         run: |
@@ -61,5 +74,6 @@ jobs:
             build-ci/ctest.xml
             build-ci/Testing/Temporary/
             build-ci/CMakeCache.txt
+            build-ci/encoder-timeout.log
           if-no-files-found: ignore
           retention-days: 14

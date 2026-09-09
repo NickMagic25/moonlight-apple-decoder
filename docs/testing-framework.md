@@ -236,7 +236,9 @@ client default. See [the original matrix report](toolchain-matrix.md).
 pushes to `main`, and manual dispatch. It validates every YAML example, tests the
 configuration/comparison code with Python `unittest`, builds Debug CMake tests
 with assertions enabled on Linux and macOS, and runs the Swift package smoke
-on macOS. The macOS job selects Xcode 26.6 from the
+on macOS. The macOS job also compiles the native tools and checks encoder-process
+timeout cleanup through `mav-fixture` using a sleeping fake encoder; these checks
+require no VideoToolbox or Metal decode device. It selects Xcode 26.6 from the
 [official `macos-26` runner image](https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md).
 Hosted and mock tests do not claim hardware decode performance.
 

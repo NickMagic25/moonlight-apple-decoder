@@ -128,6 +128,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          MAV_FIXTURE_TOOL=build-ci-candidate/mav-fixture python tests/benchmark_process_tests.py \
+            2>&1 | tee results/hardware-build/encoder-timeout.log
           python tests/fixture_generation.py \
             --tool build-ci-candidate/mav-fixture --aomenc "$AOMENC" \
             --results-dir results/fixture-generation \

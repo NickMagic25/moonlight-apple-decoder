@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Fixture timeout cleanup uses only tiny Python child processes, never codecs."""
 import importlib.util
+import json
 import os
 import pathlib
 import select
@@ -10,6 +11,9 @@ import sys
 import tempfile
 import unittest
 from unittest import mock
+
+if os.name == 'posix':
+    import fcntl
 
 
 SCRIPTS = pathlib.Path(__file__).resolve().parents[1] / 'scripts'
@@ -112,6 +116,59 @@ class EncoderProcessTests(unittest.TestCase):
                         RUNNER.prepare_fixture(case, build, root / 'unused-aomenc', out, 180)
                 self.assertEqual(list((root / 'fixtures').rglob('manifest.json')), [])
                 self.assertTrue((out / 'test-encode.log').is_file())
+
+    @unittest.skipUnless(sys.platform == 'darwin' and os.environ.get('MAV_FIXTURE_TOOL'),
+                         'set MAV_FIXTURE_TOOL after building; run outside timed benchmarks')
+    def test_native_fixture_encoder_inherits_group_and_dies_on_timeout(self):
+        with tempfile.TemporaryDirectory(prefix='mav-native-timeout-') as directory:
+            root = pathlib.Path(directory)
+            fake = root / 'aomenc'
+            metadata = root / 'encoder.json'
+            lock_path = root / 'encoder.lock'
+            fake.write_text('#!/usr/bin/python3\nimport fcntl,json,os,pathlib,time\n'
+                f'with open({str(lock_path)!r},"w") as lock:\n'
+                '    fcntl.flock(lock,fcntl.LOCK_EX)\n'
+                f'    pathlib.Path({str(metadata)!r}).write_text(json.dumps(dict(pid=os.getpid(),pgid=os.getpgrp(),sid=os.getsid(0))))\n'
+                '    time.sleep(60)\n')
+            fake.chmod(0o755)
+            command = [str(pathlib.Path(os.environ['MAV_FIXTURE_TOOL']).resolve()),
+                       '--codec', 'av1', '--output', str(root / 'fixture'), '--aomenc', str(fake),
+                       '--width', '64', '--height', '64', '--fps', '30', '--frames', '2']
+            created = []
+            original = subprocess.Popen
+
+            def spawn(*args, **kwargs):
+                process = original(*args, **kwargs)
+                created.append(process)
+                return process
+
+            try:
+                with mock.patch.object(RUNNER.subprocess, 'Popen', side_effect=spawn), \
+                        (root / 'fixture.log').open('w') as log:
+                    with self.assertRaises(subprocess.TimeoutExpired):
+                        RUNNER.run_encoder(command, log, timeout=1)
+                self.assertTrue(metadata.is_file(), (root / 'fixture.log').read_text())
+                child = json.loads(metadata.read_text())
+                self.assertEqual(child['pgid'], created[0].pid, 'native encoder changed process group')
+                self.assertEqual(child['sid'], created[0].pid)
+                self.assertEqual(created[0].returncode, -signal.SIGKILL)
+                with lock_path.open('r') as lock:
+                    # The fake encoder holds this lock until it terminates.
+                    fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            finally:
+                if created:
+                    if metadata.is_file():
+                        pid = json.loads(metadata.read_text())['pid']
+                        try:
+                            if os.getsid(pid) == created[0].pid:
+                                os.kill(pid, signal.SIGKILL)
+                        except ProcessLookupError:
+                            pass
+                    try:
+                        os.killpg(created[0].pid, signal.SIGKILL)
+                    except ProcessLookupError:
+                        pass
+                    created[0].wait()
 
 
 if __name__ == '__main__':
