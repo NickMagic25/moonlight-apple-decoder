@@ -1,0 +1,1284 @@
+{
+  "schema_version": 1,
+  "purpose": "Frame-aligned VideoToolbox syscall, condition-object and scheduler-waker dependencies from existing traces.",
+  "comparison_limit": "The original SDR fixture trace and later native-output trace are separate instrumented cohorts. This evidence establishes recurring protocol and wait structure; it is not a causal output-format performance comparison.",
+  "runs": [
+    {
+      "schema_version": 1,
+      "case": "hevc-system",
+      "joined_frames": 600,
+      "qualification": {
+        "full_run_join_qualified": true,
+        "exact_subset_qualified": true,
+        "partial_capture": false,
+        "csv_rows": 600,
+        "exact_joined_frames": 600,
+        "omitted_boundary_frames": 0,
+        "first_joined_frame_id": 0,
+        "last_joined_frame_id": 599
+      },
+      "service_identification": {
+        "method": "unique process with XPC reply, decode IOKit and output IOKit stack patterns; name unconfirmed",
+        "name_confirmed": false
+      },
+      "syscalls": {
+        "frames": 480,
+        "overlapping_adjacent_frame_windows": 0,
+        "match_counts": {
+          "submit_rpc_syscalls:2": 480,
+          "submit_rpc_send_receive_pairs:1": 480,
+          "condition_wait:1": 480,
+          "same_condition_signal:1": 480,
+          "client_surface_lookup:1": 480,
+          "output_rpc_send_receive_pairs:1": 480,
+          "immediate_reply:1": 479,
+          "decode_ack:1": 480,
+          "decode_io:6": 480,
+          "output_io:6": 480,
+          "output_rpc_syscall:2": 480,
+          "immediate_reply_inside_submit_rpc:1": 480,
+          "immediate_reply:2": 1
+        },
+        "metrics": {
+          "api_call": {
+            "count": 480,
+            "p50_ns": 826021.0,
+            "p95_ns": 1174833.3499999999,
+            "p99_ns": 1530934.4299999997,
+            "sum_ns": 398148721
+          },
+          "submit_to_callback": {
+            "count": 480,
+            "p50_ns": 2830937.5,
+            "p95_ns": 3232968.4499999997,
+            "p99_ns": 6235041.109999999,
+            "sum_ns": 1381678097
+          },
+          "return_to_callback": {
+            "count": 480,
+            "p50_ns": 1972979.0,
+            "p95_ns": 2138427.75,
+            "p99_ns": 4778158.499999999,
+            "sum_ns": 983529376
+          },
+          "submit_to_rpc": {
+            "count": 480,
+            "p50_ns": 37583.0,
+            "p95_ns": 248986.84999999971,
+            "p99_ns": 562020.1099999974,
+            "sum_ns": 36927880
+          },
+          "rpc_send_through_receive_end": {
+            "count": 480,
+            "p50_ns": 257208.5,
+            "p95_ns": 348595.5,
+            "p99_ns": 410200.49999999994,
+            "sum_ns": 120362383
+          },
+          "condition_wait": {
+            "count": 480,
+            "p50_ns": 495208.5,
+            "p95_ns": 608574.9999999999,
+            "p99_ns": 738920.57,
+            "sum_ns": 228647496
+          },
+          "service_first_decode_io_to_ack_end": {
+            "count": 480,
+            "p50_ns": 382167.0,
+            "p95_ns": 444145.85,
+            "p99_ns": 482781.81999999995,
+            "sum_ns": 174437667
+          },
+          "service_decode_io_syscall_sum": {
+            "count": 480,
+            "p50_ns": 255020.5,
+            "p95_ns": 292394.54999999993,
+            "p99_ns": 320634.82,
+            "sum_ns": 114221070
+          },
+          "local_signal_end_to_wait_end": {
+            "count": 480,
+            "p50_ns": 18708.5,
+            "p95_ns": 25708.0,
+            "p99_ns": 43091.82,
+            "sum_ns": 8610042
+          },
+          "service_ack_end_to_local_signal_start": {
+            "count": 480,
+            "p50_ns": 93979.0,
+            "p95_ns": 134087.79999999996,
+            "p99_ns": 169747.42999999973,
+            "sum_ns": 43802498
+          },
+          "return_to_first_recorded_service_output_io": {
+            "count": 480,
+            "p50_ns": 1489791.5,
+            "p95_ns": 1601337.4999999998,
+            "p99_ns": 4211631.25,
+            "sum_ns": 761429046
+          },
+          "first_recorded_service_output_io_to_callback": {
+            "count": 480,
+            "p50_ns": 498208.5,
+            "p95_ns": 597133.95,
+            "p99_ns": 664075.71,
+            "sum_ns": 222100330
+          },
+          "service_output_send_to_callback": {
+            "count": 480,
+            "p50_ns": 207812.5,
+            "p95_ns": 263631.25,
+            "p99_ns": 292101.43,
+            "sum_ns": 91552182
+          },
+          "client_surface_lookup_syscall": {
+            "count": 480,
+            "p50_ns": 13770.5,
+            "p95_ns": 20842.299999999992,
+            "p99_ns": 24626.889999999996,
+            "sum_ns": 6167702
+          },
+          "client_surface_lookup_start_to_callback": {
+            "count": 480,
+            "p50_ns": 79083.5,
+            "p95_ns": 102924.34999999999,
+            "p99_ns": 114711.31999999995,
+            "sum_ns": 35852633
+          }
+        }
+      },
+      "limitations": [
+        "Service events are temporally matched inside exact replay frame windows, not matched by transaction IDs. Extra/missing matches are counted, not silently forced.",
+        "A synchronous XPC send trap and receive trap are one candidate RPC pair, not two independent RPCs. Stack classification and static code review support this interpretation.",
+        "Same condition object addresses link local condition signals to submit waits; scheduler waker edges provide separate evidence.",
+        "The first recorded service output IOKit call is not a hardware completion timestamp. The preceding gap includes an unknown combination of hardware, driver and scheduling time.",
+        "Mach syscall arguments do not expose the IOConnectCallMethod selector or its structure payload. This analyzer does not name private driver methods.",
+        "Service IOKit syscall sums are elapsed wall intervals, not CPU or hardware time. They overlap submit-thread waits and must not be added to those waits.",
+        "Independent percentile values do not add to a percentile of total frame latency.",
+        "Output RPC receive may finish after callback entry; only activity preceding callback entry belongs in submit-to-callback latency.",
+        "This is an instrumented, paced trace; benchmark claims require separate uninstrumented replay measurements."
+      ],
+      "artifacts": {
+        "joined": {
+          "filename": "all-joined-frames.json",
+          "sha256": "5b2d0d2b0edd43b26a98ef5030d1d691b31f578a7b3316319151c68874ee7880"
+        },
+        "join_summary": {
+          "filename": "vt-profile-analysis.json",
+          "sha256": "3aa419b710cf47773ba91214d0cf6be92b71741b867409917ed652a0a044e377"
+        },
+        "analyzer": {
+          "filename": "analyze-vt-waits.py",
+          "sha256": "1363f47cc6693e989e2d4b1bf200820614e5a7caed20cc6a416de6c7052b50d5"
+        },
+        "syscall": {
+          "filename": "hevc-system-syscall.xml",
+          "sha256": "8e312adbc379cfa39308f82013f556910e24365d34152d7619942c930e7a42b2",
+          "parsed_rows": 441967
+        },
+        "thread_state": {
+          "filename": "hevc-system-thread-state.xml",
+          "sha256": "887cb207b83d44ac7997e029c75d4dfa15b3f3761d553291e8243447f8132b71"
+        },
+        "state_analyzer": {
+          "filename": "vt_wait_states.py",
+          "sha256": "bff7ad59dd91425b9efabe13eb6e600730f3caacf71ece46e494a07c7f670558"
+        }
+      },
+      "related_static_evidence": {
+        "path": "docs/evidence/vt-wait-symbols.json",
+        "sha256": "55b116f3fcca59522880360975a08f9d4c5def755dffd5d06cad18b51c43ab23",
+        "scope": "Supports the old capture RPC interpretation and emitted-frame metadata chain; does not establish per-frame transaction identities."
+      },
+      "thread_states": {
+        "steady_frames": 480,
+        "analyzed_frames": 480,
+        "excluded_nonsequential_frames": 0,
+        "roles": {
+          "submit_call": {
+            "frames": 480,
+            "duration_ns": {
+              "count": 480,
+              "mean": 829476.5020833333,
+              "median": 826021.0,
+              "p95": 1174833.3499999999,
+              "p99": 1530934.4299999997,
+              "min": 230334,
+              "max": 2118125,
+              "sum": 398148721
+            },
+            "states_ns": {
+              "Blocked": {
+                "count": 480,
+                "mean": 624286.0479166667,
+                "median": 649958.5,
+                "p95": 813672.5999999999,
+                "p99": 946252.9299999998,
+                "min": 163334,
+                "max": 1219167,
+                "sum": 299657303
+              },
+              "Interrupted": {
+                "count": 480,
+                "mean": 971.45,
+                "median": 0.0,
+                "p95": 4304.499999999989,
+                "p99": 11411.859999999977,
+                "min": 0,
+                "max": 20459,
+                "sum": 466296
+              },
+              "Preempted": {
+                "count": 480,
+                "mean": 4027.43125,
+                "median": 0.0,
+                "p95": 0.0,
+                "p99": 79156.7499999998,
+                "min": 0,
+                "max": 869625,
+                "sum": 1933167
+              },
+              "Runnable": {
+                "count": 480,
+                "mean": 25785.50625,
+                "median": 24667.0,
+                "p95": 40696.79999999994,
+                "p99": 97122.06999999995,
+                "min": 4501,
+                "max": 297667,
+                "sum": 12377043
+              },
+              "Running": {
+                "count": 480,
+                "mean": 174406.06666666668,
+                "median": 142188.0,
+                "p95": 341855.5999999996,
+                "p99": 666857.4299999974,
+                "min": 49624,
+                "max": 995457,
+                "sum": 83714912
+              },
+              "ambiguous": {
+                "count": 480,
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "p99": 0.0,
+                "min": 0,
+                "max": 0,
+                "sum": 0
+              },
+              "uncovered": {
+                "count": 480,
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "p99": 0.0,
+                "min": 0,
+                "max": 0,
+                "sum": 0
+              }
+            },
+            "fully_covered_frames": 480,
+            "wake_origins": {
+              "selected_service_process": 478,
+              "replay_callback_thread": 480
+            }
+          },
+          "submit_after_return": {
+            "frames": 480,
+            "duration_ns": {
+              "count": 480,
+              "mean": 2049019.5333333334,
+              "median": 1972979.0,
+              "p95": 2138427.75,
+              "p99": 4778158.499999999,
+              "min": 1073209,
+              "max": 8862291,
+              "sum": 983529376
+            },
+            "states_ns": {
+              "Blocked": {
+                "count": 480,
+                "mean": 1987472.15625,
+                "median": 1909104.0,
+                "p95": 2073525.3499999999,
+                "p99": 4583886.8999999985,
+                "min": 1040709,
+                "max": 8637917,
+                "sum": 953986635
+              },
+              "Interrupted": {
+                "count": 480,
+                "mean": 502.9458333333333,
+                "median": 0.0,
+                "p95": 3335.099999999998,
+                "p99": 7085.679999999996,
+                "min": 0,
+                "max": 28958,
+                "sum": 241414
+              },
+              "Preempted": {
+                "count": 480,
+                "mean": 877.78125,
+                "median": 0.0,
+                "p95": 0.0,
+                "p99": 17573.929999999953,
+                "min": 0,
+                "max": 250208,
+                "sum": 421335
+              },
+              "Runnable": {
+                "count": 480,
+                "mean": 12082.914583333333,
+                "median": 6625.0,
+                "p95": 21712.149999999998,
+                "p99": 103670.70999999982,
+                "min": 0,
+                "max": 858832,
+                "sum": 5799799
+              },
+              "Running": {
+                "count": 480,
+                "mean": 48083.73541666667,
+                "median": 48708.5,
+                "p95": 72135.4,
+                "p99": 104622.88999999978,
+                "min": 12666,
+                "max": 217041,
+                "sum": 23080193
+              },
+              "ambiguous": {
+                "count": 480,
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "p99": 0.0,
+                "min": 0,
+                "max": 0,
+                "sum": 0
+              },
+              "uncovered": {
+                "count": 480,
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "p99": 0.0,
+                "min": 0,
+                "max": 0,
+                "sum": 0
+              }
+            },
+            "fully_covered_frames": 480,
+            "wake_origins": {
+              "timer": 507,
+              "selected_service_process": 1
+            }
+          },
+          "callback_after_return": {
+            "frames": 480,
+            "duration_ns": {
+              "count": 480,
+              "mean": 2049019.5333333334,
+              "median": 1972979.0,
+              "p95": 2138427.75,
+              "p99": 4778158.499999999,
+              "min": 1073209,
+              "max": 8862291,
+              "sum": 983529376
+            },
+            "states_ns": {
+              "Blocked": {
+                "count": 480,
+                "mean": 1933239.6645833333,
+                "median": 1843854.0,
+                "p95": 1996762.5,
+                "p99": 4636852.39,
+                "min": 932583,
+                "max": 8717666,
+                "sum": 927955039
+              },
+              "Interrupted": {
+                "count": 480,
+                "mean": 480.03125,
+                "median": 0.0,
+                "p95": 3127.0499999999984,
+                "p99": 4987.569999999941,
+                "min": 0,
+                "max": 13708,
+                "sum": 230415
+              },
+              "Runnable": {
+                "count": 480,
+                "mean": 11423.79375,
+                "median": 12291.5,
+                "p95": 19977.74999999998,
+                "p99": 25096.17999999999,
+                "min": 1583,
+                "max": 32792,
+                "sum": 5483421
+              },
+              "Running": {
+                "count": 480,
+                "mean": 103876.04375,
+                "median": 110062.5,
+                "p95": 144328.54999999996,
+                "p99": 189070.56999999995,
+                "min": 28875,
+                "max": 218958,
+                "sum": 49860501
+              },
+              "ambiguous": {
+                "count": 480,
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "p99": 0.0,
+                "min": 0,
+                "max": 0,
+                "sum": 0
+              },
+              "uncovered": {
+                "count": 480,
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "p99": 0.0,
+                "min": 0,
+                "max": 0,
+                "sum": 0
+              }
+            },
+            "fully_covered_frames": 480,
+            "wake_origins": {
+              "replay_other_thread": 494
+            }
+          },
+          "service_output_before_first_io": {
+            "frames": 480,
+            "duration_ns": {
+              "count": 480,
+              "mean": 1586310.5125,
+              "median": 1489791.5,
+              "p95": 1601337.4999999998,
+              "p99": 4211631.25,
+              "min": 496209,
+              "max": 8337708,
+              "sum": 761429046
+            },
+            "states_ns": {
+              "Blocked": {
+                "count": 480,
+                "mean": 1560181.3041666667,
+                "median": 1462291.5,
+                "p95": 1581696.1499999997,
+                "p99": 4181340.4299999997,
+                "min": 457292,
+                "max": 8317375,
+                "sum": 748887026
+              },
+              "Interrupted": {
+                "count": 480,
+                "mean": 134.4625,
+                "median": 0.0,
+                "p95": 0.0,
+                "p99": 3820.139999999993,
+                "min": 0,
+                "max": 7208,
+                "sum": 64542
+              },
+              "Preempted": {
+                "count": 480,
+                "mean": 20.747916666666665,
+                "median": 0.0,
+                "p95": 0.0,
+                "p99": 0.0,
+                "min": 0,
+                "max": 9959,
+                "sum": 9959
+              },
+              "Runnable": {
+                "count": 480,
+                "mean": 9086.4125,
+                "median": 10020.5,
+                "p95": 12752.099999999999,
+                "p99": 15493.069999999996,
+                "min": 2000,
+                "max": 28625,
+                "sum": 4361478
+              },
+              "Running": {
+                "count": 480,
+                "mean": 16887.585416666665,
+                "median": 17791.5,
+                "p95": 22251.149999999998,
+                "p99": 26133.82,
+                "min": 5500,
+                "max": 31375,
+                "sum": 8106041
+              },
+              "ambiguous": {
+                "count": 480,
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "p99": 0.0,
+                "min": 0,
+                "max": 0,
+                "sum": 0
+              },
+              "uncovered": {
+                "count": 480,
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "p99": 0.0,
+                "min": 0,
+                "max": 0,
+                "sum": 0
+              }
+            },
+            "fully_covered_frames": 480,
+            "wake_origins": {
+              "kernel_AppleAVD": 480
+            }
+          }
+        },
+        "service_output_interval_selection": {
+          "qualified": 480
+        },
+        "service_output_notification": {
+          "frames_with_unique_wake_and_waker": 480,
+          "origins": {
+            "kernel_AppleAVD": 480
+          },
+          "unique_kernel_AppleAVD_threads": 1,
+          "metrics_ns": {
+            "return_to_wake_ns": {
+              "count": 480,
+              "mean": 1560181.3041666667,
+              "median": 1462291.5,
+              "p95": 1581696.1499999997,
+              "p99": 4181340.4299999997,
+              "min": 457292,
+              "max": 8317375,
+              "sum": 748887026
+            },
+            "runnable_ns": {
+              "count": 480,
+              "mean": 9086.4125,
+              "median": 10020.5,
+              "p95": 12752.099999999999,
+              "p99": 15493.069999999996,
+              "min": 2000,
+              "max": 28625,
+              "sum": 4361478
+            },
+            "wake_to_first_io_ns": {
+              "count": 480,
+              "mean": 26129.208333333332,
+              "median": 27833.0,
+              "p95": 34544.049999999996,
+              "p99": 42949.499999999985,
+              "min": 8084,
+              "max": 52541,
+              "sum": 12542020
+            }
+          }
+        },
+        "callback_event_states": {
+          "Running": 480
+        },
+        "callback_dispatch": {
+          "frames_with_last_runnable": 480,
+          "frames_last_runnable_followed_by_only_running": 412,
+          "runnable_ns": {
+            "count": 480,
+            "mean": 11144.104166666666,
+            "median": 12229.0,
+            "p95": 18336.05,
+            "p99": 22341.82,
+            "min": 1583,
+            "max": 25834,
+            "sum": 5349170
+          },
+          "after_runnable_until_callback_ns": {
+            "count": 480,
+            "mean": 98140.65833333334,
+            "median": 105354.5,
+            "p95": 131264.55,
+            "p99": 147167.53999999992,
+            "min": 28875,
+            "max": 167625,
+            "sum": 47107516
+          }
+        },
+        "syscalls": {
+          "condition_wait": {
+            "syscalls": 480,
+            "calls_with_blocked_interval": 480,
+            "calls_with_wake_edge": 480,
+            "wake_origins": {
+              "replay_callback_thread": 480
+            },
+            "unique_condition_signal_count": 480,
+            "signal_matches_unique_kernel_waker_count": 480,
+            "wake_inside_signal_count": 480
+          },
+          "sync_xpc": {
+            "syscalls": 960,
+            "calls_with_blocked_interval": 478,
+            "calls_with_wake_edge": 478,
+            "wake_origins": {
+              "selected_service_process": 478
+            }
+          }
+        },
+        "limitations": [
+          "Blocked time is a thread state, not a measurement of hardware decoder execution.",
+          "Wake origins identify immediate kernel wakers, not transitive ownership or causality.",
+          "After-runnable execution includes worker work before the callback signpost; it is not a pure dispatch cost.",
+          "The service output interval is return to the first recorded output IO syscall on a unique output thread. Its state does not isolate hardware time.",
+          "Trace signpost boundaries are exact within the trace clock; raw callback stamps precede their trace end event."
+        ]
+      }
+    },
+    {
+      "schema_version": 1,
+      "case": "hevc-native-live",
+      "joined_frames": 721,
+      "qualification": {
+        "full_run_join_qualified": false,
+        "exact_subset_qualified": true,
+        "partial_capture": true,
+        "csv_rows": 1200,
+        "exact_joined_frames": 721,
+        "omitted_boundary_frames": 479,
+        "first_joined_frame_id": 221,
+        "last_joined_frame_id": 941
+      },
+      "service_identification": {
+        "method": "VTDecoder process name in trace metadata; missing stack matches remain explicit",
+        "name_confirmed": true
+      },
+      "syscalls": {
+        "frames": 721,
+        "overlapping_adjacent_frame_windows": 0,
+        "match_counts": {
+          "submit_rpc_syscalls:2": 721,
+          "submit_rpc_send_receive_pairs:1": 721,
+          "condition_wait:1": 721,
+          "same_condition_signal:1": 721,
+          "client_surface_lookup:1": 721,
+          "output_rpc_send_receive_pairs:1": 721,
+          "immediate_reply:1": 721,
+          "decode_ack:1": 721,
+          "decode_io:4": 721,
+          "output_io:6": 721,
+          "output_rpc_syscall:2": 721,
+          "immediate_reply_inside_submit_rpc:1": 721
+        },
+        "metrics": {
+          "api_call": {
+            "count": 721,
+            "p50_ns": 668459.0,
+            "p95_ns": 1028417.0,
+            "p99_ns": 1302149.9999999988,
+            "sum_ns": 466338243
+          },
+          "submit_to_callback": {
+            "count": 721,
+            "p50_ns": 2631042.0,
+            "p95_ns": 3220500.0,
+            "p99_ns": 5866966.799999984,
+            "sum_ns": 1915427926
+          },
+          "return_to_callback": {
+            "count": 721,
+            "p50_ns": 1945250.0,
+            "p95_ns": 2190458.0,
+            "p99_ns": 4670274.999999999,
+            "sum_ns": 1449089683
+          },
+          "submit_to_rpc": {
+            "count": 721,
+            "p50_ns": 33459.0,
+            "p95_ns": 246167.0,
+            "p99_ns": 628574.9999999997,
+            "sum_ns": 48869706
+          },
+          "rpc_send_through_receive_end": {
+            "count": 721,
+            "p50_ns": 232708.0,
+            "p95_ns": 329125.0,
+            "p99_ns": 404199.59999999957,
+            "sum_ns": 155014094
+          },
+          "condition_wait": {
+            "count": 721,
+            "p50_ns": 370250.0,
+            "p95_ns": 487917.0,
+            "p99_ns": 620033.1999999997,
+            "sum_ns": 245659995
+          },
+          "service_first_decode_io_to_ack_end": {
+            "count": 721,
+            "p50_ns": 280000.0,
+            "p95_ns": 357791.0,
+            "p99_ns": 422191.5999999999,
+            "sum_ns": 183424509
+          },
+          "service_decode_io_syscall_sum": {
+            "count": 721,
+            "p50_ns": 179500.0,
+            "p95_ns": 215125.0,
+            "p99_ns": 236825.39999999997,
+            "sum_ns": 115308680
+          },
+          "local_signal_end_to_wait_end": {
+            "count": 721,
+            "p50_ns": 15291.0,
+            "p95_ns": 20083.0,
+            "p99_ns": 29649.999999999978,
+            "sum_ns": 9921164
+          },
+          "service_ack_end_to_local_signal_start": {
+            "count": 721,
+            "p50_ns": 78583.0,
+            "p95_ns": 110875.0,
+            "p99_ns": 136607.99999999983,
+            "sum_ns": 52782780
+          },
+          "return_to_first_recorded_service_output_io": {
+            "count": 721,
+            "p50_ns": 1494917.0,
+            "p95_ns": 1623458.0,
+            "p99_ns": 4208950.6,
+            "sum_ns": 1151261044
+          },
+          "first_recorded_service_output_io_to_callback": {
+            "count": 721,
+            "p50_ns": 452291.0,
+            "p95_ns": 592917.0,
+            "p99_ns": 780742.1999999988,
+            "sum_ns": 297828639
+          },
+          "service_output_send_to_callback": {
+            "count": 721,
+            "p50_ns": 189958.0,
+            "p95_ns": 259583.0,
+            "p99_ns": 358932.9999999998,
+            "sum_ns": 124320590
+          },
+          "client_surface_lookup_syscall": {
+            "count": 721,
+            "p50_ns": 12250.0,
+            "p95_ns": 21958.0,
+            "p99_ns": 25650.199999999997,
+            "sum_ns": 8535244
+          },
+          "client_surface_lookup_start_to_callback": {
+            "count": 721,
+            "p50_ns": 77334.0,
+            "p95_ns": 109083.0,
+            "p99_ns": 137274.9999999999,
+            "sum_ns": 51766304
+          }
+        }
+      },
+      "limitations": [
+        "Service events are temporally matched inside exact replay frame windows, not matched by transaction IDs. Extra/missing matches are counted, not silently forced.",
+        "A synchronous XPC send trap and receive trap are one candidate RPC pair, not two independent RPCs. Stack classification and static code review support this interpretation.",
+        "Same condition object addresses link local condition signals to submit waits; scheduler waker edges provide separate evidence.",
+        "The first recorded service output IOKit call is not a hardware completion timestamp. The preceding gap includes an unknown combination of hardware, driver and scheduling time.",
+        "Mach syscall arguments do not expose the IOConnectCallMethod selector or its structure payload. This analyzer does not name private driver methods.",
+        "Service IOKit syscall sums are elapsed wall intervals, not CPU or hardware time. They overlap submit-thread waits and must not be added to those waits.",
+        "Independent percentile values do not add to a percentile of total frame latency.",
+        "Output RPC receive may finish after callback entry; only activity preceding callback entry belongs in submit-to-callback latency.",
+        "This is an instrumented, paced trace; benchmark claims require separate uninstrumented replay measurements.",
+        "Unnamed stack frames were restored using supplied exact aliases; that mapping must be verified against the recorded image UUIDs and addresses for this capture."
+      ],
+      "artifacts": {
+        "joined": {
+          "filename": "hevc-native-live-joined.json",
+          "sha256": "7a2e20e660f4139f85f6fb47bd243879a8af5d5dbf7d07cd3a78581ec606086f"
+        },
+        "join_summary": {
+          "filename": "hevc-native-live-profile.json",
+          "sha256": "5e03fb42efc349e1e7286d3cf3ae726cffc475584626acdd5a52335d0d0cbf10"
+        },
+        "analyzer": {
+          "filename": "analyze-vt-waits.py",
+          "sha256": "1363f47cc6693e989e2d4b1bf200820614e5a7caed20cc6a416de6c7052b50d5"
+        },
+        "syscall": {
+          "filename": "hevc-native-live-syscall.xml",
+          "sha256": "4f6a3b6ab5c22cfb8295f8804daeb6f598164bbd5bf76f31b1aff7cbbd3c4840",
+          "parsed_rows": 225380
+        },
+        "stack_symbols": {
+          "filename": "hevc-native-stack-symbols.json",
+          "sha256": "56cd4fc1c0600110180af64b61f05b70f52b76f047441a9c379b88e9a65a5602",
+          "method": "Exact exported frame-text aliases resolved against verified image UUIDs and shared-cache mapping; no fuzzy address matching.",
+          "aliases": 62
+        },
+        "thread_state": {
+          "filename": "hevc-native-live-thread-state.xml",
+          "sha256": "b18b009abb53cbe2ee8e98210d4753aa2d56cf3834e4f08d0de8a6dafb39bf50"
+        },
+        "state_analyzer": {
+          "filename": "vt_wait_states.py",
+          "sha256": "bff7ad59dd91425b9efabe13eb6e600730f3caacf71ece46e494a07c7f670558"
+        }
+      },
+      "related_static_evidence": {
+        "path": "docs/evidence/vt-wait-symbols.json",
+        "sha256": "55b116f3fcca59522880360975a08f9d4c5def755dffd5d06cad18b51c43ab23",
+        "scope": "Supports the old capture RPC interpretation and emitted-frame metadata chain; does not establish per-frame transaction identities."
+      },
+      "thread_states": {
+        "steady_frames": 721,
+        "analyzed_frames": 721,
+        "excluded_nonsequential_frames": 0,
+        "roles": {
+          "submit_call": {
+            "frames": 721,
+            "duration_ns": {
+              "count": 721,
+              "mean": 646793.6796116505,
+              "median": 668459.0,
+              "p95": 1028417.0,
+              "p99": 1302149.9999999988,
+              "min": 100291,
+              "max": 1836125,
+              "sum": 466338243
+            },
+            "states_ns": {
+              "Blocked": {
+                "count": 721,
+                "mean": 471747.4216366158,
+                "median": 511625.0,
+                "p95": 697416.0,
+                "p99": 870024.5999999989,
+                "min": 67833,
+                "max": 1059000,
+                "sum": 340129891
+              },
+              "Interrupted": {
+                "count": 721,
+                "mean": 806.6380027739251,
+                "median": 0.0,
+                "p95": 4292.0,
+                "p99": 10358.999999999996,
+                "min": 0,
+                "max": 15583,
+                "sum": 581586
+              },
+              "Preempted": {
+                "count": 721,
+                "mean": 1727.632454923717,
+                "median": 0.0,
+                "p95": 0.0,
+                "p99": 26591.799999999956,
+                "min": 0,
+                "max": 682542,
+                "sum": 1245623
+              },
+              "Runnable": {
+                "count": 721,
+                "mean": 21254.278779472956,
+                "median": 21291.0,
+                "p95": 30459.0,
+                "p99": 75025.19999999997,
+                "min": 2042,
+                "max": 161166,
+                "sum": 15324335
+              },
+              "Running": {
+                "count": 721,
+                "mean": 151257.70873786407,
+                "median": 129042.0,
+                "p95": 343252.0,
+                "p99": 706265.9999999998,
+                "min": 19333,
+                "max": 890082,
+                "sum": 109056808
+              },
+              "ambiguous": {
+                "count": 721,
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "p99": 0.0,
+                "min": 0,
+                "max": 0,
+                "sum": 0
+              },
+              "uncovered": {
+                "count": 721,
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "p99": 0.0,
+                "min": 0,
+                "max": 0,
+                "sum": 0
+              }
+            },
+            "fully_covered_frames": 721,
+            "wake_origins": {
+              "selected_service_process": 720,
+              "replay_callback_thread": 721
+            }
+          },
+          "submit_after_return": {
+            "frames": 721,
+            "duration_ns": {
+              "count": 721,
+              "mean": 2009833.1248266296,
+              "median": 1945250.0,
+              "p95": 2190458.0,
+              "p99": 4670274.999999999,
+              "min": 1453584,
+              "max": 8905666,
+              "sum": 1449089683
+            },
+            "states_ns": {
+              "Blocked": {
+                "count": 721,
+                "mean": 1959467.4230235785,
+                "median": 1895208.0,
+                "p95": 2122084.0,
+                "p99": 4546308.2,
+                "min": 1450334,
+                "max": 8743291,
+                "sum": 1412776012
+              },
+              "Interrupted": {
+                "count": 721,
+                "mean": 401.124826629681,
+                "median": 0.0,
+                "p95": 3001.0,
+                "p99": 6108.399999999996,
+                "min": 0,
+                "max": 11751,
+                "sum": 289211
+              },
+              "Preempted": {
+                "count": 721,
+                "mean": 860.7822468793343,
+                "median": 0.0,
+                "p95": 0.0,
+                "p99": 19016.999999999938,
+                "min": 0,
+                "max": 255833,
+                "sum": 620624
+              },
+              "Runnable": {
+                "count": 721,
+                "mean": 8680.115117891817,
+                "median": 6416.0,
+                "p95": 16958.0,
+                "p99": 34383.59999999993,
+                "min": 0,
+                "max": 398875,
+                "sum": 6258363
+              },
+              "Running": {
+                "count": 721,
+                "mean": 40423.679611650485,
+                "median": 41501.0,
+                "p95": 64666.0,
+                "p99": 112941.39999999994,
+                "min": 2375,
+                "max": 190041,
+                "sum": 29145473
+              },
+              "ambiguous": {
+                "count": 721,
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "p99": 0.0,
+                "min": 0,
+                "max": 0,
+                "sum": 0
+              },
+              "uncovered": {
+                "count": 721,
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "p99": 0.0,
+                "min": 0,
+                "max": 0,
+                "sum": 0
+              }
+            },
+            "fully_covered_frames": 721,
+            "wake_origins": {
+              "timer": 742
+            }
+          },
+          "callback_after_return": {
+            "frames": 721,
+            "duration_ns": {
+              "count": 721,
+              "mean": 2009833.1248266296,
+              "median": 1945250.0,
+              "p95": 2190458.0,
+              "p99": 4670274.999999999,
+              "min": 1453584,
+              "max": 8905666,
+              "sum": 1449089683
+            },
+            "states_ns": {
+              "Blocked": {
+                "count": 721,
+                "mean": 1900663.884882108,
+                "median": 1826750.0,
+                "p95": 2035583.0,
+                "p99": 4561249.799999999,
+                "min": 1434626,
+                "max": 8775667,
+                "sum": 1370378661
+              },
+              "Interrupted": {
+                "count": 721,
+                "mean": 476.83217753120664,
+                "median": 0.0,
+                "p95": 3333.0,
+                "p99": 8116.5999999999985,
+                "min": 0,
+                "max": 12834,
+                "sum": 343796
+              },
+              "Runnable": {
+                "count": 721,
+                "mean": 10073.726768377253,
+                "median": 10667.0,
+                "p95": 20084.0,
+                "p99": 22658.79999999999,
+                "min": 959,
+                "max": 31833,
+                "sum": 7263157
+              },
+              "Running": {
+                "count": 721,
+                "mean": 98618.68099861304,
+                "median": 106000.0,
+                "p95": 154583.0,
+                "p99": 194600.0,
+                "min": 13458,
+                "max": 231501,
+                "sum": 71104069
+              },
+              "ambiguous": {
+                "count": 721,
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "p99": 0.0,
+                "min": 0,
+                "max": 0,
+                "sum": 0
+              },
+              "uncovered": {
+                "count": 721,
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "p99": 0.0,
+                "min": 0,
+                "max": 0,
+                "sum": 0
+              }
+            },
+            "fully_covered_frames": 721,
+            "wake_origins": {
+              "no_thread_waker": 260,
+              "replay_other_thread": 482,
+              "replay_callback_thread": 1
+            }
+          },
+          "service_output_before_first_io": {
+            "frames": 721,
+            "duration_ns": {
+              "count": 721,
+              "mean": 1596755.9556171983,
+              "median": 1494917.0,
+              "p95": 1623458.0,
+              "p99": 4208950.6,
+              "min": 1265083,
+              "max": 8371459,
+              "sum": 1151261044
+            },
+            "states_ns": {
+              "Blocked": {
+                "count": 721,
+                "mean": 1571171.7018030514,
+                "median": 1469542.0,
+                "p95": 1607042.0,
+                "p99": 4180808.5999999996,
+                "min": 1233917,
+                "max": 8343292,
+                "sum": 1132814797
+              },
+              "Interrupted": {
+                "count": 721,
+                "mean": 314.55478502080445,
+                "median": 0.0,
+                "p95": 2917.0,
+                "p99": 4449.799999999998,
+                "min": 0,
+                "max": 17042,
+                "sum": 226794
+              },
+              "Runnable": {
+                "count": 721,
+                "mean": 9234.474341192788,
+                "median": 9750.0,
+                "p95": 13000.0,
+                "p99": 16183.799999999994,
+                "min": 1959,
+                "max": 23375,
+                "sum": 6658056
+              },
+              "Running": {
+                "count": 721,
+                "mean": 16035.224687933425,
+                "median": 16458.0,
+                "p95": 22875.0,
+                "p99": 29383.399999999918,
+                "min": 3125,
+                "max": 44291,
+                "sum": 11561397
+              },
+              "ambiguous": {
+                "count": 721,
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "p99": 0.0,
+                "min": 0,
+                "max": 0,
+                "sum": 0
+              },
+              "uncovered": {
+                "count": 721,
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "p99": 0.0,
+                "min": 0,
+                "max": 0,
+                "sum": 0
+              }
+            },
+            "fully_covered_frames": 721,
+            "wake_origins": {
+              "kernel_AppleAVD": 721
+            }
+          }
+        },
+        "service_output_interval_selection": {
+          "qualified": 721
+        },
+        "service_output_notification": {
+          "frames_with_unique_wake_and_waker": 721,
+          "origins": {
+            "kernel_AppleAVD": 721
+          },
+          "unique_kernel_AppleAVD_threads": 1,
+          "metrics_ns": {
+            "return_to_wake_ns": {
+              "count": 721,
+              "mean": 1571171.7018030514,
+              "median": 1469542.0,
+              "p95": 1607042.0,
+              "p99": 4180808.5999999996,
+              "min": 1233917,
+              "max": 8343292,
+              "sum": 1132814797
+            },
+            "runnable_ns": {
+              "count": 721,
+              "mean": 9234.474341192788,
+              "median": 9750.0,
+              "p95": 13000.0,
+              "p99": 16183.799999999994,
+              "min": 1959,
+              "max": 23375,
+              "sum": 6658056
+            },
+            "wake_to_first_io_ns": {
+              "count": 721,
+              "mean": 25584.253814147018,
+              "median": 26375.0,
+              "p95": 33667.0,
+              "p99": 45233.199999999975,
+              "min": 7250,
+              "max": 58958,
+              "sum": 18446247
+            }
+          }
+        },
+        "callback_event_states": {
+          "Running": 721
+        },
+        "callback_dispatch": {
+          "frames_with_last_runnable": 721,
+          "frames_last_runnable_followed_by_only_running": 629,
+          "runnable_ns": {
+            "count": 721,
+            "mean": 9844.128987517337,
+            "median": 10625.0,
+            "p95": 19042.0,
+            "p99": 21899.599999999995,
+            "min": 959,
+            "max": 28458,
+            "sum": 7097617
+          },
+          "after_runnable_until_callback_ns": {
+            "count": 721,
+            "mean": 94086.99861303745,
+            "median": 102667.0,
+            "p95": 140875.0,
+            "p99": 175199.59999999995,
+            "min": 13458,
+            "max": 223916,
+            "sum": 67836726
+          }
+        },
+        "syscalls": {
+          "condition_wait": {
+            "syscalls": 721,
+            "calls_with_blocked_interval": 721,
+            "calls_with_wake_edge": 721,
+            "wake_origins": {
+              "replay_callback_thread": 721
+            },
+            "unique_condition_signal_count": 721,
+            "signal_matches_unique_kernel_waker_count": 721,
+            "wake_inside_signal_count": 721
+          },
+          "sync_xpc": {
+            "syscalls": 1442,
+            "calls_with_blocked_interval": 720,
+            "calls_with_wake_edge": 720,
+            "wake_origins": {
+              "selected_service_process": 720
+            }
+          }
+        },
+        "limitations": [
+          "Blocked time is a thread state, not a measurement of hardware decoder execution.",
+          "Wake origins identify immediate kernel wakers, not transitive ownership or causality.",
+          "After-runnable execution includes worker work before the callback signpost; it is not a pure dispatch cost.",
+          "The service output interval is return to the first recorded output IO syscall on a unique output thread. Its state does not isolate hardware time.",
+          "Trace signpost boundaries are exact within the trace clock; raw callback stamps precede their trace end event."
+        ]
+      }
+    }
+  ]
+}
