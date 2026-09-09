@@ -1,0 +1,62 @@
+{
+  "timestamp_utc": "2026-09-09T03:37:36.749576+00:00",
+  "status": "PASS",
+  "tests": [
+    {
+      "test": "qt-native-ownership-metal",
+      "codec": "av1",
+      "bit_depth": 8,
+      "status": "PASS"
+    },
+    {
+      "test": "qt-native-ownership-metal",
+      "codec": "av1",
+      "bit_depth": 10,
+      "status": "PASS"
+    },
+    {
+      "test": "qt-native-ownership-metal",
+      "codec": "hevc",
+      "bit_depth": 8,
+      "status": "PASS"
+    },
+    {
+      "test": "qt-native-ownership-metal",
+      "codec": "hevc",
+      "bit_depth": 10,
+      "status": "PASS"
+    }
+  ],
+  "configuration": "Release arm64",
+  "qt_version": "6.11.2",
+  "application_minimum_macos": "13",
+  "library_minimum_macos": "11.0",
+  "macos": "26.6.2",
+  "sdk": "26.5",
+  "device": "Apple M3 (actual Metal renderer device)",
+  "moonlight_qt_revision": "f743c23663bcd01059b620b823629e0afcb3dde8",
+  "common_c_revision": "874ac9548f1bd6f095ef2b435c42cdde460e7821",
+  "app_sha256": "4bfef749cb7f632e4b8899f13ad25e35b2e95fb8d8e1630fc278d6688307ab44",
+  "public_header_sha256": "22008d60115135570ac10d31a28be654ec64fef78e641dce1851e66097ebfa74",
+  "command": "./scripts/validate-moonlight-qt.sh",
+  "hardware_access": "Run outside tool sandbox after sandbox VT service access failed in separate core probes",
+  "limits": [
+    "Existing 1280x720 codec probes; not long-sequence or encoded HDR mastering-content validation",
+    "Probe path only: production pull/handoff/pacer workers, Session strict/fallback, and terminal-error UI branches not exercised",
+    "No live server session tested",
+    "Presentation latency, dedicated drawable/GPU waits, complete inherited display-drop counts and live A/B performance NOT MEASURED"
+  ],
+  "measurement_clock": "Apple CLOCK_UPTIME_RAW, calibrated common-c epoch",
+  "adapter_sources_sha256": {
+    "integration/moonlight-qt/apple_video_frame.cpp": "c3e00505bf216df3cd0a8d9650bcb2750b93d0e0219a70d09ffe303e74907e3a",
+    "integration/moonlight-qt/apple_video.cpp": "d08c9acd92a0bfbcd46cb31a589ff2126512a3aa42de51aae5f1972a8545ed3a",
+    "integration/moonlight-qt/apple_video_frame.h": "ed65847201c3975b7a10033c48fd6c471cf63e28dba0633f05ba5bc84255f376",
+    "integration/moonlight-qt/apple_video.h": "c4c0bbb3ab0e4795c4998194fe26a066f673fb34b4a7053feae9069afe58bd0a",
+    "integration/moonlight-qt/apple_video_timing.h": "a690b31093a87622e6b5cb630b0fdb4a757c955af5e74b7639197775eebe6e5d"
+  },
+  "media_timing_checks": "PASS: uint32 RTP rollover, zero at rollover, repeated/backward media timestamps, fallback validity, stale callback ordering, frame-number rollover, epoch/generation changes",
+  "backpressure_policy": "Event capacity wait then retry; controlled drain only after retry still blocked despite available capacity",
+  "consumer_patch_sha256": "c326f851c8326c30024a8bab72f3c06229600eba2d9fe01dc39d0ad687fc5825",
+  "hdr_metadata_checks": "PASS: synthetic mastering/CLL AVFrame side-data exact round trip, native CAEDRMetadata construction, subsequent metadata-free wrapper and renderer update; no visible HDR validation",
+  "admission_age_scope": "Complete-AU enqueue to submit return, including queue/capacity wait, preparation and submission; not pure queue wait"
+}

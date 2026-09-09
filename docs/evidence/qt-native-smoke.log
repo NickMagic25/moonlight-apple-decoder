@@ -1,0 +1,12 @@
+00:00:00 - SDL Info (0): Selected Metal device: Apple M3
+00:00:00 - Qt Info: Found "vt_renderer.metal" at ":/data/vt_renderer.metal"
+00:00:00 - SDL Info (0): Native probe codec=AV1 depth=8 1280x720 hardware=1 ownership+Metal+HDR-metadata=PASS result=OK backend=0; negotiated dimensions will be validated by the real stream
+00:00:00 - SDL Info (0): Selected Metal device: Apple M3
+00:00:00 - Qt Info: Found "vt_renderer.metal" at ":/data/vt_renderer.metal"
+00:00:00 - SDL Info (0): Native probe codec=AV1 depth=10 1280x720 hardware=1 ownership+Metal+HDR-metadata=PASS result=OK backend=0; negotiated dimensions will be validated by the real stream
+00:00:00 - SDL Info (0): Selected Metal device: Apple M3
+00:00:00 - Qt Info: Found "vt_renderer.metal" at ":/data/vt_renderer.metal"
+00:00:00 - SDL Info (0): Native probe codec=HEVC depth=8 1280x720 hardware=1 ownership+Metal+HDR-metadata=PASS result=OK backend=0; negotiated dimensions will be validated by the real stream
+00:00:00 - SDL Info (0): Selected Metal device: Apple M3
+00:00:00 - Qt Info: Found "vt_renderer.metal" at ":/data/vt_renderer.metal"
+00:00:00 - SDL Info (0): Native probe codec=HEVC depth=10 1280x720 hardware=1 ownership+Metal+HDR-metadata=PASS result=OK backend=0; negotiated dimensions will be validated by the real stream

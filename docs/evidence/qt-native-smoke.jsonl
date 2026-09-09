@@ -1,0 +1,4 @@
+{"test":"qt-native-ownership-metal","codec":"av1","bit_depth":8,"status":"PASS"}
+{"test":"qt-native-ownership-metal","codec":"av1","bit_depth":10,"status":"PASS"}
+{"test":"qt-native-ownership-metal","codec":"hevc","bit_depth":8,"status":"PASS"}
+{"test":"qt-native-ownership-metal","codec":"hevc","bit_depth":10,"status":"PASS"}

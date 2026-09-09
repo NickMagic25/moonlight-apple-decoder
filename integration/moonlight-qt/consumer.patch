@@ -1,0 +1,293 @@
+diff --git a/app/app.pro b/app/app.pro
+index 1c0661b3..acea6c00 100644
+--- a/app/app.pro
++++ b/app/app.pro
+@@ -10,6 +10,12 @@ unix:!macx {
+ 
+ include(../globaldefs.pri)
+ 
++# Optional shared native decoder integration; no machine-specific source paths.
++MAV_SOURCE_DIR = $$(MOONLIGHT_APPLE_VIDEO_SOURCE_DIR)
++!isEmpty(MAV_SOURCE_DIR) {
++    include($$MAV_SOURCE_DIR/integration/moonlight-qt/moonlight-apple-video.pri)
++}
++
+ # Precompile QML files to avoid writing qmlcache on portable versions.
+ # Since this binds the app against the Qt runtime version, we will only
+ # do this for Windows and Mac (when disable-prebuilts is not defined),
+diff --git a/app/main.cpp b/app/main.cpp
+index c0be000c..99124931 100644
+--- a/app/main.cpp
++++ b/app/main.cpp
+@@ -29,6 +29,10 @@
+ #include "streaming/video/ffmpeg.h"
+ #endif
+ 
++#ifdef HAVE_MOONLIGHT_APPLE_VIDEO
++#include "apple_video.h"
++#endif
++
+ #if defined(Q_OS_WIN32)
+ #include "antihookingprotection.h"
+ 
+@@ -755,6 +759,13 @@ int main(int argc, char *argv[])
+ 
+     QGuiApplication app(argc, argv);
+ 
++#ifdef HAVE_MOONLIGHT_APPLE_VIDEO
++    if (qgetenv("MOONLIGHT_APPLE_VIDEO_SMOKE") == "1") {
++        // Server-free hardware, retained AVFrame and actual Metal texture checks.
++        return AppleVideoDecoder::runOfflineSmoke();
++    }
++#endif
++
+ #ifdef Q_OS_DARWIN
+     // macOS defaults "Keyboard navigation" to text fields and lists only, which
+     // prevents Tab (and the gamepad navigation that synthesizes it) from moving
+diff --git a/app/streaming/session.cpp b/app/streaming/session.cpp
+index 40c1e59c..7f03f7c0 100644
+--- a/app/streaming/session.cpp
++++ b/app/streaming/session.cpp
+@@ -11,6 +11,10 @@
+ #include "video/ffmpeg.h"
+ #endif
+ 
++#ifdef HAVE_MOONLIGHT_APPLE_VIDEO
++#include "apple_video.h"
++#endif
++
+ #ifdef HAVE_SLVIDEO
+ #include "video/slvid.h"
+ #endif
+@@ -318,6 +322,26 @@ bool Session::chooseDecoder(StreamingPreferences::VideoDecoderSelection vds,
+ #endif
+ 
+ #ifdef HAVE_FFMPEG
++    const QByteArray appleBackend = qgetenv("MOONLIGHT_APPLE_VIDEO_DECODER");
++    const bool strictNative = qgetenv("MOONLIGHT_APPLE_VIDEO_STRICT") == "1";
++    if (appleBackend == "native" || strictNative) {
++#ifdef HAVE_MOONLIGHT_APPLE_VIDEO
++        chosenDecoder = new AppleVideoDecoder(testOnly);
++        if (chosenDecoder->initialize(&params)) {
++            SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Native Apple video decoder chosen (format=%x)", videoFormat);
++            return true;
++        }
++        delete chosenDecoder;
++        chosenDecoder = nullptr;
++#endif
++        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
++                    "Native Apple video unavailable for format=%x. %s", videoFormat,
++                    strictNative ? "STRICT: FFmpeg fallback prohibited." : "FALLBACK: selecting existing FFmpeg backend.");
++        if (strictNative) return false;
++    }
++    else if (!appleBackend.isEmpty() && appleBackend != "ffmpeg") {
++        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Unknown MOONLIGHT_APPLE_VIDEO_DECODER=%s; using FFmpeg", appleBackend.constData());
++    }
+     chosenDecoder = new FFmpegVideoDecoder(testOnly);
+     if (chosenDecoder->initialize(&params)) {
+         SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
+@@ -1964,6 +1988,17 @@ void Session::exec()
+     // because we want to suspend all Qt processing until the stream is over.
+     SDL_Event event;
+     for (;;) {
++#ifdef HAVE_MOONLIGHT_APPLE_VIDEO
++        if (auto* native = dynamic_cast<AppleVideoDecoder*>(m_VideoDecoder)) {
++            if (native->fatalError() != MAV_OK) {
++                m_UnexpectedTermination = true;
++                emit displayLaunchError(tr("The native Apple video decoder cannot decode this stream (%1).")
++                    .arg(QString::fromLatin1(mav_result_string(native->fatalError()))) + "\n\n" +
++                    tr("Try a different codec or resolution, or select the FFmpeg decoder before reconnecting."));
++                goto DispatchDeferredCleanup;
++            }
++        }
++#endif
+ #if SDL_VERSION_ATLEAST(2, 0, 18) && !defined(STEAM_LINK)
+         // SDL 2.0.18 has a proper wait event implementation that uses platform
+         // support to block on events rather than polling on Windows, macOS, X11,
+@@ -2003,6 +2038,11 @@ void Session::exec()
+ 
+         case SDL_USEREVENT:
+             switch (event.user.code) {
++#ifdef HAVE_MOONLIGHT_APPLE_VIDEO
++            case SDL_CODE_APPLE_VIDEO_FATAL:
++                // The latched decoder error is dispatched on the next loop pass.
++                break;
++#endif
+             case SDL_CODE_FRAME_READY:
+                 if (m_VideoDecoder != nullptr) {
+                     m_VideoDecoder->renderFrameOnMainThread();
+diff --git a/app/streaming/video/ffmpeg-renderers/vt.h b/app/streaming/video/ffmpeg-renderers/vt.h
+index d5b1b45e..54d33156 100644
+--- a/app/streaming/video/ffmpeg-renderers/vt.h
++++ b/app/streaming/video/ffmpeg-renderers/vt.h
+@@ -26,7 +26,7 @@ protected:
+ class VTMetalRendererFactory {
+ public:
+     static
+-    IFFmpegRenderer* createRenderer(bool hwAccel);
++    IFFmpegRenderer* createRenderer(bool hwAccel, bool preferFrameHdrMetadata = false);
+ };
+ 
+ class VTRendererFactory {
+diff --git a/app/streaming/video/ffmpeg-renderers/vt_metal.mm b/app/streaming/video/ffmpeg-renderers/vt_metal.mm
+index 2852d437..ddf44ba2 100644
+--- a/app/streaming/video/ffmpeg-renderers/vt_metal.mm
++++ b/app/streaming/video/ffmpeg-renderers/vt_metal.mm
+@@ -3,6 +3,9 @@
+ #define AVMediaType AVMediaType_FFmpeg
+ #include "vt.h"
+ #include "pacer/pacer.h"
++#ifdef HAVE_MOONLIGHT_APPLE_VIDEO
++#include "apple_video_frame.h"
++#endif
+ #undef AVMediaType
+ 
+ #include <SDL_syswm.h>
+@@ -54,9 +57,10 @@ - (id)initWithRenderer:(VTMetalRenderer *)renderer;
+ class VTMetalRenderer : public VTBaseRenderer
+ {
+ public:
+-    VTMetalRenderer(bool hwAccel)
++    VTMetalRenderer(bool hwAccel, bool preferFrameHdrMetadata)
+         : VTBaseRenderer(RendererType::VTMetal),
+           m_HwAccel(hwAccel),
++          m_PreferFrameHdrMetadata(preferFrameHdrMetadata),
+           m_Window(nullptr),
+           m_HwContext(nullptr),
+           m_MetalLayer(nullptr),
+@@ -221,8 +225,40 @@ int getBitnessScaleFactor(AVFrame* frame)
+         }
+     }
+ 
++    void setHdrMode(bool enabled) override
++    {
++        // Native frames already contain bitstream metadata merged with valid
++        // host fallback. Keep that precedence and mutate its cache only on the
++        // render thread. Existing FFmpeg renderers retain their host behavior.
++        if (!m_PreferFrameHdrMetadata) VTBaseRenderer::setHdrMode(enabled);
++    }
++
++    void updateNativeHdrMetadata(AVFrame* frame)
++    {
++#ifdef HAVE_MOONLIGHT_APPLE_VIDEO
++        if (!m_PreferFrameHdrMetadata) return;
++        const auto metadata = appleVideoFrameHdrMetadata(frame);
++        auto update = [this](CFDataRef& cached, bool valid, const uint8_t* bytes, CFIndex length) {
++            if (!valid) {
++                if (cached) { CFRelease(cached); cached = nullptr; m_HdrMetadataChanged = true; }
++                return;
++            }
++            if (cached && CFDataGetLength(cached) == length &&
++                    memcmp(CFDataGetBytePtr(cached), bytes, size_t(length)) == 0) return;
++            if (cached) CFRelease(cached);
++            cached = CFDataCreate(kCFAllocatorDefault, bytes, length);
++            m_HdrMetadataChanged = true;
++        };
++        update(m_MasteringDisplayColorVolume, metadata.hasMastering, metadata.mastering.data(), metadata.mastering.size());
++        update(m_ContentLightLevelInfo, metadata.hasContentLight, metadata.contentLight.data(), metadata.contentLight.size());
++#else
++        Q_UNUSED(frame);
++#endif
++    }
++
+     bool updateColorSpaceForFrame(AVFrame* frame)
+     {
++        updateNativeHdrMetadata(frame);
+         if (!hasFrameFormatChanged(frame) && !m_HdrMetadataChanged) {
+             return true;
+         }
+@@ -452,6 +488,11 @@ bool createTexturesFromFrame(AVFrame* frame, std::array<CVMetalTextureRef, MAX_V
+ 
+     bool testRenderFrame(AVFrame *frame) override
+     { @autoreleasepool {
++        updateNativeHdrMetadata(frame);
++        if (m_PreferFrameHdrMetadata && m_MasteringDisplayColorVolume &&
++                ![CAEDRMetadata HDR10MetadataWithDisplayInfo:(__bridge NSData*)m_MasteringDisplayColorVolume
++                                               contentInfo:(__bridge NSData*)m_ContentLightLevelInfo
++                                        opticalOutputScale:203.0]) return false;
+         if (frame->format == AV_PIX_FMT_VIDEOTOOLBOX) {
+             std::array<CVMetalTextureRef, MAX_VIDEO_PLANES> cvMetalTextures;
+             size_t planes = getFramePlaneCount(frame);
+@@ -938,6 +979,7 @@ void renderLatestFrameOnDrawable(id<CAMetalDrawable> drawable, CFTimeInterval ta
+ 
+ private:
+     bool m_HwAccel;
++    bool m_PreferFrameHdrMetadata;
+     SDL_Window* m_Window;
+     AVBufferRef* m_HwContext;
+     CAMetalLayer* m_MetalLayer;
+@@ -979,6 +1021,6 @@ - (void)metalDisplayLink:(CAMetalDisplayLink *)link
+ 
+ @end
+ 
+-IFFmpegRenderer* VTMetalRendererFactory::createRenderer(bool hwAccel) {
+-    return new VTMetalRenderer(hwAccel);
++IFFmpegRenderer* VTMetalRendererFactory::createRenderer(bool hwAccel, bool preferFrameHdrMetadata) {
++    return new VTMetalRenderer(hwAccel, preferFrameHdrMetadata);
+ }
+diff --git a/app/streaming/video/ffmpeg.h b/app/streaming/video/ffmpeg.h
+index 1e9e9d18..371266d9 100644
+--- a/app/streaming/video/ffmpeg.h
++++ b/app/streaming/video/ffmpeg.h
+@@ -32,6 +32,9 @@ public:
+ 
+     virtual IFFmpegRenderer* getBackendRenderer();
+ 
++    // Existing compressed test bytes only; does not instantiate an FFmpeg decoder.
++    static bool getNativeProbeSample(int videoFormat, const uint8_t** data, size_t* size);
++
+ private:
+     enum class TestMode {
+         // No test frame and prepare for rendering
+diff --git a/app/streaming/video/ffmpeg_videosamples.cpp b/app/streaming/video/ffmpeg_videosamples.cpp
+index d2552396..e25a6ff6 100644
+--- a/app/streaming/video/ffmpeg_videosamples.cpp
++++ b/app/streaming/video/ffmpeg_videosamples.cpp
+@@ -1,5 +1,9 @@
+ #include "ffmpeg.h"
+ 
++// The native adapter uses the same samples to check each codec/bit-depth variant.
++// AV1 arrays carry FFmpeg input padding after the final sized OBU. Real common-c
++// access units have already had transport padding removed by VideoDepacketizer.
++
+ // NOTE: All test frames MUST be 720p in order for us to provide the correct dimensions in the AVCodecContext!
+ // See FFmpegVideoDecoder::tryInitializeRenderer() for details.
+ 
+@@ -168,3 +172,37 @@ const uint8_t FFmpegVideoDecoder::k_AV1High10_444TestFrame[] = {
+   0x81, 0x37, 0x40, 0xfd, 0x19, 0x97, 0xdc, 0x15, 0x72, 0x1d, 0xe0, 0xff,
+   0x00, 0x35, 0x9d, 0x2c, 0x10, 0x7d, 0x17, 0x58, 0x60,
+ };
++
++bool FFmpegVideoDecoder::getNativeProbeSample(int format, const uint8_t** data, size_t* size)
++{
++    if (!data || !size) return false;
++    switch (format) {
++    case VIDEO_FORMAT_H265: *data = k_HEVCMainTestFrame; *size = sizeof(k_HEVCMainTestFrame); break;
++    case VIDEO_FORMAT_H265_MAIN10: *data = k_HEVCMain10TestFrame; *size = sizeof(k_HEVCMain10TestFrame); break;
++    case VIDEO_FORMAT_AV1_MAIN8: *data = k_AV1Main8TestFrame; *size = sizeof(k_AV1Main8TestFrame); break;
++    case VIDEO_FORMAT_AV1_MAIN10: *data = k_AV1Main10TestFrame; *size = sizeof(k_AV1Main10TestFrame); break;
++    default: return false;
++    }
++    if (format & VIDEO_FORMAT_MASK_AV1) {
++        size_t offset = 0;
++        while (offset < *size && (*data)[offset] != 0) {
++            uint8_t header = (*data)[offset++];
++            if (!(header & 2) || (header & 0x81)) return false;
++            if (header & 4) { if (offset == *size) return false; ++offset; }
++            size_t length = 0;
++            unsigned shift = 0;
++            uint8_t byte;
++            do {
++                if (offset == *size || shift > 49) return false;
++                byte = (*data)[offset++];
++                length |= size_t(byte & 127) << shift;
++                shift += 7;
++            } while (byte & 128);
++            if (length > *size - offset) return false;
++            offset += length;
++        }
++        for (size_t i = offset; i < *size; ++i) if ((*data)[i]) return false;
++        *size = offset;
++    }
++    return true;
++}
