@@ -4,6 +4,12 @@ This branch adds fixture controls and reporting. No fixtures, encodes, or timed
 decode measurements were run as part of the implementation. The root experiment
 coordinator owns generation and every timed run.
 
+The coordinator's final results are recorded separately in
+[`docs/experiment-results.md`](experiment-results.md) on
+`codex/experiment-comparison`. Open that link from the comparison branch checkout.
+Those results cover centrally generated fixtures and measurements; this document
+describes the encoder-layout implementation and its own validation only.
+
 Start with AV1 column log2 values **0, 1, 2** (requested 1, 2, 4 columns), keeping
 row log2=0. Value 1 is the existing default. This is a bounded experiment, not a
 claim that extra tiles improve VideoToolbox latency. Keep the moving-gradient
@@ -16,10 +22,11 @@ zero lag, no alternate references, and CQ 12 identical within each case:
 | 4k60-sdr8 | 3840x2160 | 60 fps | 8-bit BT.709 | 0, 1, 2 |
 | 4k60-hdr10 | 3840x2160 | 60 fps | 10-bit BT.2020/PQ | 0, 1, 2 |
 
-Produce the nine commands without executing them:
+Run these commands from the repository root. Produce the nine generation commands
+without executing them:
 
 ```sh
-python3 scripts/encoder-layout.py plan --fixture-tool build/mav-fixture --aomenc /Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/.local/aom-build/aomenc --output-root fixtures/generated/encoder-layout
+python3 scripts/encoder-layout.py plan --fixture-tool build/mav-fixture --aomenc "$PWD/.local/aom-build/aomenc" --output-root fixtures/generated/encoder-layout
 ```
 
 The returned command arrays all request `--aom-psnr 1`. To validate one command
@@ -55,7 +62,7 @@ The separate `mav-tile-geometry` tool links the public libaom decoder API only;
 the production decoder does not acquire an AOM dependency. Configure explicitly:
 
 ```sh
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 -DMAV_AOM_SOURCE=/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/.local/src/aom -DMAV_AOM_LIBRARY=/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/.local/aom-build/libaom.a
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 -DMAV_AOM_SOURCE="$PWD/.local/src/aom" -DMAV_AOM_LIBRARY="$PWD/.local/aom-build/libaom.a"
 cmake --build build --target mav-tile-geometry --parallel 4
 build/mav-tile-geometry --ivf fixtures/generated/encoder-layout/1080p120-sdr8/columns2-rows0/encoded.ivf --expect-columns 4 --expect-rows 1 --output fixtures/generated/encoder-layout/1080p120-sdr8/columns2-rows0/tile-geometry.json
 python3 scripts/encoder-layout.py summarize --output-root fixtures/generated/encoder-layout --require-geometry
