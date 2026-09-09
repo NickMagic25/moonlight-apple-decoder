@@ -1,0 +1,44 @@
+--- a/src/backend_vt.mm
++++ b/src/backend_vt.mm
+@@ -1,4 +1,6 @@
+ #include "apple.hpp"
++#include <dlfcn.h>
++#include <unistd.h>
+ #ifdef MAV_VT_EXPERIMENTS
+ #include "vt_experiment.hpp"
+ #endif
+@@ -118,7 +120,33 @@
+ #endif
+         CFDictionarySetValue(attrs,kCVPixelBufferMetalCompatibilityKey,kCFBooleanTrue);
+         VTDecompressionOutputCallbackRecord cb{callback,this};
+-        status=VTDecompressionSessionCreate(kCFAllocatorDefault,format_,spec,attrs,&cb,&session_);info_.last_status=status;
++        // Isolated installed-OS probe; never part of the production source tree.
++        bool privateClient=std::getenv("MAV_PRIVATE_CLIENT_PROCESS")&&std::strcmp(std::getenv("MAV_PRIVATE_CLIENT_PROCESS"),"1")==0;
++        auto sandboxKeyPtr=static_cast<const CFStringRef*>(dlsym(RTLD_DEFAULT,"kVTDecompressionPropertyKey_UsingSandboxedVideoDecoder"));
++        if(privateClient){
++            using Create=OSStatus(*)(CFAllocatorRef,CMVideoFormatDescriptionRef,CFDictionaryRef,CFDictionaryRef,const VTDecompressionOutputCallbackRecord*,CFDictionaryRef,VTDecompressionSessionRef*);
++            auto create=reinterpret_cast<Create>(dlsym(RTLD_DEFAULT,"VTDecompressionSessionCreateWithOptions"));
++            auto key=static_cast<const CFStringRef*>(dlsym(RTLD_DEFAULT,"kVTDecompressionSessionOption_AllowClientProcessDecode"));
++            if(!create||!key||!*key){std::fprintf(stderr,"MAV_PRIVATE_PROBE {\"error\":\"private symbol unavailable\"}\n");invalidate();return MAV_API_UNAVAILABLE;}
++            CFHolder<CFMutableDictionaryRef> options(dictionary());
++            CFDictionarySetValue(options,*key,kCFBooleanTrue);
++            status=create(kCFAllocatorDefault,format_,spec,attrs,&cb,options,&session_);
++        }else status=VTDecompressionSessionCreate(kCFAllocatorDefault,format_,spec,attrs,&cb,&session_);
++        info_.last_status=status;
++        CFHolder<CFTypeRef> sandbox;
++        OSStatus sandboxStatus=(!status&&sandboxKeyPtr&&*sandboxKeyPtr)?VTSessionCopyProperty(session_,*sandboxKeyPtr,kCFAllocatorDefault,sandbox.out()):-1;
++        auto fenceKeyPtr=static_cast<const CFStringRef*>(dlsym(RTLD_DEFAULT,"kVTDecompressionPropertyKey_EnableIOFenceDecode"));
++        CFHolder<CFTypeRef> fence;
++        OSStatus fenceRead=(!status&&fenceKeyPtr&&*fenceKeyPtr)?VTSessionCopyProperty(session_,*fenceKeyPtr,kCFAllocatorDefault,fence.out()):-1;
++        std::fprintf(stderr,"MAV_PRIVATE_PROBE {\"pid\":%d,\"private_client_requested\":%s,\"create_status\":%d,\"sandbox_read_status\":%d,\"using_sandboxed_decoder\":%s,\"iofence_read_status\":%d,\"iofence_value\":%s}\n",getpid(),privateClient?"true":"false",int(status),int(sandboxStatus),VTExperiment::json_value(sandbox).c_str(),int(fenceRead),VTExperiment::json_value(fence).c_str());
++        if(std::getenv("MAV_PRIVATE_IOFENCE")&&std::strcmp(std::getenv("MAV_PRIVATE_IOFENCE"),"1")==0){
++            int enabled=1;CFHolder<CFNumberRef> requested(CFNumberCreate(kCFAllocatorDefault,kCFNumberIntType,&enabled));
++            OSStatus set=(!status&&fenceKeyPtr&&*fenceKeyPtr)?VTSessionSetProperty(session_,*fenceKeyPtr,requested):-1;
++            CFHolder<CFTypeRef> after;
++            OSStatus read=(!status&&fenceKeyPtr&&*fenceKeyPtr)?VTSessionCopyProperty(session_,*fenceKeyPtr,kCFAllocatorDefault,after.out()):-1;
++            std::fprintf(stderr,"MAV_PRIVATE_FENCE {\"requested_number\":1,\"setter_status\":%d,\"read_status\":%d,\"value\":%s}\n",int(set),int(read),VTExperiment::json_value(after).c_str());
++        }
++        if(std::getenv("MAV_PRIVATE_PROBE_HOLD"))sleep(2);
+         if(status){invalidate();return vt_result(status);}
+         CFHolder<CFTypeRef> hardware;
+         if(@available(macOS 10.9,iOS 17.0,tvOS 17.0,*))status=VTSessionCopyProperty(session_,kVTDecompressionPropertyKey_UsingHardwareAcceleratedVideoDecoder,kCFAllocatorDefault,hardware.out());

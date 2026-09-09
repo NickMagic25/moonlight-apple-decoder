@@ -1,0 +1,525 @@
+{
+  "schema_version": 1,
+  "kind": "installed-OS-private-options-capability-and-correctness-probe",
+  "source_commit": "f1a3bc1e3b3686d53f9e454dcfe4dd209bab1e6f",
+  "binary_sha256": "476f3194e015309c0185c9fe2b86e5038ee4c70e0e5e50670136e5807a4d23b3",
+  "source_archive_sha256": "6f1cfea2382ebf124f5f8d269fa69af44f8440989676b6f04ceab4cef8594cad",
+  "patched_backend_sha256": "e3550b1168e32c452dc0dc7b006c625944acc512ca6504ddc750f0a5f4fef98e",
+  "artifacts": {
+    "raw_gates": {
+      "path": "results/vt-wait-dependencies/private-probe-exact-gates/gates.json",
+      "sha256": "d8070c8a72c575db08ae8cb819404f90ea2a71e5408a091f38f845e746e0ffd2"
+    },
+    "patch": {
+      "path": "docs/evidence/vt-private-options-probe.patch",
+      "sha256": "731d3946e11d09d09bbeba9f814c91ef69ef0a082daf2bf88ac2f0494953cb31"
+    },
+    "provenance": {
+      "path": "results/vt-wait-dependencies/private-probe-provenance-v2.json",
+      "sha256": "852d6ff2d174e36d8943f6b1f06715cee5d9cde07d81b049b7ac13a659e8cd11"
+    }
+  },
+  "scope": [
+    "Isolated source archive and build; production decoder code unchanged.",
+    "Normal application calls only; no entitlement, sandbox policy or OS protection changes.",
+    "CreateWithOptions ABI and exported keys validated against installed VideoToolbox image; this is not a supported public API or a shipping recommendation.",
+    "Requests and readbacks are reported separately. API success alone does not establish an in-process decoder.",
+    "Correctness checks include exact software-reference pixels, dimensions, hardware, IOSurface/Metal compatibility, visible frame identity and ownership after decoder destruction.",
+    "These correctness runs contain an intentional two-second process-observation pause; none of their timing metrics is a latency benchmark."
+  ],
+  "totals": {
+    "qualified_runs": 12,
+    "outputs": 1440,
+    "maximum_pixel_code_error": 0
+  },
+  "findings": {
+    "allow_client_process_decode": "All four codec/depth requests returned success but UsingSandboxedVideoDecoder remained true; every run started a new VTDecoderXPCService. The option did not select in-process HEVC or AV1 decode.",
+    "enable_iofence_decode": "CFNumber(1) property setter and getter both returned -12900 on all four codec/depth combinations. No effective fence mode was observed."
+  },
+  "runs": [
+    {
+      "fixture": "hevc-sdr8-3840x2160p60-120",
+      "variant": "baseline",
+      "exit_status": 0,
+      "exact_gate": true,
+      "private_probe": {
+        "private_client_requested": false,
+        "create_status": 0,
+        "sandbox_read_status": 0,
+        "using_sandboxed_decoder": true,
+        "iofence_read_status": -12900,
+        "iofence_value": null
+      },
+      "iofence_probe": [],
+      "new_decoder_service_processes": 1,
+      "replay": {
+        "status": "PASS",
+        "codec": "hevc",
+        "bit_depth": 8,
+        "width": 3840,
+        "height": 2160,
+        "offered": 120,
+        "submitted": 120,
+        "completed": 120,
+        "displayed_outputs": 120,
+        "rejected": 0,
+        "failed_or_cancelled_or_dropped": 0,
+        "hardware_validated": 1,
+        "pixel_format": 641234480,
+        "iosurface_metal_verified": true,
+        "retained_after_destroy_verified": true,
+        "software_reference_samples": 1492992000,
+        "software_reference_max_code_error": 0,
+        "fixture_sha256": "adcf92ca66452bb9fb27af351218e8c60c78ff6cb51062989085f57aecc6d318",
+        "model": "Mac15,3",
+        "os": "Version 26.6.2 (Build 25G83)"
+      }
+    },
+    {
+      "fixture": "hevc-sdr8-3840x2160p60-120",
+      "variant": "allow-client",
+      "exit_status": 0,
+      "exact_gate": true,
+      "private_probe": {
+        "private_client_requested": true,
+        "create_status": 0,
+        "sandbox_read_status": 0,
+        "using_sandboxed_decoder": true,
+        "iofence_read_status": -12900,
+        "iofence_value": null
+      },
+      "iofence_probe": [],
+      "new_decoder_service_processes": 1,
+      "replay": {
+        "status": "PASS",
+        "codec": "hevc",
+        "bit_depth": 8,
+        "width": 3840,
+        "height": 2160,
+        "offered": 120,
+        "submitted": 120,
+        "completed": 120,
+        "displayed_outputs": 120,
+        "rejected": 0,
+        "failed_or_cancelled_or_dropped": 0,
+        "hardware_validated": 1,
+        "pixel_format": 641234480,
+        "iosurface_metal_verified": true,
+        "retained_after_destroy_verified": true,
+        "software_reference_samples": 1492992000,
+        "software_reference_max_code_error": 0,
+        "fixture_sha256": "adcf92ca66452bb9fb27af351218e8c60c78ff6cb51062989085f57aecc6d318",
+        "model": "Mac15,3",
+        "os": "Version 26.6.2 (Build 25G83)"
+      }
+    },
+    {
+      "fixture": "hevc-sdr8-3840x2160p60-120",
+      "variant": "iofence",
+      "exit_status": 0,
+      "exact_gate": true,
+      "private_probe": {
+        "private_client_requested": false,
+        "create_status": 0,
+        "sandbox_read_status": 0,
+        "using_sandboxed_decoder": true,
+        "iofence_read_status": -12900,
+        "iofence_value": null
+      },
+      "iofence_probe": [
+        {
+          "requested_number": 1,
+          "setter_status": -12900,
+          "read_status": -12900,
+          "value": null
+        }
+      ],
+      "new_decoder_service_processes": 1,
+      "replay": {
+        "status": "PASS",
+        "codec": "hevc",
+        "bit_depth": 8,
+        "width": 3840,
+        "height": 2160,
+        "offered": 120,
+        "submitted": 120,
+        "completed": 120,
+        "displayed_outputs": 120,
+        "rejected": 0,
+        "failed_or_cancelled_or_dropped": 0,
+        "hardware_validated": 1,
+        "pixel_format": 641234480,
+        "iosurface_metal_verified": true,
+        "retained_after_destroy_verified": true,
+        "software_reference_samples": 1492992000,
+        "software_reference_max_code_error": 0,
+        "fixture_sha256": "adcf92ca66452bb9fb27af351218e8c60c78ff6cb51062989085f57aecc6d318",
+        "model": "Mac15,3",
+        "os": "Version 26.6.2 (Build 25G83)"
+      }
+    },
+    {
+      "fixture": "hevc-hdr10-3840x2160p60-120",
+      "variant": "baseline",
+      "exit_status": 0,
+      "exact_gate": true,
+      "private_probe": {
+        "private_client_requested": false,
+        "create_status": 0,
+        "sandbox_read_status": 0,
+        "using_sandboxed_decoder": true,
+        "iofence_read_status": -12900,
+        "iofence_value": null
+      },
+      "iofence_probe": [],
+      "new_decoder_service_processes": 1,
+      "replay": {
+        "status": "PASS",
+        "codec": "hevc",
+        "bit_depth": 10,
+        "width": 3840,
+        "height": 2160,
+        "offered": 120,
+        "submitted": 120,
+        "completed": 120,
+        "displayed_outputs": 120,
+        "rejected": 0,
+        "failed_or_cancelled_or_dropped": 0,
+        "hardware_validated": 1,
+        "pixel_format": 645428784,
+        "iosurface_metal_verified": true,
+        "retained_after_destroy_verified": true,
+        "software_reference_samples": 1492992000,
+        "software_reference_max_code_error": 0,
+        "fixture_sha256": "d54731a26db188878012b245c63ab5fad75031fe7c05a946e962820530d879e8",
+        "model": "Mac15,3",
+        "os": "Version 26.6.2 (Build 25G83)"
+      }
+    },
+    {
+      "fixture": "hevc-hdr10-3840x2160p60-120",
+      "variant": "allow-client",
+      "exit_status": 0,
+      "exact_gate": true,
+      "private_probe": {
+        "private_client_requested": true,
+        "create_status": 0,
+        "sandbox_read_status": 0,
+        "using_sandboxed_decoder": true,
+        "iofence_read_status": -12900,
+        "iofence_value": null
+      },
+      "iofence_probe": [],
+      "new_decoder_service_processes": 1,
+      "replay": {
+        "status": "PASS",
+        "codec": "hevc",
+        "bit_depth": 10,
+        "width": 3840,
+        "height": 2160,
+        "offered": 120,
+        "submitted": 120,
+        "completed": 120,
+        "displayed_outputs": 120,
+        "rejected": 0,
+        "failed_or_cancelled_or_dropped": 0,
+        "hardware_validated": 1,
+        "pixel_format": 645428784,
+        "iosurface_metal_verified": true,
+        "retained_after_destroy_verified": true,
+        "software_reference_samples": 1492992000,
+        "software_reference_max_code_error": 0,
+        "fixture_sha256": "d54731a26db188878012b245c63ab5fad75031fe7c05a946e962820530d879e8",
+        "model": "Mac15,3",
+        "os": "Version 26.6.2 (Build 25G83)"
+      }
+    },
+    {
+      "fixture": "hevc-hdr10-3840x2160p60-120",
+      "variant": "iofence",
+      "exit_status": 0,
+      "exact_gate": true,
+      "private_probe": {
+        "private_client_requested": false,
+        "create_status": 0,
+        "sandbox_read_status": 0,
+        "using_sandboxed_decoder": true,
+        "iofence_read_status": -12900,
+        "iofence_value": null
+      },
+      "iofence_probe": [
+        {
+          "requested_number": 1,
+          "setter_status": -12900,
+          "read_status": -12900,
+          "value": null
+        }
+      ],
+      "new_decoder_service_processes": 1,
+      "replay": {
+        "status": "PASS",
+        "codec": "hevc",
+        "bit_depth": 10,
+        "width": 3840,
+        "height": 2160,
+        "offered": 120,
+        "submitted": 120,
+        "completed": 120,
+        "displayed_outputs": 120,
+        "rejected": 0,
+        "failed_or_cancelled_or_dropped": 0,
+        "hardware_validated": 1,
+        "pixel_format": 645428784,
+        "iosurface_metal_verified": true,
+        "retained_after_destroy_verified": true,
+        "software_reference_samples": 1492992000,
+        "software_reference_max_code_error": 0,
+        "fixture_sha256": "d54731a26db188878012b245c63ab5fad75031fe7c05a946e962820530d879e8",
+        "model": "Mac15,3",
+        "os": "Version 26.6.2 (Build 25G83)"
+      }
+    },
+    {
+      "fixture": "av1-sdr8-3840x2160p60-120",
+      "variant": "baseline",
+      "exit_status": 0,
+      "exact_gate": true,
+      "private_probe": {
+        "private_client_requested": false,
+        "create_status": 0,
+        "sandbox_read_status": 0,
+        "using_sandboxed_decoder": true,
+        "iofence_read_status": -12900,
+        "iofence_value": null
+      },
+      "iofence_probe": [],
+      "new_decoder_service_processes": 1,
+      "replay": {
+        "status": "PASS",
+        "codec": "av1",
+        "bit_depth": 8,
+        "width": 3840,
+        "height": 2160,
+        "offered": 120,
+        "submitted": 120,
+        "completed": 120,
+        "displayed_outputs": 120,
+        "rejected": 0,
+        "failed_or_cancelled_or_dropped": 0,
+        "hardware_validated": 1,
+        "pixel_format": 641234480,
+        "iosurface_metal_verified": true,
+        "retained_after_destroy_verified": true,
+        "software_reference_samples": 1492992000,
+        "software_reference_max_code_error": 0,
+        "fixture_sha256": "677010412d5d4e45bd60b405c36aef8156b1e60b0c8092aedd889a4e7e794ae8",
+        "model": "Mac15,3",
+        "os": "Version 26.6.2 (Build 25G83)"
+      }
+    },
+    {
+      "fixture": "av1-sdr8-3840x2160p60-120",
+      "variant": "allow-client",
+      "exit_status": 0,
+      "exact_gate": true,
+      "private_probe": {
+        "private_client_requested": true,
+        "create_status": 0,
+        "sandbox_read_status": 0,
+        "using_sandboxed_decoder": true,
+        "iofence_read_status": -12900,
+        "iofence_value": null
+      },
+      "iofence_probe": [],
+      "new_decoder_service_processes": 1,
+      "replay": {
+        "status": "PASS",
+        "codec": "av1",
+        "bit_depth": 8,
+        "width": 3840,
+        "height": 2160,
+        "offered": 120,
+        "submitted": 120,
+        "completed": 120,
+        "displayed_outputs": 120,
+        "rejected": 0,
+        "failed_or_cancelled_or_dropped": 0,
+        "hardware_validated": 1,
+        "pixel_format": 641234480,
+        "iosurface_metal_verified": true,
+        "retained_after_destroy_verified": true,
+        "software_reference_samples": 1492992000,
+        "software_reference_max_code_error": 0,
+        "fixture_sha256": "677010412d5d4e45bd60b405c36aef8156b1e60b0c8092aedd889a4e7e794ae8",
+        "model": "Mac15,3",
+        "os": "Version 26.6.2 (Build 25G83)"
+      }
+    },
+    {
+      "fixture": "av1-sdr8-3840x2160p60-120",
+      "variant": "iofence",
+      "exit_status": 0,
+      "exact_gate": true,
+      "private_probe": {
+        "private_client_requested": false,
+        "create_status": 0,
+        "sandbox_read_status": 0,
+        "using_sandboxed_decoder": true,
+        "iofence_read_status": -12900,
+        "iofence_value": null
+      },
+      "iofence_probe": [
+        {
+          "requested_number": 1,
+          "setter_status": -12900,
+          "read_status": -12900,
+          "value": null
+        }
+      ],
+      "new_decoder_service_processes": 1,
+      "replay": {
+        "status": "PASS",
+        "codec": "av1",
+        "bit_depth": 8,
+        "width": 3840,
+        "height": 2160,
+        "offered": 120,
+        "submitted": 120,
+        "completed": 120,
+        "displayed_outputs": 120,
+        "rejected": 0,
+        "failed_or_cancelled_or_dropped": 0,
+        "hardware_validated": 1,
+        "pixel_format": 641234480,
+        "iosurface_metal_verified": true,
+        "retained_after_destroy_verified": true,
+        "software_reference_samples": 1492992000,
+        "software_reference_max_code_error": 0,
+        "fixture_sha256": "677010412d5d4e45bd60b405c36aef8156b1e60b0c8092aedd889a4e7e794ae8",
+        "model": "Mac15,3",
+        "os": "Version 26.6.2 (Build 25G83)"
+      }
+    },
+    {
+      "fixture": "av1-hdr10-3840x2160p60-120",
+      "variant": "baseline",
+      "exit_status": 0,
+      "exact_gate": true,
+      "private_probe": {
+        "private_client_requested": false,
+        "create_status": 0,
+        "sandbox_read_status": 0,
+        "using_sandboxed_decoder": true,
+        "iofence_read_status": -12900,
+        "iofence_value": null
+      },
+      "iofence_probe": [],
+      "new_decoder_service_processes": 1,
+      "replay": {
+        "status": "PASS",
+        "codec": "av1",
+        "bit_depth": 10,
+        "width": 3840,
+        "height": 2160,
+        "offered": 120,
+        "submitted": 120,
+        "completed": 120,
+        "displayed_outputs": 120,
+        "rejected": 0,
+        "failed_or_cancelled_or_dropped": 0,
+        "hardware_validated": 1,
+        "pixel_format": 645428784,
+        "iosurface_metal_verified": true,
+        "retained_after_destroy_verified": true,
+        "software_reference_samples": 1492992000,
+        "software_reference_max_code_error": 0,
+        "fixture_sha256": "37565fa5482c0de03a0fe59776a5dd082af2fd5cfebdefdcbd655cd83cd20629",
+        "model": "Mac15,3",
+        "os": "Version 26.6.2 (Build 25G83)"
+      }
+    },
+    {
+      "fixture": "av1-hdr10-3840x2160p60-120",
+      "variant": "allow-client",
+      "exit_status": 0,
+      "exact_gate": true,
+      "private_probe": {
+        "private_client_requested": true,
+        "create_status": 0,
+        "sandbox_read_status": 0,
+        "using_sandboxed_decoder": true,
+        "iofence_read_status": -12900,
+        "iofence_value": null
+      },
+      "iofence_probe": [],
+      "new_decoder_service_processes": 1,
+      "replay": {
+        "status": "PASS",
+        "codec": "av1",
+        "bit_depth": 10,
+        "width": 3840,
+        "height": 2160,
+        "offered": 120,
+        "submitted": 120,
+        "completed": 120,
+        "displayed_outputs": 120,
+        "rejected": 0,
+        "failed_or_cancelled_or_dropped": 0,
+        "hardware_validated": 1,
+        "pixel_format": 645428784,
+        "iosurface_metal_verified": true,
+        "retained_after_destroy_verified": true,
+        "software_reference_samples": 1492992000,
+        "software_reference_max_code_error": 0,
+        "fixture_sha256": "37565fa5482c0de03a0fe59776a5dd082af2fd5cfebdefdcbd655cd83cd20629",
+        "model": "Mac15,3",
+        "os": "Version 26.6.2 (Build 25G83)"
+      }
+    },
+    {
+      "fixture": "av1-hdr10-3840x2160p60-120",
+      "variant": "iofence",
+      "exit_status": 0,
+      "exact_gate": true,
+      "private_probe": {
+        "private_client_requested": false,
+        "create_status": 0,
+        "sandbox_read_status": 0,
+        "using_sandboxed_decoder": true,
+        "iofence_read_status": -12900,
+        "iofence_value": null
+      },
+      "iofence_probe": [
+        {
+          "requested_number": 1,
+          "setter_status": -12900,
+          "read_status": -12900,
+          "value": null
+        }
+      ],
+      "new_decoder_service_processes": 1,
+      "replay": {
+        "status": "PASS",
+        "codec": "av1",
+        "bit_depth": 10,
+        "width": 3840,
+        "height": 2160,
+        "offered": 120,
+        "submitted": 120,
+        "completed": 120,
+        "displayed_outputs": 120,
+        "rejected": 0,
+        "failed_or_cancelled_or_dropped": 0,
+        "hardware_validated": 1,
+        "pixel_format": 645428784,
+        "iosurface_metal_verified": true,
+        "retained_after_destroy_verified": true,
+        "software_reference_samples": 1492992000,
+        "software_reference_max_code_error": 0,
+        "fixture_sha256": "37565fa5482c0de03a0fe59776a5dd082af2fd5cfebdefdcbd655cd83cd20629",
+        "model": "Mac15,3",
+        "os": "Version 26.6.2 (Build 25G83)"
+      }
+    }
+  ]
+}

@@ -1,0 +1,265 @@
+{
+  "schema_version": 1,
+  "case": "hevc-system",
+  "platform": "macOS 26.6.2 (25G83), arm64e",
+  "analysis_kind": "Read-only existing trace plus matching installed system-image symbol lookup/disassembly; no live attachment or decoding",
+  "address_basis": {
+    "shared_cache_slide": "0x2764000",
+    "basis": "Trace libsystem_kernel load 0x182c1f000 minus installed cache-map __TEXT 0x1804bb000; recorded and installed UUID C6A4A4CB-92E6-3BAF-AAE0-E8306259209A match.",
+    "videotoolbox_uuid": "C287CF1D-67F4-3798-99A3-221052B70A22",
+    "coremedia_uuid": "DB8BA2C9-C144-310E-AD6B-EB623FB3C7FB",
+    "framework_uuids_have_original_trace_symbol_archives": true
+  },
+  "resolved_frames": [
+    {
+      "trace_address": "0x18f5fb2e4",
+      "image": "CoreMedia",
+      "unslid_address": "0x18ce972e4",
+      "symbol": "WaitOnConditionTimed",
+      "offset": "0x98"
+    },
+    {
+      "trace_address": "0x18f5e66b8",
+      "image": "CoreMedia",
+      "unslid_address": "0x18ce826b8",
+      "symbol": "FigSemaphoreWaitRelative",
+      "offset": "0x88"
+    },
+    {
+      "trace_address": "0x18f5e3ab0",
+      "image": "CoreMedia",
+      "unslid_address": "0x18ce7fab0",
+      "symbol": "FigSemaphoreSignal",
+      "offset": "0x74"
+    },
+    {
+      "trace_address": "0x195214354",
+      "image": "VideoToolbox",
+      "unslid_address": "0x192ab0354",
+      "symbol": null,
+      "function_start": "0x192ab020c",
+      "offset": "0x148",
+      "role": "Return address after synchronous XPC request"
+    },
+    {
+      "trace_address": "0x19521438c",
+      "image": "VideoToolbox",
+      "unslid_address": "0x192ab038c",
+      "symbol": null,
+      "function_start": "0x192ab020c",
+      "offset": "0x180",
+      "role": "Return address after FigSemaphoreWaitRelative"
+    },
+    {
+      "trace_address": "0x194d4a154",
+      "image": "VideoToolbox",
+      "unslid_address": "0x1925e6154",
+      "symbol": null,
+      "function_start": "0x1925e5b68",
+      "offset": "0x5ec"
+    },
+    {
+      "trace_address": "0x194d47018",
+      "image": "VideoToolbox",
+      "unslid_address": "0x1925e3018",
+      "symbol": null,
+      "function_start": "0x1925e2e90",
+      "offset": "0x188"
+    }
+  ],
+  "xpc_count_correction": {
+    "steady_frames": 480,
+    "mach_syscall_rows_beneath_sync_xpc": 960,
+    "each_frame_has_two_mach_syscalls": true,
+    "unique_videotoolbox_call_site": "0x195214354",
+    "interpretation": "One synchronous XPC request per frame with separate Mach send and receive syscalls, not two independent synchronous XPC requests",
+    "all_rows_address_stacks": "results/vt-wait-dependencies/submit-xpc-address-stacks.json"
+  },
+  "handshake_disassembly": [
+    {
+      "image": "VideoToolbox",
+      "instruction": "0x192ab02d4..0x192ab02dc",
+      "observation": "Client request sets message discriminator0x44656346 (ASCII DecF)"
+    },
+    {
+      "image": "VideoToolbox",
+      "instruction": "0x192ab0350",
+      "observation": "Calls xpc_connection_send_message_with_reply_sync"
+    },
+    {
+      "image": "VideoToolbox",
+      "instruction": "0x192ab0380..0x192ab0388",
+      "observation": "After reply-status check, waits via FigSemaphoreWaitRelative on decoder-storage field+0xb0; no test of asynchronous decode flag at this wait"
+    },
+    {
+      "image": "VideoToolbox",
+      "instruction": "0x19293968c..0x1929396e8",
+      "observation": "Service block calls decoder vtable, then sends DecR (0x44656352) message containing returned status and decode information"
+    },
+    {
+      "image": "VideoToolbox",
+      "instruction": "0x1927f6b28..0x1927f6b34",
+      "observation": "Client XPC handler dispatches DecR to0x1927f6e90"
+    },
+    {
+      "image": "VideoToolbox",
+      "instruction": "0x1927f6e90..0x1927f6ef4",
+      "observation": "DecR handler stores returned values at decoder-storage+0xb8/+0xbc, loads semaphore+0xb0 and tail-branches FigSemaphoreSignal; tail call accounts for absence of a VT frame between CoreMedia semaphore signal and XPC event handler"
+    }
+  ],
+  "interpretation": "The client has a synchronous request/reply acknowledgement followed by a semaphore wait for decoder-call return information delivered in another XPC message. This is not evidence that final pixel output is ready or that the entire interval is avoidable transport overhead. Service decoding/submission work may run during the semaphore interval.",
+  "public_entry_comparison": {
+    "ordinary_api": "VTDecompressionSessionDecodeFrame tail-branches to VTDecompressionSessionDecodeFrameWithOptions",
+    "shared_target": "Both callback-record WithOptions and output-handler WithOptions APIs tail-branch to0x1925e2e90",
+    "conclusion": "Changing callback API is not an alternative dispatch path in this installed build. Different versions or parameter-dependent behavior are not ruled out."
+  },
+  "public_controls": "No documented SDK option was found that disables the synchronous request followed by decoder-return semaphore in this path. The asynchronous flag is forwarded to the service and does not bypass either call in this function. Internal exports named kVTDecompressionSessionOption_AllowClientProcessDecode, kVTDecompressionPropertyKey_EnableIOFenceDecode and kVTDecompressionPropertyKey_UsingSandboxedVideoDecoder have no declarations in the installed public VideoToolbox headers; their presence is not a supported optimization recommendation.",
+  "plugin_inference": {
+    "image": "/System/Library/Video/Plug-Ins/AppleVideoDecoder.bundle/Contents/MacOS/AppleVideoDecoder",
+    "installed_arm64e_uuid": "615D191F-5FB4-32B4-8299-CF6CD7EBC59E",
+    "inferred_load_address": "0x123a00000",
+    "matching_return_addresses": {
+      "0x123ab0600": "IOConnectCallStructMethod at image offset0xb05fc returns0xb0600",
+      "0x123ab5d94": "IOConnectCallStructMethod at image offset0xb5d90 returns0xb5d94",
+      "0x123ac5784": "VTDecoderSessionEmitDecodedFrame at image offset0xc5780 returns0xc5784"
+    },
+    "limit": "Three exact return-site matches support this image/base; original trace module map/UUID confirmation unavailable, so still an inference."
+  },
+  "output_stack_observation": "Service output stack51 enters VTDecoderSessionEmitDecodedFrame (inferred plugin image), then VT helpers reading/writing CVBuffer attachments and format metadata. These specific frames do not establish a full-frame pixel transfer.",
+  "limits": [
+    "Private VideoToolbox function names remain stripped; roles are inferred from exact callsites/control flow, not invented symbol names.",
+    "Disassembly describes this installed OS build and does not document stable API contracts.",
+    "Old trace gives call stacks and timings, not XPC payload bytes; message-code assignments and semantics come from matching code.",
+    "Additional condition-address/waker joins belong to separate wait-dependency analysis."
+  ],
+  "kind": "installed-build-vt-wait-symbolization",
+  "scope": "Portable symbol and control-flow observations for the existing HEVC System Trace. No unrelated process data or full disassembly is included.",
+  "sources": {
+    "filtered_submit_addresses": {
+      "path": "results/vt-profile/hevc-system-submit-stack-addresses.json",
+      "size_bytes": 4649,
+      "sha256": "a78e140809bc45462f63f95d1934e7fa14b0e8328079a73afb0dd50b5e29e171"
+    },
+    "selected_xpc_address_stacks": {
+      "path": "results/vt-wait-dependencies/submit-xpc-address-stacks.json",
+      "size_bytes": 1571596,
+      "sha256": "35be3ab1ee7e57a2d14fa4c1fc437bf641afb83c800761bf8512efbccaeefe43"
+    },
+    "portable_submit_syscalls": {
+      "path": "docs/evidence/vt-submit-syscalls.json",
+      "size_bytes": 8637,
+      "sha256": "6152898b334fce444e440a7a304c5940deab189eaa01ccff52bdb6d9c0f1e2a8"
+    },
+    "service_address_map": {
+      "path": "results/vt-wait-dependencies/service-address-map.json",
+      "size_bytes": 11999,
+      "sha256": "def0304e99e4907b3e339cf635cb73deaa5edba3f31f2638d7d928bebbbd45fe"
+    }
+  },
+  "methodology": [
+    "Read the original trace stack addresses and dyld load address. Mapped addresses into the installed arm64e shared cache after subtracting its ASLR slide. Validated system-library UUIDs and presence of the CoreMedia and VideoToolbox UUID archives in the original trace.",
+    "Used the installed symbols utility on system framework image paths. The utility obtains images from the dyld shared cache even when separate framework Mach-O files are absent.",
+    "Inspected only the relevant local disassembly to follow named calls, branch targets, field offsets and message discriminators. Stripped function names are left null.",
+    "Resolved every typed XML frame/backtrace reference for the 960 selected synchronous-XPC Mach syscalls. All 480 steady frames had exactly two such syscalls and the same VideoToolbox call site.",
+    "Compared the local public SDK declarations against internal symbol names. An exported symbol without a public SDK declaration is not treated as a supported API."
+  ],
+  "internal_configuration_investigation": {
+    "scope": "Static analysis only. No internal option was executed by this analysis, and no entitlement or OS security policy was changed. Root-owned isolated probes are separate evidence.",
+    "create_with_options": {
+      "exported_symbol": "VTDecompressionSessionCreateWithOptions",
+      "inferred_installed_arm64e_abi": "OSStatus (*)(CFAllocatorRef allocator, CMVideoFormatDescriptionRef formatDescription, CFDictionaryRef decoderSpecification, CFDictionaryRef destinationImageBufferAttributes, const VTDecompressionOutputCallbackRecord *outputCallback, CFDictionaryRef sessionOptions, VTDecompressionSessionRef *sessionOut)",
+      "abi_evidence": [
+        "Public VTDecompressionSessionCreate at0x1925df270 moves x5(sessionOut) to x6, sets x5 toNULL, and tail-branches to VTDecompressionSessionCreateWithOptions.",
+        "The destination at0x1925c4f90 saves x6 as output pointer, x5 as options, x4 as callback; stores/retains the options dictionary in session storage+0x78."
+      ],
+      "option_export": "kVTDecompressionSessionOption_AllowClientProcessDecode",
+      "option_kind": "Internal session-creation option by export name; separate from decoderSpecification and the later property setter.",
+      "probe_value": "Actual exported CFStringRef key with kCFBooleanTrue in sixth-argument sessionOptions dictionary.",
+      "lookup_note": "dlsym of a CFStringRef global returns the address of that global and must be dereferenced. Function dlsym names have no leading underscore.",
+      "readback_export": "kVTDecompressionPropertyKey_UsingSandboxedVideoDecoder",
+      "evidence_limit": "No direct consumer of AllowClientProcessDecode was found in the bounded installed arm64e VT code scan. Decoder selection takes codec, decoderSpecification and policy flags, without the retained sessionOptions argument. Therefore successful creation alone cannot establish that the option was honored.",
+      "feasibility": "The exported function and ordinary CF objects allow an isolated normal-process call to test acceptance/readback without altering or spoofing entitlements or OS policy. This is an unsupported diagnostic, not a documented shipping API."
+    },
+    "entitlement_policy": {
+      "export": "VTIsSecTaskEntitledForInProcessH264AndVP9Decode",
+      "observed_behavior": "Calls SecTaskCopyValueForEntitlement for two client-sandbox-decoder entitlement strings; decoder-selection code initializes a cached result and follows it with H264/VP9 codec checks.",
+      "limitation": "This explicit entitlement path is not proof of the policy applied to HEVC or AV1. No entitlement alteration or spoofing is proposed."
+    },
+    "iofence": {
+      "export": "kVTDecompressionPropertyKey_EnableIOFenceDecode",
+      "kind": "Internal decompression session property, implemented by the AppleVideoDecoder H264 wrapper in this installed build.",
+      "static_evidence": [
+        "AppleVideoDecoder arm64e imports the key. Its two direct references are a supported-property dictionary at image offset0xd41e8 and setter comparison at0xd4ed0.",
+        "Setter checks CFNumber type, extracts signed32 integer, stores enableIOFenceMode at decoder storage+0x2260. No entitlement call occurs in the inspected setter branch.",
+        "No corresponding reference was found in the HEVC/AV1 wrapper regions of this plugin."
+      ],
+      "probe_implication": "An ordinary VTSessionSetProperty diagnostic should use CFNumber rather than CFBoolean, and record unsupported/invalid statuses. Availability or successful setting would not establish correct output-readiness semantics, pixel equivalence or lower latency.",
+      "scope_limit": "Property support and fence semantics require actual target-codec readback/testing. An H264-specific implementation is not evidence of an HEVC/AV1 optimization."
+    }
+  },
+  "fresh_capture_module_validation": {
+    "source": "results/vt-wait-dependencies/hevc-native-live-time-profile.xml",
+    "same_shared_cache_slide": "0x2764000",
+    "modules": [
+      {
+        "image": "libsystem_kernel.dylib",
+        "uuid": "C6A4A4CB-92E6-3BAF-AAE0-E8306259209A",
+        "load_address": "0x182c1f000"
+      },
+      {
+        "image": "CoreMedia",
+        "uuid": "DB8BA2C9-C144-310E-AD6B-EB623FB3C7FB",
+        "load_address": "0x18f5dc000"
+      },
+      {
+        "image": "VideoToolbox",
+        "uuid": "C287CF1D-67F4-3798-99A3-221052B70A22",
+        "load_address": "0x194d25000"
+      },
+      {
+        "image": "IOKit",
+        "uuid": "12372585-DF92-33EF-B632-714FAA13260A",
+        "load_address": "0x186fc2000"
+      }
+    ],
+    "limit": "Fresh TOC identifies VTDecoderXPCService pid18979 with pathUnknown. No AppleVideoDecoder/H13 binary entry found in this time-profile export.",
+    "exact_symbol_aliases": {
+      "path": "results/vt-wait-dependencies/hevc-native-stack-symbols.json",
+      "sha256": "56cd4fc1c0600110180af64b61f05b70f52b76f047441a9c379b88e9a65a5602",
+      "count": 62,
+      "method": "Exact unnamed exported addresses resolved in installed matching-UUID IOKit, libxpc and libdispatch using the validated shared-cache slide, without adjusting addresses by one byte."
+    }
+  },
+  "service_output_handshake": {
+    "image": "VideoToolbox",
+    "image_uuid": "C287CF1D-67F4-3798-99A3-221052B70A22",
+    "function_unslid_start": "0x192acc4f0",
+    "old_trace_sync_call_return": "0x1952305ec",
+    "fresh_exported_sync_call_frame": "0x1952305eb",
+    "message_discriminator": {
+      "value": "0x456d6946",
+      "ascii": "EmiF",
+      "construction_unslid_addresses": [
+        "0x192acc544",
+        "0x192acc548"
+      ]
+    },
+    "observations": [
+      {
+        "instruction_unslid_address": "0x192acc59c",
+        "target": "FigPixelBufferOriginSetPixelBufferInXPCMessage",
+        "meaning": "Adds the emitted CVPixelBuffer to the XPC message."
+      },
+      {
+        "instruction_unslid_address": "0x192acc5e8",
+        "target": "xpc_connection_send_message_with_reply_sync",
+        "meaning": "Service synchronously requests a reply for the emitted-frame message, distinct from the client submit DecF RPC."
+      }
+    ],
+    "limits": [
+      "Function name is stripped; EmiF interpretation is based on message discriminator and buffer-packaging callee, not a published protocol contract.",
+      "This output-side wait is a separate dependency from the submit-side decoder-return semaphore wait. Its whole duration cannot be assumed removable.",
+      "Buffer packaging and CVBuffer attachment frames do not establish a full-frame pixel copy."
+    ]
+  }
+}
