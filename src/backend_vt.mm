@@ -3,6 +3,13 @@
 #include <map>
 #include <mutex>
 namespace mav {
+static mav_result codec_api_availability(mav_codec codec) {
+    if(codec==MAV_CODEC_AV1) {
+        if(@available(macOS 14.0,iOS 17.0,tvOS 17.0,*))return MAV_OK;
+        return MAV_API_UNAVAILABLE;
+    }
+    return codec==MAV_CODEC_HEVC?MAV_OK:MAV_INVALID_ARGUMENT;
+}
 class VideoToolboxBackend final:public Backend {
     VTDecompressionSessionRef session_=nullptr;CMVideoFormatDescriptionRef format_=nullptr;
     BackendInfo info_;mav_color color_{};Format parsed_;
@@ -44,7 +51,7 @@ public:
     ~VideoToolboxBackend()override{invalidate();}
     mav_result configure(const Format& f,const mav_config& c,const mav_color& color)override {
         invalidate();info_=BackendInfo{};color_=color;parsed_=f;
-        cold_.beginSession(c.codec,f.width,f.height,f.bit_depth);
+        cold_.beginSession(c.codec,f.width,f.height,f.bit_depth,c.hardware_policy);
         auto done=[&](mav_result result,bool cleanup=false){
             cold_.hardware=info_.hardware;cold_.realtime_status=info_.realtime_status;
             cold_.realtime_effective=info_.realtime_effective;cold_.power_status=info_.power_status;
@@ -54,10 +61,20 @@ public:
         if(!cold_.valid)return done(MAV_INVALID_ARGUMENT,true);
         mav_capability cap{};cap.struct_size=sizeof(cap);cap.version=MAV_ABI_VERSION;
         cold_.begin(ColdDiagnostics::Capability);
-        auto available=backend_capability(c.codec,cap);
+        mav_result available;
+        if(cold_.shouldSkipCapability(c.hardware_policy)) {
+            // The API guard remains mandatory. Hardware enforcement still uses
+            // RequireHardware SessionCreate and the actual-session readback.
+            available=codec_api_availability(c.codec);
+            cold_.skip_capability_applied=available==MAV_OK;
+        } else {
+            available=backend_capability(c.codec,cap);
+            cold_.capability_query_attempted=available==MAV_OK;
+            if(cold_.capability_query_attempted)cold_.hardware_candidate=cap.hardware_decode_candidate;
+        }
         cold_.end(ColdDiagnostics::Capability,available);
         if(available!=MAV_OK)return done(available);
-        if(c.hardware_policy==MAV_HARDWARE_REQUIRED&&!cap.hardware_decode_candidate)return done(MAV_UNSUPPORTED);
+        if(c.hardware_policy==MAV_HARDWARE_REQUIRED&&!cold_.skip_capability_applied&&!cap.hardware_decode_candidate)return done(MAV_UNSUPPORTED);
         cold_.begin(ColdDiagnostics::FormatCreation);
         OSStatus status=create_format(f,c.codec,color,&format_);
         cold_.end(ColdDiagnostics::FormatCreation,status);
@@ -163,9 +180,9 @@ public:
 std::unique_ptr<Backend> make_backend(){return std::make_unique<VideoToolboxBackend>();}
 mav_result backend_capability(mav_codec codec,mav_capability& c) {
     c.codec=codec;c.api_available=0;c.hardware_decode_candidate=0;
-    if(codec==MAV_CODEC_AV1){if(@available(macOS 14.0,iOS 17.0,tvOS 17.0,*))c.api_available=1;}
-    else c.api_available=1;
-    if(!c.api_available)return MAV_API_UNAVAILABLE;
+    auto available=codec_api_availability(codec);
+    if(available!=MAV_OK)return available;
+    c.api_available=1;
     c.hardware_decode_candidate=VTIsHardwareDecodeSupported(codec==MAV_CODEC_AV1?kCMVideoCodecType_AV1:kCMVideoCodecType_HEVC);
     return MAV_OK;
 }

@@ -42,7 +42,8 @@ more retained memory; no preallocation or latency improvement is assumed.
 Both public pool keys are available within the project's minimum deployment
 targets (minimum-count: macOS 10.9/iOS 8/tvOS 10.2). These are not private VT keys.
 The diagnostic controls themselves are private environment variables consumed at
-backend construction: `MAV_EXPERIMENT_COLD_TRACE` and `MAV_EXPERIMENT_POOL_MIN`.
+backend construction: `MAV_EXPERIMENT_COLD_TRACE`, `MAV_EXPERIMENT_POOL_MIN`, and
+`MAV_EXPERIMENT_SKIP_CAPABILITY`.
 Direct environment use appends instead of truncating and requires an existing
 parent directory. Pool settings without a trace path are rejected. No settings
 are added to the public library configuration structure.
@@ -53,3 +54,34 @@ binary. Verify trace records exist: serialization failures report stderr and do
 not alter production teardown semantics. Cold diagnostics are separate from
 steady decoding performance; no busy-spin, dummy decoding or session prewarming
 is performed by this branch.
+
+The direct-session experiment adds `--skip-capability 0|1`, default 0. An explicit
+option requires `--cold-trace`. The replay CLI always overrides the private skip
+environment setting with its requested value, including the default 0, so an
+inherited setting cannot silently change the baseline. Direct library environment
+use accepts only 0/1 and requires a trace path for 1.
+
+With 1, configure bypasses `VTIsHardwareDecodeSupported` only for
+`MAV_HARDWARE_REQUIRED`. AV1 availability remains macOS 14/iOS 17/tvOS 17. Session
+creation still requires hardware; actual-session hardware readback and decoded
+output validation remain mandatory. Preferred-policy sessions retain the query.
+The public `mav_query_capability` API always queries normally and is unaffected by
+the private setting. There is no capability cache or public ABI change.
+
+Each session trace adds `skip_capability_requested`, `skip_capability_applied`,
+`hardware_policy`, `capability_query_attempted`, and `hardware_candidate`. The
+candidate is -1 when no hardware-support query ran. Applied is true only after
+the API availability guard succeeds and the required-policy configure query is
+bypassed. The existing `hardware` field is the actual-session readback. The
+`capability` stage times the availability guard and optional query, so bypassed
+records still contain a small interval rather than pretending that no code ran.
+Session reset clears all observed fields but preserves the requested control.
+
+Use fresh-process alternating 0/1 runs with this same binary and equivalent
+fixtures, pool settings, and tracing. Compare total admission-to-first-public
+output alongside stage timings and full frame accounting. Decoder creation does
+not itself query capability. The first query may pay shared VideoToolbox startup
+costs that move into session creation when bypassed; no additive 13 ms saving or
+age-budget improvement is assumed. Apple's required-hardware session option
+provides the enforcement needed for this experiment:
+[RequireHardwareAcceleratedVideoDecoder](https://developer.apple.com/documentation/VideoToolbox/kVTVideoDecoderSpecification_RequireHardwareAcceleratedVideoDecoder).

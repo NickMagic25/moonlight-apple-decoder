@@ -16,9 +16,12 @@ struct ColdDiagnostics {
     struct Interval { uint64_t begin=0,end=0; int32_t status=0; };
     std::string path;
     int pool_requested=0;
+    bool skip_capability_requested=false,skip_capability_applied=false,capability_query_attempted=false;
+    int hardware_candidate=-1;
     bool valid=true,active=false,emitted=false,first_attempt=false;
     uint64_t ordinal=0,configure_begin=0,configure_end=0,first_submit=0,first_return=0;
     uint32_t codec=0,width=0,height=0,depth=0,hardware=0;
+    mav_hardware_policy hardware_policy=MAV_HARDWARE_REQUIRED;
     int32_t configure_result=-1,backend_status=0;
     int32_t realtime_status=0,realtime_effective=-1,power_status=0,power_effective=-1;
     int pool_supported=-1,pool_effective=-1,pool_shared=-1;
@@ -27,8 +30,9 @@ struct ColdDiagnostics {
     std::array<Interval,StageCount> stages{};
 
     ColdDiagnostics():ColdDiagnostics(std::getenv("MAV_EXPERIMENT_COLD_TRACE"),
-                                     std::getenv("MAV_EXPERIMENT_POOL_MIN")){}
-    ColdDiagnostics(const char* output,const char* pool):path(output?output:"") {
+                                     std::getenv("MAV_EXPERIMENT_POOL_MIN"),
+                                     std::getenv("MAV_EXPERIMENT_SKIP_CAPABILITY")){}
+    ColdDiagnostics(const char* output,const char* pool,const char* skip=nullptr):path(output?output:"") {
         if(pool && *pool) {
             std::string value(pool);
             if(value=="3")pool_requested=3;
@@ -36,13 +40,24 @@ struct ColdDiagnostics {
             else if(value!="0")valid=false;
             if(path.empty())valid=false;
         }
+        if(skip && *skip) {
+            std::string value(skip);
+            if(value=="1")skip_capability_requested=true;
+            else if(value!="0")valid=false;
+            if(skip_capability_requested&&path.empty())valid=false;
+        }
     }
     bool enabled() const noexcept { return !path.empty(); }
-    void beginSession(uint32_t c,uint32_t w,uint32_t h,uint32_t d) {
+    bool shouldSkipCapability(mav_hardware_policy policy) const noexcept {
+        return valid&&enabled()&&skip_capability_requested&&policy==MAV_HARDWARE_REQUIRED;
+    }
+    void beginSession(uint32_t c,uint32_t w,uint32_t h,uint32_t d,mav_hardware_policy policy=MAV_HARDWARE_REQUIRED) {
         if(!enabled())return;
         ++ordinal;active=true;emitted=false;first_attempt=false;
         configure_begin=mav_monotonic_time_ns();configure_end=first_submit=first_return=0;
         codec=c;width=w;height=h;depth=d;hardware=0;configure_result=-1;backend_status=0;
+        hardware_policy=policy;
+        skip_capability_applied=capability_query_attempted=false;hardware_candidate=-1;
         realtime_status=power_status=0;realtime_effective=power_effective=-1;
         pool_supported=pool_effective=pool_shared=-1;
         pool_set_attempted=pool_read_attempted=shared_read_attempted=false;
@@ -65,6 +80,11 @@ struct ColdDiagnostics {
                <<",\"session_ordinal\":"<<ordinal<<",\"codec\":"<<codec<<",\"width\":"<<width
                <<",\"height\":"<<height<<",\"bit_depth\":"<<depth<<",\"configure_result\":"<<configure_result
                <<",\"backend_status\":"<<backend_status<<",\"hardware\":"<<hardware
+               <<",\"skip_capability_requested\":"<<(skip_capability_requested?"true":"false")
+               <<",\"skip_capability_applied\":"<<(skip_capability_applied?"true":"false")
+               <<",\"hardware_policy\":"<<hardware_policy
+               <<",\"capability_query_attempted\":"<<(capability_query_attempted?"true":"false")
+               <<",\"hardware_candidate\":"<<hardware_candidate
                <<",\"configure_begin_ns\":";number(out,configure_begin);
             out<<",\"configure_end_ns\":";number(out,configure_end);
             out<<",\"first_vt_submit_ns\":";number(out,first_submit);
