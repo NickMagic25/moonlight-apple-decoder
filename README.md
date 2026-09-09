@@ -53,6 +53,9 @@ results, and limits. Encoders run before replay, never during timing. Strict
 coverage fails when a required codec/variant is unavailable. Hardware-required
 session creation and actual hardware output are checked separately.
 
+[Latency optimization investigation](docs/optimization-investigation.md) compares
+paced and saturated decode and ranks the next experiments toward the 1 ms goal.
+
 ## Architecture and consumer compatibility
 
 [Architecture and lifecycle](docs/architecture.md) describes spans, AV1 temporal
