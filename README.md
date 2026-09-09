@@ -67,6 +67,9 @@ The [YAML testing framework](docs/testing-framework.md) configures resolution,
 frame rate, codec, dynamic range, bitrate, and decoder settings for local and CI
 runs. It compares two builds using identical fixtures and alternating run order,
 and preserves raw measurements with JSON, Markdown, and JUnit reports.
+The [full paired toolchain comparison](docs/toolchain-paired-comparison.md)
+records all requested modes, the queue-32 startup control, and balanced
+confirmation of the initial latency flags.
 
 [Latency optimization investigation](docs/optimization-investigation.md) compares
 paced and saturated decode and ranks the next experiments toward the 1 ms goal.

@@ -74,3 +74,6 @@ compatibility, live host streaming, or a performance improvement.
 The subsequent [resolution/frame-rate matrix](toolchain-matrix.md) adds paced
 1080p60/120, ultrawide 120/240, and 4K60/120 coverage. It documents a pre-existing
 AV1 startup-budget failure at ultrawide 240 fps and a separate queue-32 mitigation.
+The [full paired comparison](toolchain-paired-comparison.md) extends this with
+identical-fixture C++17/C++23 measurements across all modes and balanced
+confirmation of latency flags, using the [YAML framework](testing-framework.md).

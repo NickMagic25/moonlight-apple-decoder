@@ -1,5 +1,10 @@
 # C++23 / Swift 6.3 resolution and frame-rate matrix
 
+This report preserves the initial measurements. The subsequent
+[full paired comparison](toolchain-paired-comparison.md) tests C++17 and C++23
+across the entire matrix, retains the initial latency flags, and adds balanced
+confirmation runs. Use that report for the complete performance comparison.
+
 Measured on 2026-09-09, Apple M3 / macOS 26.6.2, Xcode 26.6, Apple Clang 21,
 Swift 6.3.3 and SDK 26.5. The production Release decoder uses C++23; Swift is
 only involved in the separately validated package/ownership smoke.
