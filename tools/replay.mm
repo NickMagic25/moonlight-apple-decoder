@@ -15,21 +15,59 @@
 #include <cmath>
 #include <memory>
 #include <sys/resource.h>
+#if MAV_VT_EXPERIMENTS
+#include "vt_experiment_output.hpp"
+#include "vt_retained_outputs.hpp"
+#include <pthread/qos.h>
+#endif
 using namespace fixture;
+#if MAV_VT_EXPERIMENTS
+// Scoped process activity is a scheduling diagnostic, independent of thread QoS.
+struct ReplayActivity {
+    id<NSObject> token = nil;
+    std::string requested = "none";
+    ReplayActivity() {
+        if (const char* value = std::getenv("MAV_VT_ACTIVITY")) requested = value;
+        if (requested == "none") return;
+        NSActivityOptions options = NSActivityUserInitiatedAllowingIdleSystemSleep;
+        if (requested == "latency-critical") options |= NSActivityLatencyCritical;
+        else if (requested != "user-initiated") throw std::runtime_error("MAV_VT_ACTIVITY must be none, user-initiated, or latency-critical");
+        token = [NSProcessInfo.processInfo beginActivityWithOptions:options reason:@"VideoToolbox latency investigation"];
+        if (!token) throw std::runtime_error("process activity request failed");
+    }
+    ~ReplayActivity() { if (token) [NSProcessInfo.processInfo endActivity:token]; }
+};
+#endif
 struct Record {mav_completion c{};uint64_t entry=0;CVPixelBufferRef retained=nullptr;};
-struct Sink {std::mutex lock;std::vector<Record> records;bool correctness=false;uint64_t overflow=0,retained=0,retainedPeak=0;std::condition_variable ready;bool finished=false;std::string validationError;CVPixelBufferRef ownershipProbe=nullptr;};
+struct Sink {std::mutex lock;std::vector<Record> records;bool correctness=false;uint64_t overflow=0,retained=0,retainedPeak=0;std::condition_variable ready;bool finished=false;std::string validationError;CVPixelBufferRef ownershipProbe=nullptr;
+#if MAV_VT_EXPERIMENTS
+    vt_experiment::RetainedOutputs heldOutputs;
+#endif
+};
 static void complete(void* context,const mav_completion* c){
     uint64_t entry=mav_monotonic_time_ns();auto&s=*static_cast<Sink*>(context);std::lock_guard<std::mutex>g(s.lock);
     if(s.records.size()==s.records.capacity()){++s.overflow;return;}
+#if MAV_VT_EXPERIMENTS
+    if(c->status==MAV_COMPLETION_OUTPUT&&c->pixel_buffer)s.heldOutputs.retain(c->pixel_buffer);
+#endif
     Record r;r.c=*c;r.entry=entry;if(s.correctness&&c->pixel_buffer){if(s.retained>=32){++s.overflow;}else{r.retained=CVPixelBufferRetain(c->pixel_buffer);++s.retained;s.retainedPeak=std::max(s.retainedPeak,s.retained);if(!s.ownershipProbe)s.ownershipProbe=CVPixelBufferRetain(c->pixel_buffer);}}s.records.push_back(r);s.ready.notify_one();
 }
 static NSDictionary* distribution(std::vector<double>v){if(v.empty())return @{@"count":@0,@"mean":NSNull.null,@"median":NSNull.null,@"p95":NSNull.null,@"p99":NSNull.null,@"min":NSNull.null,@"max":NSNull.null};std::sort(v.begin(),v.end());double sum=0;for(auto x:v)sum+=x;auto q=[&](double p){double i=p*(v.size()-1);size_t n=size_t(i);return v[n]+(v[std::min(n+1,v.size()-1)]-v[n])*(i-n);};return @{@"count":@(v.size()),@"mean":@(sum/v.size()),@"median":@(q(.5)),@"p95":@(q(.95)),@"p99":@(q(.99)),@"min":@(v.front()),@"max":@(v.back())};}
 static void verify(Record&r,const Manifest&m,id<MTLDevice>device,CVMetalTextureCacheRef cache){
     auto&c=r.c;if(c.status!=MAV_COMPLETION_OUTPUT)return;
     if(!r.retained||c.width!=m.width||c.height!=m.height||c.bit_depth!=m.depth||!c.hardware_accelerated)throw std::runtime_error("output dimensions/depth/hardware mismatch");
-    auto p=r.retained;auto pf=CVPixelBufferGetPixelFormatType(p);bool ten=pf==kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange||pf==kCVPixelFormatType_420YpCbCr10BiPlanarFullRange;
+    auto p=r.retained;auto pf=CVPixelBufferGetPixelFormatType(p);
+#if MAV_VT_EXPERIMENTS
+    const auto outputFormat=vt_experiment::outputFormat(pf);
+    bool ten=outputFormat.depth==10;
+    if(ten!=(m.depth==10))throw std::runtime_error("output depth mismatch");
+    vt_experiment::verifyOriginalMetalOutput(p,cache);
+    auto linear=vt_experiment::linearForReadback(p);p=linear.get();
+#else
+    bool ten=pf==kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange||pf==kCVPixelFormatType_420YpCbCr10BiPlanarFullRange;
     if(ten!=(m.depth==10)||CVPixelBufferGetPlaneCount(p)!=2||!CVPixelBufferGetIOSurface(p))throw std::runtime_error("output format/IOSurface mismatch");
     for(size_t plane=0;plane<2;++plane){CVMetalTextureRef texture=nullptr;MTLPixelFormat fmt=plane?(ten?MTLPixelFormatRG16Unorm:MTLPixelFormatRG8Unorm):(ten?MTLPixelFormatR16Unorm:MTLPixelFormatR8Unorm);auto e=CVMetalTextureCacheCreateTextureFromImage(nullptr,cache,p,nullptr,fmt,CVPixelBufferGetWidthOfPlane(p,plane),CVPixelBufferGetHeightOfPlane(p,plane),plane,&texture);if(e||!texture||!CVMetalTextureGetTexture(texture))throw std::runtime_error("Metal texture creation failed");CFRelease(texture);}
+#endif
     if(m.depth==10&&(!(c.color.valid&MAV_COLOR_DESCRIPTION)||c.color.primaries!=9||c.color.transfer!=16||c.color.matrix!=9||!(c.color.valid&MAV_COLOR_MASTERING)||!(c.color.valid&MAV_COLOR_CONTENT_LIGHT)))throw std::runtime_error("HDR normalized metadata lost");
     if(utf(m.document[@"generator"][@"pattern"])=="moving-gradient-detail-square-frame-id-v1"){
         if(CVPixelBufferLockBaseAddress(p,kCVPixelBufferLock_ReadOnly))throw std::runtime_error("pixel map failed");
@@ -48,7 +86,11 @@ static void compareReference(Record& r,const Manifest& m,std::ifstream& file,Ref
     if(!r.retained||r.c.status!=MAV_COMPLETION_OUTPUT)return;
     size_t source=(reinterpret_cast<uintptr_t>(r.c.caller_context)-1)%m.units.size(),ordinal=0;for(size_t i=0;i<source;++i)ordinal+=m.units[i].displays;
     uint64_t samples=uint64_t(m.width)*m.height*3/2,bytes=samples*(m.depth==10?2:1);std::vector<uint8_t>raw(bytes);file.seekg(ordinal*bytes);file.read(reinterpret_cast<char*>(raw.data()),raw.size());if(!file)throw std::runtime_error("software reference is truncated or expected display order disagrees");
-    auto p=r.retained;if(CVPixelBufferLockBaseAddress(p,kCVPixelBufferLock_ReadOnly))throw std::runtime_error("reference comparison map failed");
+    auto p=r.retained;
+#if MAV_VT_EXPERIMENTS
+    auto linear=vt_experiment::linearForReadback(p);p=linear.get();
+#endif
+    if(CVPixelBufferLockBaseAddress(p,kCVPixelBufferLock_ReadOnly))throw std::runtime_error("reference comparison map failed");
     uint64_t maximum=0;for(unsigned plane=0;plane<3;++plane){uint32_t w=plane?m.width/2:m.width,h=plane?m.height/2:m.height;size_t base=plane?size_t(m.width)*m.height+(plane-1)*size_t(w)*h:0;auto buffer=(uint8_t*)CVPixelBufferGetBaseAddressOfPlane(p,plane?1:0);size_t stride=CVPixelBufferGetBytesPerRowOfPlane(p,plane?1:0);
         for(uint32_t y=0;y<h;++y)for(uint32_t x=0;x<w;++x){size_t index=base+size_t(y)*w+x,px=plane?x*2+plane-1:x;unsigned want=m.depth==10?uint16_t(raw[index*2])|(uint16_t(raw[index*2+1])<<8):raw[index];unsigned got=m.depth==10?(reinterpret_cast<uint16_t*>(buffer+y*stride)[px]>>6):buffer[y*stride+px];uint64_t error=got>want?got-want:want-got;stats.sum+=error;++stats.count;maximum=std::max(maximum,error);}}
     CVPixelBufferUnlockBaseAddress(p,kCVPixelBufferLock_ReadOnly);stats.max=std::max(stats.max,maximum);if(maximum>(m.depth==10?8:2))throw std::runtime_error("software/native output differs beyond tolerance; max code error="+std::to_string(maximum));
@@ -73,6 +115,10 @@ static mav_color manifestFallback(const Manifest& manifest){
     return result;
 }
 int main(int argc,char**argv){@autoreleasepool{mav_decoder*decoder=nullptr;Sink sink;CVMetalTextureCacheRef cache=nullptr;std::thread consumer;ReferenceStats referenceStats;try{
+#if MAV_VT_EXPERIMENTS
+    ReplayActivity activity;
+    sink.heldOutputs.configureFromEnvironment();
+#endif
     std::map<std::string,std::string>o;for(int i=1;i<argc;++i){std::string k=argv[i];if(k=="--help"){std::cout<<"mav-replay --fixture manifest.json --output results/run --mode correctness|paced|throughput|fault [--inflight 2 --fps 120 --loops 1 --warmup 12 --power -1 --queue-depth 16 --seed 7 --jitter-us 0 --drop-every 0 --corrupt-every 0 --reset-every 0 --consumer-delay-ms 0 --loop-mode reset|continuous] [--spin-us 0..1000]\n";return 0;}if(i+1>=argc)throw std::runtime_error("option missing value");o[k]=argv[++i];}
     auto val=[&](std::string k,std::string d){return o.count(k)?o[k]:d;};if(!o.count("--fixture"))throw std::runtime_error("--fixture required");auto m=load(o["--fixture"]);std::string mode=val("--mode","correctness"),out=val("--output","results/replay");
     if(mode!="correctness"&&mode!="paced"&&mode!="throughput"&&mode!="fault")throw std::runtime_error("invalid mode");sink.correctness=mode=="correctness"||mode=="fault";
@@ -117,7 +163,12 @@ int main(int argc,char**argv){@autoreleasepool{mav_decoder*decoder=nullptr;Sink 
     if(mav_decoder_reset(decoder)!=MAV_OK||mav_decoder_destroy(decoder)!=MAV_OK)throw std::runtime_error("teardown failed");decoder=nullptr;
     {std::lock_guard<std::mutex>lock(sink.lock);sink.finished=true;}sink.ready.notify_all();if(consumer.joinable())consumer.join();
     if(!sink.validationError.empty())throw std::runtime_error(sink.validationError);
-    if(sink.ownershipProbe){if(CVPixelBufferLockBaseAddress(sink.ownershipProbe,kCVPixelBufferLock_ReadOnly))throw std::runtime_error("retained buffer invalid after destruction");volatile uint8_t byte=*((uint8_t*)CVPixelBufferGetBaseAddressOfPlane(sink.ownershipProbe,0));(void)byte;CVPixelBufferUnlockBaseAddress(sink.ownershipProbe,kCVPixelBufferLock_ReadOnly);}
+    if(sink.ownershipProbe){auto probe=sink.ownershipProbe;
+#if MAV_VT_EXPERIMENTS
+        vt_experiment::verifyOriginalMetalOutput(probe,cache);
+        auto linear=vt_experiment::linearForReadback(probe);probe=linear.get();
+#endif
+        if(CVPixelBufferLockBaseAddress(probe,kCVPixelBufferLock_ReadOnly))throw std::runtime_error("retained buffer invalid after destruction");volatile uint8_t byte=*((uint8_t*)CVPixelBufferGetBaseAddressOfPlane(probe,0));(void)byte;CVPixelBufferUnlockBaseAddress(probe,kCVPixelBufferLock_ReadOnly);}
     if(metrics.accepted!=metrics.completed||metrics.outstanding||sink.overflow||sink.records.size()!=submitted)throw std::runtime_error("terminal completion/capacity/trace accounting mismatch");
     std::set<uint64_t>ids;uint64_t outputs=0,failures=0,noDisplay=0,existing=0,displayMismatches=0;
     for(auto&r:sink.records){if(!ids.insert(r.c.frame_id).second||!expected.count(r.c.frame_id))throw std::runtime_error("duplicate or unexpected completion");if(mode!="fault"&&r.c.displayed_outputs!=expected[r.c.frame_id])++displayMismatches;if(r.c.status==MAV_COMPLETION_OUTPUT){++outputs;existing+=r.c.show_existing_frame;}else if(r.c.status==MAV_COMPLETION_NO_DISPLAY)++noDisplay;else ++failures;}
@@ -136,6 +187,17 @@ int main(int argc,char**argv){@autoreleasepool{mav_decoder*decoder=nullptr;Sink 
     NSMutableDictionary* annotated=[result mutableCopy];annotated[@"experiment_spin_us"]=@(spinUs);annotated[@"experiment_busy_wait_wall_ns"]=@(spinTotal);
     double cpuWindowSeconds=double(cpuWindowEnd-cpuWindowStart)/1e9;annotated[@"experiment_process_cpu_seconds"]=@(cpuSeconds);annotated[@"experiment_cpu_window_seconds"]=@(cpuWindowSeconds);annotated[@"experiment_cpu_percent_one_core"]=@(100*cpuSeconds/cpuWindowSeconds);
     annotated[@"experiment_pacing_semantics"]=@"Original absolute arrival deadlines; sleep until bounded final window then poll the monotonic clock; includes busy-wait CPU cost";result=annotated;
+#if MAV_VT_EXPERIMENTS
+    annotated[@"experiment_vt_controls_enabled"]=@YES;
+    annotated[@"experiment_process_activity"]=ns(activity.requested);
+    annotated[@"experiment_process_activity_acquired"]=@(activity.token != nil);
+    annotated[@"experiment_retained_outputs_requested"]=@(sink.heldOutputs.limit());
+    annotated[@"experiment_retained_outputs_at_end"]=@(sink.heldOutputs.size());
+    int relativePriority=0;qos_class_t requestedQos=QOS_CLASS_UNSPECIFIED;
+    annotated[@"experiment_submit_thread_qos_status"]=@(pthread_get_qos_class_np(pthread_self(),&requestedQos,&relativePriority));
+    annotated[@"experiment_submit_thread_requested_qos"]=@(requestedQos);
+    annotated[@"experiment_submit_thread_relative_priority"]=@(relativePriority);
+#endif
     json(out+".json",result);for(auto&r:sink.records)if(r.retained)CVPixelBufferRelease(r.retained);if(cache)CFRelease(cache);cache=nullptr;if(sink.ownershipProbe)CVPixelBufferRelease(sink.ownershipProbe);sink.ownershipProbe=nullptr;
     std::cout<<(passed?"PASS ":"FAIL ")<<m.codec<<" "<<m.variant<<" outputs="<<outputs<<" accepted="<<submitted<<" median_vt_ms="<<([result[@"vt_submit_to_callback_ns"][@"count"] unsignedLongLongValue]?std::to_string([result[@"vt_submit_to_callback_ns"][@"median"] doubleValue]/1e6):"unavailable")<<" result="<<out<<".json\n";return passed?0:1;
 }catch(const std::exception&e){if(decoder)mav_decoder_destroy(decoder);{std::lock_guard<std::mutex>lock(sink.lock);sink.finished=true;}sink.ready.notify_all();if(consumer.joinable())consumer.join();if(sink.ownershipProbe)CVPixelBufferRelease(sink.ownershipProbe);for(auto&r:sink.records)if(r.retained)CVPixelBufferRelease(r.retained);if(cache)CFRelease(cache);std::string failOut="results/replay";for(int i=1;i+1<argc;++i)if(std::string(argv[i])=="--output")failOut=argv[i+1];[[NSFileManager defaultManager]createDirectoryAtPath:ns(failOut).stringByDeletingLastPathComponent withIntermediateDirectories:YES attributes:nil error:nil];try{json(failOut+".json",@{@"status":@"FAIL",@"reason":ns(e.what()),@"completed_records":@(sink.records.size()),@"vt_submit_to_callback_ns":NSNull.null});}catch(...){}std::cerr<<"FAIL/BLOCKED: "<<e.what()<<"\n";return 1;}}}

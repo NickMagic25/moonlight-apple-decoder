@@ -56,6 +56,10 @@ struct mav_decoder {
                 c.pixel_buffer=output.image;retain_pixel(output.image);
                 c.status=MAV_COMPLETION_OUTPUT;c.displayed_outputs=1;
                 c.width=output.width;c.height=output.height;c.pixel_format=output.pixel_format;
+#ifdef MAV_VT_EXPERIMENTS
+                // Native-output experiments learn the actual FourCC at callback.
+                metrics.pixel_format=output.pixel_format;
+#endif
                 c.color=merge_color(s->bitstream_color,merge_color(output.color,c.color));
                 if(c.hardware_accelerated) metrics.hardware_validated=1;
             }

@@ -60,6 +60,8 @@ branches, including 4K60 SDR/HDR correctness and hardware timing, with commands
 and evidence for choosing which changes to prioritize.
 Main adopts the HEVC scanner and parser-state optimizations plus optional replay
 pacing. See [adopted changes and combined validation](docs/main-adoption.md).
+The [4K60 VT interval investigation](docs/vt-interval-investigation.md) separates
+API blocking, output-format/cadence controls, and native-to-Qt handoff costs.
 
 ## Architecture and consumer compatibility
 
