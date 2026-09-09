@@ -230,13 +230,19 @@ overlap, 57.43% of the API intervals. There are also 1,152 `mach_msg2` rows;
 send-and-wait-for-reply functions. All 2,463 selected syscall intervals are
 wholly inside the matched call intervals.
 
+The [follow-up dependency analysis](vt-wait-dependencies.md) resolves an
+important counting distinction: the two XPC-attributed Mach syscall rows per
+frame are the send and receive sides of **one synchronous XPC request**, not
+two requests. It also identifies the condition-variable signal and separates
+the decoder submission acknowledgement from later output delivery.
+
 These syscall findings attribute operations inside the call; they are not a
 second additive timing partition. Exported syscall CPU/wait annotations can
 exceed the enclosing syscall wall duration, so the thread-state partition is
-used for Running/Blocked claims. Several middle stack symbols are missing from
-the export; the evidence does not invent the unnamed subsystem or condition
-being waited on. Callback-after-return time is still separate, and no hardware
-engine duration is established.
+used for Running/Blocked claims. Several middle stack symbols were missing from
+the initial export; the follow-up uses matching installed image UUIDs and
+scheduler wake edges to resolve them. Neither analysis establishes a
+hardware-only engine duration.
 
 See [profile aggregates and raw-source hashes](evidence/vt-profile-analysis.json)
 and [syscall attribution aggregates](evidence/vt-submit-syscalls.json).
@@ -338,10 +344,10 @@ here are exhausted as credible routes to 1 ms. The goal remains unmet. This
 does not establish a universal hardware floor or rule out different hardware,
 streams, OS behavior, or future supported APIs.
 
-The next useful work requires a materially different hypothesis: identify the
-condition-variable/XPC dependency more precisely, test representative encoder
-outputs and target hardware, or obtain Apple-supported guidance for the API
-wait. Repeating nearby allocation or public-property tweaks without a measured
+The [follow-up investigation](vt-wait-dependencies.md) identifies the
+condition-variable/XPC dependency more precisely. Further work can test
+representative encoder outputs and target hardware, or obtain Apple-supported
+guidance for the API wait. Repeating nearby allocation or public-property tweaks without a measured
 lead cannot reasonably promise the missing 1.7–1.8 ms. The diagnostic controls
 and aligned analyzer are retained for that work; a native future client can
 consume CVPixelBuffer/IOSurface/Metal directly while measuring presentation

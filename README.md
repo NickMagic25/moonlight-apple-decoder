@@ -62,6 +62,8 @@ Main adopts the HEVC scanner and parser-state optimizations plus optional replay
 pacing. See [adopted changes and combined validation](docs/main-adoption.md).
 The [4K60 VT interval investigation](docs/vt-interval-investigation.md) separates
 API blocking, output-format/cadence controls, and native-to-Qt handoff costs.
+The [decoder-service follow-up](docs/vt-wait-dependencies.md) traces the waits
+through XPC, CoreMedia semaphores and AppleAVD notifications.
 
 ## Architecture and consumer compatibility
 
