@@ -57,6 +57,7 @@ def check(tool, aomenc, root, codec, variant, gop=6, bitrate_mbps=1.25):
     else:
         assert generator['encoder_settings']['average_bitrate_bps'] == target_bps
         assert generator['encoder_settings']['data_rate_limits'] == [target_bps * 3 // 20, 1]
+        assert generator['encoder_settings']['realtime'] is False
         assert generator['rate_control'] == 'average_bitrate'
     imported = output / 'imported'
     subprocess.run([str(tool), '--import', str(output / 'manifest.json'), '--output', str(imported)],

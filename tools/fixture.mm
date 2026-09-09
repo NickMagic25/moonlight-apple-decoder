@@ -28,7 +28,13 @@ struct Encoded {uint64_t id;std::vector<uint8_t> data;};
 struct EncodeState {std::mutex lock;std::vector<Encoded> units;std::string error;};
 static void output(void* context,void* frame,OSStatus status,VTEncodeInfoFlags flags,CMSampleBufferRef sample){
     auto& s=*static_cast<EncodeState*>(context);std::lock_guard<std::mutex>g(s.lock);
-    if(status||!sample){s.error="VT encoder callback status "+std::to_string(status);return;}
+    if(status||!sample||(flags&kVTEncodeInfo_FrameDropped)){
+        if(s.error.empty())s.error="VT encoder callback frame_id "+std::to_string(uint64_t(reinterpret_cast<uintptr_t>(frame))-1)
+            +" status "+std::to_string(status)+" flags "+std::to_string(flags)
+            +" frame_dropped "+std::to_string(bool(flags&kVTEncodeInfo_FrameDropped))
+            +" sample_present "+std::to_string(bool(sample));
+        return;
+    }
     Encoded e{uint64_t(reinterpret_cast<uintptr_t>(frame))-1,{}};
     auto add=[&](const uint8_t*p,size_t n){e.data.insert(e.data.end(),{0,0,0,1});e.data.insert(e.data.end(),p,p+n);};
     CMFormatDescriptionRef format=CMSampleBufferGetFormatDescription(sample);
@@ -52,7 +58,9 @@ static std::vector<Encoded> hevc(uint32_t w,uint32_t h,uint32_t depth,uint32_t f
     if(status)throw std::runtime_error("BLOCKED HEVC hardware encoder creation "+std::to_string(status));
     try {
         property(session,kVTCompressionPropertyKey_ProfileLevel,depth==10?kVTProfileLevel_HEVC_Main10_AutoLevel:kVTProfileLevel_HEVC_Main_AutoLevel);
-        property(session,kVTCompressionPropertyKey_RealTime,kCFBooleanTrue);property(session,kVTCompressionPropertyKey_AllowFrameReordering,kCFBooleanFalse);
+        // Explicit bitrate fixtures are prepared offline; source timestamps
+        // must not impose a wall-clock deadline that permits encoder loss.
+        property(session,kVTCompressionPropertyKey_RealTime,bitrate_workload?kCFBooleanFalse:kCFBooleanTrue);property(session,kVTCompressionPropertyKey_AllowFrameReordering,kCFBooleanFalse);
         property(session,kVTCompressionPropertyKey_ExpectedFrameRate,(__bridge CFNumberRef)@(fps));property(session,kVTCompressionPropertyKey_MaxKeyFrameInterval,(__bridge CFNumberRef)@(gop));
         property(session,kVTCompressionPropertyKey_AverageBitRate,(__bridge CFNumberRef)@(bitrate));
         if(bitrate_workload)property(session,kVTCompressionPropertyKey_DataRateLimits,(__bridge CFArrayRef)@[@(bitrate*3/20),@1]);
@@ -161,7 +169,7 @@ static void save(const Options& options,std::vector<Encoded>& units,const std::s
     write(dir+"/payload.bin",payload);
     id requestedBitrate=options.bitrate_kbps?(id)@(double(*options.bitrate_kbps)/1000.0):(id)[NSNull null];
     id targetBitrate=codec=="hevc"?(id)@(options.hevc_target_bitrate_bps()):(options.bitrate_kbps?(id)@(uint64_t(*options.bitrate_kbps)*1000):(id)[NSNull null]);
-    NSDictionary* encoderSettings=codec=="av1"?@{@"arguments":encoderArguments}:@{@"hardware_required":@YES,@"realtime":@YES,@"allow_frame_reordering":@NO,@"average_bitrate_bps":targetBitrate,@"data_rate_limits":options.bitrate_kbps?(id)@[@(options.hevc_target_bitrate_bps()*3/20),@1]:(id)[NSNull null],@"expected_frame_rate":@(fps),@"max_key_frame_interval":@(options.gop),@"profile":depth==10?@"Main10_AutoLevel":@"Main_AutoLevel"};
+    NSDictionary* encoderSettings=codec=="av1"?@{@"arguments":encoderArguments}:@{@"hardware_required":@YES,@"realtime":@(!options.bitrate_kbps.has_value()),@"allow_frame_reordering":@NO,@"average_bitrate_bps":targetBitrate,@"data_rate_limits":options.bitrate_kbps?(id)@[@(options.hevc_target_bitrate_bps()*3/20),@1]:(id)[NSNull null],@"expected_frame_rate":@(fps),@"max_key_frame_interval":@(options.gop),@"profile":depth==10?@"Main10_AutoLevel":@"Main_AutoLevel"};
     NSDictionary* generator=@{@"name":@"mav-fixture",@"pattern":@"moving-gradient-detail-square-frame-id-v1",@"content_profile":options.bitrate_kbps?@"seeded-noise-frame-id-v1":@"moving-gradient-detail-square-frame-id-v1",@"content_seed":options.bitrate_kbps?(id)@(0x6d617631u):(id)[NSNull null],@"encoder":ns(encoder),@"os":NSProcessInfo.processInfo.operatingSystemVersionString,@"low_delay_verified":@YES,@"random_access_count":@(keys),@"inter_count":@(inters),@"requested_bitrate_mbps":requestedBitrate,@"target_bitrate_bps":targetBitrate,@"measured_bitrate_bps":@(double(payload.size())*8.0*fps/units.size()),@"measured_bitrate_mbps":@(double(payload.size())*8.0*fps/units.size()/1000000.0),@"bitrate_measurement":@"encoded payload bytes including codec headers and HDR metadata divided by generated presentation duration; no transport overhead",@"rate_control":codec=="hevc"?@"average_bitrate":(options.bitrate_kbps?@"cbr":@"constant_quality"),@"settings":@{@"codec":ns(codec),@"variant":ns(options.variant),@"width":@(w),@"height":@(h),@"fps":@(fps),@"frames":@(options.frames),@"gop":@(options.gop),@"bitrate_mbps":requestedBitrate,@"chroma":@"420"},@"encoder_settings":encoderSettings};
     NSDictionary*doc=@{@"schema_version":@1,@"codec":ns(codec),@"variant":depth==10?@"hdr10":@"sdr8",@"profile":@(final.profile),@"framing":codec=="av1"?@"av1-low-overhead-obu":@"hevc-annex-b",@"width":@(w),@"height":@(h),@"bit_depth":@(depth),@"chroma":@"420",@"frame_rate":@{@"num":@(fps),@"den":@1},@"timebase":@{@"num":@1,@"den":@(fps)},@"color":@{@"primaries":@(final.color.primaries),@"transfer":@(final.color.transfer),@"matrix":@(final.color.matrix),@"full_range":@(final.color.full_range),@"mastering_base64":[[NSData dataWithBytes:final.color.mastering.data() length:24] base64EncodedStringWithOptions:0],@"content_light_base64":[[NSData dataWithBytes:final.color.content_light.data() length:4] base64EncodedStringWithOptions:0],@"mastering_valid":@(final.color.mastering_valid),@"content_light_valid":@(final.color.content_light_valid)},@"payload_file":@"payload.bin",@"payload_sha256":ns(sha(payload.data(),payload.size())),@"access_units":access,@"generator":generator};
     json(dir+"/manifest.json",doc);(void)load(dir+"/manifest.json");
