@@ -1,25 +1,29 @@
 {
   "schema_version": 1,
   "status": "FAIL",
-  "report_generator_sha256": "21b27cf1abc1fe36af34d5ae613282db1c5f733385cc2f49c4fb88ce74e6e230",
+  "report_generator_sha256": "c823672c494e9efc9028309b20caf04e6cf164f11b1a4e2aa021eea627451639",
   "moonlight_report_derivation": {
-    "derived_at": "2026-09-09T23:06:02.715087+00:00",
+    "derived_at": "2026-09-09T23:33:45.883577+00:00",
     "source_results_file": "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/results/bitrate-isolated-confirmation/results.json",
     "source_results_sha256": "293148150d337547e10f679d7aaf9babac864f5b0580c34427fa912a56ae69b0",
     "original_report_file": "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/results/bitrate-isolated-confirmation/report.md",
     "original_report_sha256": "566ed35471ac8d9c7ee3b1afafd0603eae4cf133e5ba9d51e3520da0cbaf712a",
     "source_analysis_sha256": "9dbc18497f5b937c53956acc4810f1277367d7c015b9af2f080baf7f8bb0e243",
-    "refresh_script_sha256": "afa11cdba8bd409e796d0f29d1ef23f247696bf3275a2918d3b7df420ef1c6a1",
-    "report_generator_sha256": "21b27cf1abc1fe36af34d5ae613282db1c5f733385cc2f49c4fb88ce74e6e230",
-    "timing_derivation_sha256": "3d952c29d435b948e2447907a233b59ad50ff0e5ebe52444cd0c9e1b53bf73a2",
+    "refresh_script_sha256": "36662d3d16f5a1f550d1a238e8fd9b3d8f4074f18dcb2390b4f37829b590b30b",
+    "report_generator_sha256": "c823672c494e9efc9028309b20caf04e6cf164f11b1a4e2aa021eea627451639",
+    "timing_derivation_sha256": "3f28e8088a874c4b88eaa3d0a9b0dc4ce7a32193f67cc469b8e1258694187f83",
     "verified_timed_records": 24,
     "original_results_unchanged": true,
     "original_correctness_unchanged": true,
     "execution": "Offline derivation from saved JSON and CSV; no tests, decoders, encoders, builds, or benchmarks run."
   },
-  "native_label": "VT submit-to-callback mean",
+  "native_label": "Frame-ready mean (VT submit -> callback)",
   "native_formula": "sum(callback_ns - vt_submit_ns) / eligible outputs / 1000000",
-  "native_source": "integration/moonlight-qt/apple_video.cpp:254-268,476-499",
+  "submission_label": "VT submission mean (submit -> return)",
+  "submission_formula": "sum(vt_return_ns - vt_submit_ns) / outputs with valid submit and return timestamps / 1000000",
+  "submission_population": "Successful new single-sample outputs with valid ordered submit/return timestamps. A callback may precede API return, leaving no captured return timestamp. Such outputs remain in frame-ready accounting when eligible but contribute no submission sample. Submission and frame-ready intervals share a start and must not be added together.",
+  "native_source": "integration/moonlight-qt/apple_video.cpp: AppleVideoDecoder::receive/updateOverlay",
+  "native_adapter_sha256": "9760eff6ea432af34bd2f3b47d0106d100987915561fd6eb33dfd6addbbfe29b",
   "population": "All eligible timed outputs, including cold/warmup and recovery generations; not medians. Case means pool duration sums/counts across separate trials. Dropped/cancelled frames contribute no decode sample; failure gates remain unchanged.",
   "public_proxy_formula": "sum(sink_entry_ns - scheduled_arrival_ns) / valid outputs / 1000000",
   "limitation": "Native means reproduce the adapter formula on captured replay outputs, not a live Moonlight session. Public means are a queue-inclusive proxy, not the Qt/FFmpeg rolling-window measurement; app output wrapping, pacing, rendering and network are not measured.",
@@ -49,6 +53,11 @@
             "total_ns": 61293861185,
             "mean_ms": 2.128259068923611
           },
+          "native_submission": {
+            "sample_count": 28799,
+            "total_ns": 17859714606,
+            "mean_ms": 0.6201505123789021
+          },
           "public_queue_proxy": {
             "sample_count": 28800,
             "total_ns": 73148146531,
@@ -61,6 +70,11 @@
             "sample_count": 28740,
             "total_ns": 60778233137,
             "mean_ms": 2.114761069485038
+          },
+          "native_submission": {
+            "sample_count": 28738,
+            "total_ns": 17554797783,
+            "mean_ms": 0.6108566282622312
           },
           "public_queue_proxy": {
             "sample_count": 28740,
@@ -84,6 +98,11 @@
               "total_ns": 10254288697,
               "mean_ms": 2.1363101452083333
             },
+            "native_submission": {
+              "sample_count": 4800,
+              "total_ns": 2988949688,
+              "mean_ms": 0.6226978516666667
+            },
             "public_queue_proxy": {
               "sample_count": 4800,
               "total_ns": 12092738293,
@@ -104,6 +123,11 @@
               "sample_count": 4800,
               "total_ns": 10281296820,
               "mean_ms": 2.1419368375
+            },
+            "native_submission": {
+              "sample_count": 4800,
+              "total_ns": 3008547770,
+              "mean_ms": 0.6267807854166666
             },
             "public_queue_proxy": {
               "sample_count": 4800,
@@ -126,6 +150,11 @@
               "total_ns": 10345874700,
               "mean_ms": 2.1553905625
             },
+            "native_submission": {
+              "sample_count": 4800,
+              "total_ns": 3052926459,
+              "mean_ms": 0.6360263456249999
+            },
             "public_queue_proxy": {
               "sample_count": 4800,
               "total_ns": 12286325017,
@@ -146,6 +175,11 @@
               "sample_count": 4800,
               "total_ns": 10666146769,
               "mean_ms": 2.2221139102083334
+            },
+            "native_submission": {
+              "sample_count": 4799,
+              "total_ns": 3271177230,
+              "mean_ms": 0.6816372640133361
             },
             "public_queue_proxy": {
               "sample_count": 4800,
@@ -168,6 +202,11 @@
               "total_ns": 10110108034,
               "mean_ms": 2.1062725070833337
             },
+            "native_submission": {
+              "sample_count": 4800,
+              "total_ns": 2924549776,
+              "mean_ms": 0.6092812033333334
+            },
             "public_queue_proxy": {
               "sample_count": 4800,
               "total_ns": 12181756810,
@@ -188,6 +227,11 @@
               "sample_count": 4740,
               "total_ns": 9987135338,
               "mean_ms": 2.1069905776371307
+            },
+            "native_submission": {
+              "sample_count": 4739,
+              "total_ns": 2866844287,
+              "mean_ms": 0.6049470958008019
             },
             "public_queue_proxy": {
               "sample_count": 4740,
@@ -210,6 +254,11 @@
               "total_ns": 9879796583,
               "mean_ms": 2.0582909547916666
             },
+            "native_submission": {
+              "sample_count": 4799,
+              "total_ns": 2780151152,
+              "mean_ms": 0.5793188480933528
+            },
             "public_queue_proxy": {
               "sample_count": 4800,
               "total_ns": 11892795380,
@@ -230,6 +279,11 @@
               "sample_count": 4800,
               "total_ns": 10056648595,
               "mean_ms": 2.0951351239583333
+            },
+            "native_submission": {
+              "sample_count": 4800,
+              "total_ns": 2864040419,
+              "mean_ms": 0.5966750872916666
             },
             "public_queue_proxy": {
               "sample_count": 4800,
@@ -252,6 +306,11 @@
               "total_ns": 9999412062,
               "mean_ms": 2.08321084625
             },
+            "native_submission": {
+              "sample_count": 4800,
+              "total_ns": 2848562590,
+              "mean_ms": 0.5934505395833333
+            },
             "public_queue_proxy": {
               "sample_count": 4800,
               "total_ns": 12022182189,
@@ -272,6 +331,11 @@
               "sample_count": 4800,
               "total_ns": 10015632290,
               "mean_ms": 2.0865900604166665
+            },
+            "native_submission": {
+              "sample_count": 4800,
+              "total_ns": 2858428991,
+              "mean_ms": 0.5955060397916667
             },
             "public_queue_proxy": {
               "sample_count": 4800,
@@ -294,6 +358,11 @@
               "total_ns": 10268497406,
               "mean_ms": 2.1392702929166667
             },
+            "native_submission": {
+              "sample_count": 4800,
+              "total_ns": 2987899124,
+              "mean_ms": 0.6224789841666666
+            },
             "public_queue_proxy": {
               "sample_count": 4800,
               "total_ns": 12246473220,
@@ -314,6 +383,11 @@
               "sample_count": 4800,
               "total_ns": 10207257028,
               "mean_ms": 2.126511880833333
+            },
+            "native_submission": {
+              "sample_count": 4800,
+              "total_ns": 2962434903,
+              "mean_ms": 0.617173938125
             },
             "public_queue_proxy": {
               "sample_count": 4800,
@@ -349,6 +423,11 @@
             "total_ns": 77944660360,
             "mean_ms": 2.73845555141763
           },
+          "native_submission": {
+            "sample_count": 28461,
+            "total_ns": 18823031640,
+            "mean_ms": 0.6613622725835354
+          },
           "public_queue_proxy": {
             "sample_count": 28463,
             "total_ns": 99665623324,
@@ -361,6 +440,11 @@
             "sample_count": 28577,
             "total_ns": 78987052470,
             "mean_ms": 2.7640078549182907
+          },
+          "native_submission": {
+            "sample_count": 28576,
+            "total_ns": 19384310784,
+            "mean_ms": 0.6783423426651736
           },
           "public_queue_proxy": {
             "sample_count": 28577,
@@ -384,6 +468,11 @@
               "total_ns": 13142543910,
               "mean_ms": 2.73802998125
             },
+            "native_submission": {
+              "sample_count": 4800,
+              "total_ns": 3165005152,
+              "mean_ms": 0.6593760733333334
+            },
             "public_queue_proxy": {
               "sample_count": 4800,
               "total_ns": 17646041142,
@@ -404,6 +493,11 @@
               "sample_count": 4742,
               "total_ns": 13118183390,
               "mean_ms": 2.7663819886124
+            },
+            "native_submission": {
+              "sample_count": 4742,
+              "total_ns": 3236904132,
+              "mean_ms": 0.6826031488823282
             },
             "public_queue_proxy": {
               "sample_count": 4742,
@@ -426,6 +520,11 @@
               "total_ns": 12190904638,
               "mean_ms": 2.569210671865121
             },
+            "native_submission": {
+              "sample_count": 4743,
+              "total_ns": 2595484824,
+              "mean_ms": 0.547224293485136
+            },
             "public_queue_proxy": {
               "sample_count": 4745,
               "total_ns": 15943106982,
@@ -446,6 +545,11 @@
               "sample_count": 4745,
               "total_ns": 13426502653,
               "mean_ms": 2.829610675026344
+            },
+            "native_submission": {
+              "sample_count": 4744,
+              "total_ns": 3424333134,
+              "mean_ms": 0.7218240164418213
             },
             "public_queue_proxy": {
               "sample_count": 4745,
@@ -468,6 +572,11 @@
               "total_ns": 12985834104,
               "mean_ms": 2.7373174755480605
             },
+            "native_submission": {
+              "sample_count": 4744,
+              "total_ns": 3130900714,
+              "mean_ms": 0.659970639544688
+            },
             "public_queue_proxy": {
               "sample_count": 4744,
               "total_ns": 16578977134,
@@ -488,6 +597,11 @@
               "sample_count": 4744,
               "total_ns": 12999422764,
               "mean_ms": 2.7401818642495783
+            },
+            "native_submission": {
+              "sample_count": 4744,
+              "total_ns": 3134387011,
+              "mean_ms": 0.6607055250843171
             },
             "public_queue_proxy": {
               "sample_count": 4744,
@@ -510,6 +624,11 @@
               "total_ns": 13163740845,
               "mean_ms": 2.7742341085353006
             },
+            "native_submission": {
+              "sample_count": 4745,
+              "total_ns": 3241292939,
+              "mean_ms": 0.6830965097997893
+            },
             "public_queue_proxy": {
               "sample_count": 4745,
               "total_ns": 16858239143,
@@ -530,6 +649,11 @@
               "sample_count": 4800,
               "total_ns": 13234419154,
               "mean_ms": 2.7571706570833334
+            },
+            "native_submission": {
+              "sample_count": 4800,
+              "total_ns": 3229944532,
+              "mean_ms": 0.6729051108333334
             },
             "public_queue_proxy": {
               "sample_count": 4800,
@@ -552,6 +676,11 @@
               "total_ns": 12870917407,
               "mean_ms": 2.713093888490725
             },
+            "native_submission": {
+              "sample_count": 4744,
+              "total_ns": 3073170715,
+              "mean_ms": 0.6478015841062394
+            },
             "public_queue_proxy": {
               "sample_count": 4744,
               "total_ns": 16520465134,
@@ -572,6 +701,11 @@
               "sample_count": 4744,
               "total_ns": 13195182080,
               "mean_ms": 2.781446475548061
+            },
+            "native_submission": {
+              "sample_count": 4744,
+              "total_ns": 3281480886,
+              "mean_ms": 0.6917118225126476
             },
             "public_queue_proxy": {
               "sample_count": 4744,
@@ -594,6 +728,11 @@
               "total_ns": 13277226643,
               "mean_ms": 2.7993309388572634
             },
+            "native_submission": {
+              "sample_count": 4743,
+              "total_ns": 3333481848,
+              "mean_ms": 0.7028213889943074
+            },
             "public_queue_proxy": {
               "sample_count": 4743,
               "total_ns": 16838614244,
@@ -615,6 +754,11 @@
               "total_ns": 13326835242,
               "mean_ms": 2.8091979852445195
             },
+            "native_submission": {
+              "sample_count": 4744,
+              "total_ns": 3360956537,
+              "mean_ms": 0.7084647000421584
+            },
             "public_queue_proxy": {
               "sample_count": 4744,
               "total_ns": 16958990185,
@@ -625,5 +769,5 @@
       ]
     }
   ],
-  "report_sha256": "d906a337882de66363035b590a10671e8a17a574ffa7bf9661cd1d1c55391219"
+  "report_sha256": "cf460dcfd73fc362a3964bb79832ad7ebb756698a600576af56d2f85c7ec7db6"
 }

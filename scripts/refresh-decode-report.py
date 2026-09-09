@@ -145,7 +145,7 @@ def main(argv=None):
                 trace = verified_bytes(source, run, 'csv_file')
                 reader = csv.DictReader(io.StringIO(trace.decode('utf-8'), newline=''))
                 required = {'status', 'displayed_outputs', 'internal_samples', 'show_existing',
-                            'trace_valid', 'vt_submit_ns', 'callback_ns',
+                            'trace_valid', 'vt_submit_ns', 'vt_return_ns', 'callback_ns',
                             'scheduled_arrival_ns', 'sink_entry_ns'}
                 if not reader.fieldnames or not required.issubset(reader.fieldnames):
                     raise ValueError('timed trace lacks Moonlight timing columns: ' + run['csv_file'])

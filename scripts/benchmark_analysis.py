@@ -5,7 +5,7 @@ import csv
 def moonlight_timings(rows):
     """Whole-trial arithmetic means, including cold/warmup outputs.
 
-    Match AppleVideoDecoder::receive/updateOverlay for the native metric.
+    Match AppleVideoDecoder::receive/updateOverlay for both native metrics.
     The public metric is only a proxy for the regular Qt/FFmpeg overlay: the
     benchmark does not measure the app's queue, frame wrapping or live window.
     Keep integer sums/counts so repetitions can be weighted by actual outputs.
@@ -14,12 +14,18 @@ def moonlight_timings(rows):
     native = [r['callback_ns'] - r['vt_submit_ns'] for r in outputs
               if r['internal_samples'] == 1 and not r['show_existing']
               and (r['trace_valid'] & 10) == 10 and r['callback_ns'] >= r['vt_submit_ns']]
+    # A completion may run before the backend records API return. Keep an
+    # independent population: missing return timestamps are not zero-time calls.
+    submission = [r['vt_return_ns'] - r['vt_submit_ns'] for r in outputs
+                  if r['internal_samples'] == 1 and not r['show_existing']
+                  and (r['trace_valid'] & 6) == 6 and 'vt_return_ns' in r
+                  and r['vt_return_ns'] >= r['vt_submit_ns']]
     public = [r['sink_entry_ns'] - r['scheduled_arrival_ns'] for r in outputs
               if r['trace_valid'] & 16 and r['sink_entry_ns'] >= r['scheduled_arrival_ns']]
     def mean(values):
         count, total = len(values), sum(values)
         return dict(sample_count=count, total_ns=total, mean_ms=total / count / 1e6 if count else None)
-    return dict(native_vt=mean(native), public_queue_proxy=mean(public))
+    return dict(native_vt=mean(native), native_submission=mean(submission), public_queue_proxy=mean(public))
 
 
 def distribution(values):

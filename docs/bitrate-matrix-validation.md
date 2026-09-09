@@ -46,40 +46,65 @@ All 576 timed trials recorded nominal thermal state.
 
 ## Decode time in Moonlight
 
-The native Apple adapter displays **VT submit-to-callback mean**: the arithmetic
+The native Apple adapter displays **Frame-ready mean (VT submit -> callback)**: the arithmetic
 mean of VideoToolbox submission-to-callback durations, including startup and
 warmup. The enhanced [full report](evidence/bitrate-matrix/full/report.md#decode-time-shown-by-moonlight)
 and [confirmation report](evidence/bitrate-matrix/confirmation/report.md#decode-time-shown-by-moonlight)
-now include this metric for both builds, per trial and pooled per workload.
+now include this metric and **VT submission mean (submit -> return)** for both
+builds, per trial and pooled per workload. Frame-ready is the existing
+submit-to-callback metric with a clearer label; the JSON key `native_vt` is
+unchanged. The new `native_submission` field measures API-call duration.
 They also include a separately labeled queue-inclusive proxy for the regular
-Qt/FFmpeg overlay's broader **Average decoding time** metric. Neither is a live
-Moonlight session measurement; the native column applies the adapter's actual
-formula to the recorded replay outputs.
+Qt/FFmpeg overlay's broader **Average decoding time** metric. None is a live
+Moonlight session measurement; the native columns apply the adapter's actual
+formulas to the recorded replay outputs. Submission and frame-ready means share
+a start time and must not be added together; a smaller submission number does
+not demonstrate earlier frame availability or presentation.
 
 For example, these are the full-run native means for **HEVC SDR with a 100 Mbps
 encoder target**, in milliseconds:
 
-| Mode | Measured Mbps | C++17 baseline | C++23 candidate | Original status |
+| Mode | Measured Mbps | C++17 submission / frame-ready ms | C++23 submission / frame-ready ms | Original status |
 |---|---:|---:|---:|---|
-| 1920×1080 at 60 fps | 85.816 | 2.990 | 2.971 | PASS |
-| 1920×1080 at 120 fps | 101.643 | 2.205 | 2.212 | PASS |
-| 3440×1440 at 120 fps | 98.189 | 2.518 | 2.359 | PASS |
-| 3440×1440 at 240 fps | 95.374 | 2.218 | 2.207 | PASS |
-| 3840×2160 at 60 fps | 92.471 | 3.650 | 3.675 | PASS |
-| 3840×2160 at 120 fps | 122.563 | 3.305 | 3.301 | INCONCLUSIVE |
+| 1920×1080 at 60 fps | 85.816 | 0.815 / 2.990 | 0.807 / 2.971 | PASS |
+| 1920×1080 at 120 fps | 101.643 | 0.695 / 2.205 | 0.698 / 2.212 | PASS |
+| 3440×1440 at 120 fps | 98.189 | 0.658 / 2.518 | 0.568 / 2.359 | PASS |
+| 3440×1440 at 240 fps | 95.374 | 0.579 / 2.218 | 0.572 / 2.207 | PASS |
+| 3840×2160 at 60 fps | 92.471 | 0.740 / 3.650 | 0.756 / 3.675 | PASS |
+| 3840×2160 at 120 fps | 122.563 | 0.683 / 3.305 | 0.680 / 3.301 | INCONCLUSIVE |
 
 The last fixture exceeded the allowed bitrate tolerance; its otherwise clean
 decoding does not establish coverage at the requested target. All 96 workloads,
 including AV1, HDR10, and the other bitrate targets, remain in the full report.
 
+Comparisons between frame rates also change the compressed workload. At a fixed
+Mbps target, higher frame rates generally leave fewer encoded bytes per frame.
+These short synthetic fixtures additionally repeat their initial encoder
+rate-control burst. For the ultrawide HEVC SDR 100 Mbps cases, the first 12
+encoded frames occupy 10% of the 120 fps fixture but 5% of the 240 fps fixture.
+That expensive block averages 6.671 versus 6.628 ms, while the remaining frames
+average 1.879 versus 1.974 ms. The lower overall mean therefore reflects different
+frame weighting as well as different encoded bytes. Each C++17/C++23 pair still
+receives identical bytes, but the cross-rate rows do not isolate an intrinsic
+decoder speedup from increasing frame rate.
+
 The new columns were derived offline from **600 existing timed CSVs** after
 verifying their hashes and native JSON against the original results. They cover
-627,370 eligible output samples in the full run and 114,580 in confirmation.
+627,370 eligible frame-ready samples in the full run and 114,580 in confirmation.
+Submission timing has 627,346 and 114,574 samples respectively: 24 full-run and
+6 confirmation completions did not capture a valid API-return timestamp. A
+callback can arrive before the API call returns. These outputs remain in the
+frame-ready population, and their missing submission times are not replaced
+with zeros or inferred values. The two sample counts are explicit in each
+report and are independent of the existing delivery gates.
 Each case mean divides the sum of durations by the number of eligible outputs
 across separate trials, including each trial's startup. It does not average
 medians or give unequal-sized trials equal weight. Failed/cancelled outputs add
 no decode sample, and the original delivery and latency gates remain unchanged.
 **No tests, benchmarks, builds, or decoding were rerun for this report update.**
+The adapter's two-counter overlay change received a Clang syntax-only check
+with the existing Qt consumer's C++17 flags and headers. The application was
+not rebuilt or launched, so the updated overlay has no new runtime validation.
 
 Machine-readable supplemental means, counts, integer duration sums, and
 provenance are available for the

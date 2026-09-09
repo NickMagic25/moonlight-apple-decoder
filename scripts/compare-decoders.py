@@ -630,7 +630,7 @@ def moonlight_report_data(result):
         for setting in result['builds']:
             runs = [r for r in timed if r['setting'] == setting]
             metrics = {}
-            for key in ('native_vt', 'public_queue_proxy'):
+            for key in ('native_vt', 'native_submission', 'public_queue_proxy'):
                 values = [r.get('derived', {}).get('moonlight_decode_time', {}).get(key) for r in runs]
                 valid = bool(values) and all(isinstance(v, dict)
                     and type(v.get('sample_count')) is int and v['sample_count'] >= 0
@@ -651,9 +651,16 @@ def moonlight_report_data(result):
     return dict(schema_version=1, status=result['status'],
                 report_generator_sha256=sha(pathlib.Path(__file__)),
                 moonlight_report_derivation=result.get('moonlight_report_derivation'),
-                native_label='VT submit-to-callback mean',
+                native_label='Frame-ready mean (VT submit -> callback)',
                 native_formula='sum(callback_ns - vt_submit_ns) / eligible outputs / 1000000',
-                native_source='integration/moonlight-qt/apple_video.cpp:254-268,476-499',
+                submission_label='VT submission mean (submit -> return)',
+                submission_formula='sum(vt_return_ns - vt_submit_ns) / outputs with valid submit and return timestamps / 1000000',
+                submission_population='Successful new single-sample outputs with valid ordered submit/return timestamps. '
+                    'A callback may precede API return, leaving no captured return timestamp. Such outputs remain '
+                    'in frame-ready accounting when eligible but contribute no submission sample. '
+                    'Submission and frame-ready intervals share a start and must not be added together.',
+                native_source='integration/moonlight-qt/apple_video.cpp: AppleVideoDecoder::receive/updateOverlay',
+                native_adapter_sha256=sha(ROOT / 'integration/moonlight-qt/apple_video.cpp'),
                 population='All eligible timed outputs, including cold/warmup and recovery generations; '
                     'not medians. Case means pool duration sums/counts across separate trials. '
                     'Dropped/cancelled frames contribute no decode sample; failure gates remain unchanged.',
@@ -667,6 +674,11 @@ def moonlight_report_data(result):
 def report_markdown(result, path):
     def number(value):
         return '—' if value is None else f'{value:.3f}'
+    def mean_samples(value):
+        if not isinstance(value, dict):
+            return '—'
+        count = value.get('sample_count')
+        return number(value.get('mean_ms')) + (f' ({count})' if count is not None else '')
     moonlight = moonlight_report_data(result)
     run_settings = result['config']['run']
     lines = ['# Decoder comparison', '', f"Overall: **{result['status']}** ({result['comparison']}).", '',
@@ -701,32 +713,45 @@ def report_markdown(result, path):
               'A PASS means the configured gates passed in this sample. It does not prove absence of a smaller regression. '
               'Public latency includes scheduled arrival, queuing and callback delivery; VT latency ends at the internal decoder callback.', '']
     lines += ['## Decode time shown by Moonlight', '',
-              'The native Apple adapter displays **“VT submit-to-callback mean”**: the arithmetic mean from '
-              'VideoToolbox submission to its callback, in milliseconds. These values include cold/startup and '
+              'The native Apple adapter displays **“Frame-ready mean (VT submit -> callback)”**: the arithmetic mean from '
+              'VideoToolbox submission to its decoded-image callback, in milliseconds. This is the same '
+              'measurement previously labeled “VT submit-to-callback mean”; the machine-readable key remains '
+              '`native_vt`. These values include cold/startup and '
               'warmup outputs, matching the adapter’s cumulative counter; they are not the steady-state medians '
               'in the table above. Case means below sum durations and divide by eligible output counts across '
               'all captured timed trials, so trials with different output counts are weighted correctly. '
-              'Each trial includes its own startup. Per-trial means appear below each case.', '',
+              'Each trial includes its own startup. Per-trial means and their sample counts appear below each case.', '',
+              '**“VT submission mean (submit -> return)”** separately measures how long the VideoToolbox API '
+              'call takes to return. It is not completed decoding or presentation latency. Submission and '
+              'frame-ready intervals share the same start; do not add their means or interpret their difference '
+              'as hardware execution time. A callback can occur before the call returns, so some saved '
+              'completions lack a return timestamp. Those outputs remain eligible for frame-ready timing but '
+              'are omitted from submission timing, with independent sample counts shown explicitly. '
+              'Missing return timestamps are never replaced with zero or a callback timestamp.', '',
               'The regular Qt/FFmpeg **“Average decoding time”** includes input-queue and decoder delivery time '
               'and uses recent statistics windows. The queue-inclusive proxy below uses recorded complete-frame '
               'arrival to the harness output callback. It approximates that broader boundary; it is not an actual '
               'live overlay reading and does not include the app’s output wrapping or rendering. The native '
-              'column matches this repository’s native Apple overlay formula.', '',
+              'frame-ready column matches this repository’s native Apple overlay formula. On Intel/other GPU '
+              'backends, FFmpeg output-surface delivery need not guarantee GPU completion; the proxy does '
+              'not establish a common hardware-readiness endpoint across platforms.', '',
               'Dropped/cancelled frames add no decode sample, so a low mean does not imply smooth delivery. '
               'Original PASS/FAIL, bitrate coverage and latency gates are unchanged. A dash means the necessary '
               'trace-derived values are unavailable. Machine-readable means and sample counts: '
               '[moonlight-decode-times.json](moonlight-decode-times.json).', '',
-              '| Case | Result | Native Moonlight mean ms (baseline / candidate) | Queue-inclusive proxy ms (baseline / candidate) | Native samples (baseline / candidate) |',
-              '|---|---|---:|---:|---:|']
+              '| Case | Result | VT submission mean ms (baseline / candidate) | Frame-ready mean ms (baseline / candidate) | Queue-inclusive proxy ms (baseline / candidate) | Submission samples (baseline / candidate) | Frame-ready samples (baseline / candidate) |',
+              '|---|---|---:|---:|---:|---:|---:|']
     for case in moonlight['cases']:
         cells = []
-        for key in ('native_vt', 'public_queue_proxy'):
+        for key in ('native_submission', 'native_vt', 'public_queue_proxy'):
             cells.append(' / '.join(number(case['builds'].get(setting, {}).get(key, {}).get('mean_ms'))
                                     for setting in ('baseline', 'candidate')))
-        counts = ' / '.join(str(case['builds'].get(setting, {}).get('native_vt', {}).get('sample_count'))
-                            if case['builds'].get(setting, {}).get('native_vt', {}).get('sample_count') is not None
-                            else '—' for setting in ('baseline', 'candidate'))
-        lines.append(f"| {case['name']} | {case['status']} | {cells[0]} | {cells[1]} | {counts} |")
+        counts = []
+        for key in ('native_submission', 'native_vt'):
+            counts.append(' / '.join(str(case['builds'].get(setting, {}).get(key, {}).get('sample_count'))
+                          if case['builds'].get(setting, {}).get(key, {}).get('sample_count') is not None
+                          else '—' for setting in ('baseline', 'candidate')))
+        lines.append(f"| {case['name']} | {case['status']} | {cells[0]} | {cells[1]} | {cells[2]} | {counts[0]} | {counts[1]} |")
     lines.append('')
     for case in result['cases']:
         lines += [f"## {case['name']}", '', f"Status: {case['status']}", '']
@@ -758,8 +783,8 @@ def report_markdown(result, path):
                 lines += [f"- {run['phase']} / {run['setting']} / {run['repetition']}: " + '; '.join(run['errors'])]
         if any(run['errors'] for run in case['runs']):
             lines.append('')
-        lines += ['| Build / run | Outputs / offered | FPS | Drops / failed | First output ms | Moonlight VT mean ms | Queue-inclusive proxy ms |',
-                  '|---|---:|---:|---:|---:|---:|---:|']
+        lines += ['| Build / run | Outputs / offered | FPS | Drops / failed | First output ms | VT submission mean ms (samples) | Frame-ready mean ms (samples) | Queue-inclusive proxy ms |',
+                  '|---|---:|---:|---:|---:|---:|---:|---:|']
         for run in case['runs']:
             if run['phase'] != 'timed':
                 continue
@@ -768,7 +793,8 @@ def report_markdown(result, path):
             lines.append(f"| {run['setting']} / {run['repetition']} | {native.get('displayed_outputs', '—')} / {native.get('offered', '—')} | "
                          f"{number(native.get('decoded_fps'))} | {native.get('scheduler_drops', '—')} / "
                          f"{native.get('failed_or_cancelled_or_dropped', '—')} | {number(run.get('first_output_ms'))} | "
-                         f"{number(means.get('native_vt', {}).get('mean_ms'))} | "
+                         f"{mean_samples(means.get('native_submission'))} | "
+                         f"{mean_samples(means.get('native_vt'))} | "
                          f"{number(means.get('public_queue_proxy', {}).get('mean_ms'))} |")
         for name, metric in case['comparisons'].items():
             if metric['threshold_exceeded']:

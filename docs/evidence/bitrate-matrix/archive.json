@@ -79,15 +79,15 @@
     },
     "full/report.md": {
       "source": "Offline derivation from verified saved timed CSV/JSON; see moonlight-decode-times.json",
-      "bytes": 161203,
-      "sha256": "0679c0843524b8cc4cbce80daf2850c3b3c7c5140f530d761c224a86c6af03de",
+      "bytes": 181965,
+      "sha256": "701da304fb41a3fb9df7c71ab9d0c16496ff80576be421da00f99e60e4fe518e",
       "source_results_sha256": "83051d25e546583a32f2212f1bd624925f401384d758fa40ecb713e73f1b3682",
       "original_report_sha256": "28c8e02c3d5126bbc7129245f789835f74f32eca84a60a7054932971a6067327"
     },
     "full/moonlight-decode-times.json": {
       "source": "Offline derivation from verified saved timed CSV/JSON; see moonlight-decode-times.json",
-      "bytes": 606879,
-      "sha256": "dea36f703da6eb97ff0a253e64db15699693d71b354e3215c87e806c3a3c8c15",
+      "bytes": 733003,
+      "sha256": "5b453db8fc1cc1f40268c993960d7802922f1212f5d54fe79565900b9cd0dfb3",
       "source_results_sha256": "83051d25e546583a32f2212f1bd624925f401384d758fa40ecb713e73f1b3682",
       "original_report_sha256": "28c8e02c3d5126bbc7129245f789835f74f32eca84a60a7054932971a6067327"
     },
@@ -98,15 +98,15 @@
     },
     "confirmation/report.md": {
       "source": "Offline derivation from verified saved timed CSV/JSON; see moonlight-decode-times.json",
-      "bytes": 10367,
-      "sha256": "d906a337882de66363035b590a10671e8a17a574ffa7bf9661cd1d1c55391219",
+      "bytes": 12161,
+      "sha256": "cf460dcfd73fc362a3964bb79832ad7ebb756698a600576af56d2f85c7ec7db6",
       "source_results_sha256": "293148150d337547e10f679d7aaf9babac864f5b0580c34427fa912a56ae69b0",
       "original_report_sha256": "566ed35471ac8d9c7ee3b1afafd0603eae4cf133e5ba9d51e3520da0cbaf712a"
     },
     "confirmation/moonlight-decode-times.json": {
       "source": "Offline derivation from verified saved timed CSV/JSON; see moonlight-decode-times.json",
-      "bytes": 25356,
-      "sha256": "1785be5f62f5ed3e3986aec6978b5f950ad05b9b647f6bd633b62427a3723992",
+      "bytes": 30705,
+      "sha256": "8bbab5e0856c1b7ab169d65714ccabfab229fd239fcc0abea24b5d98aefff8a1",
       "source_results_sha256": "293148150d337547e10f679d7aaf9babac864f5b0580c34427fa912a56ae69b0",
       "original_report_sha256": "566ed35471ac8d9c7ee3b1afafd0603eae4cf133e5ba9d51e3520da0cbaf712a"
     }

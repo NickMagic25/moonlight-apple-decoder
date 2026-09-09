@@ -145,9 +145,32 @@ its original host-metadata behavior. The original small right/bottom crop policy
 remains in place.
 
 The native overlay reports input/decode/backpressure/recovery/display-handoff
-counts and single-sample newly decoded VT submit-to-callback mean. No-display and
-show-existing events are excluded from that decode timing mean. The standalone
-benchmark is the source for distributions. Pacer statistics are read only after
+counts and two timing means, each with its sample count:
+
+- **VT submission mean (submit -> return):** elapsed time inside the
+  VideoToolbox decode submission call. Returning from this call does not
+  guarantee the output image is ready.
+- **Frame-ready mean (VT submit -> callback):** elapsed time from submitting the
+  frame to VideoToolbox until its decoded-image callback. This retains the
+  previous VT submit-to-callback metric; it does not include rendering or actual
+  presentation.
+
+Both are cumulative arithmetic means over the adapter's lifetime, including
+startup, warmup and recovery. They count successful, newly decoded single-sample
+outputs before display handoff; no-display and show-existing events are excluded.
+A callback can occur before the submission call returns, so some completions do
+not carry a valid return timestamp. Such outputs still contribute to frame-ready
+timing when its timestamps are valid, but are omitted from submission timing;
+missing return timestamps are never inferred or counted as zero. Independent
+sample counts expose this difference in coverage. A lower submission mean does
+not establish faster decoding or earlier presentation.
+Both intervals start at VT submission and can overlap; their means must not be
+added together or subtracted to infer hardware execution time.
+
+The final log retains `VT-submit-to-callback-mean-us` and adds
+`VT-submit-to-return-mean-us`, `VT-submit-to-return-samples` and
+`VT-submit-to-callback-samples`. The standalone benchmark is the source for
+distributions. Pacer statistics are read only after
 its threads join; final logs report its queue and render-call totals and measured
 callback-to-pacer handoff mean. Missing intervals are reported as unavailable. The existing
 Metal render-call can include drawable acquisition and GPU waiting; with

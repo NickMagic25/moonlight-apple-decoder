@@ -293,7 +293,7 @@ erase startup loss, change total output accounting, or make a failed run pass.
 Cold-start timing and sustained decode latency answer different questions.
 
 The [native Apple adapter](../integration/moonlight-qt/apple_video.cpp) displays
-**VT submit-to-callback mean**, rounded to three decimal milliseconds. It
+**Frame-ready mean (VT submit -> callback)**, rounded to three decimal milliseconds. It
 accumulates `callback_ns - vt_submit_ns` for successful new, single-sample
 outputs with both trace timestamps. The report uses that same arithmetic mean,
 including cold/startup, warmup, and recovery outputs. A case mean pools integer
@@ -303,12 +303,34 @@ cancelled frames contribute no decode sample and remain failures in the delivery
 accounting. This supplemental mean does not replace the steady-state latency
 gates.
 
+**VT submission mean (submit -> return)** separately averages
+`vt_return_ns - vt_submit_ns` for successful new, single-sample outputs with valid
+ordered submission/return timestamps. This measures time inside the API call;
+it does not establish that decoding has completed. Both intervals start at VT
+submission, so they overlap and must not be added together. Their difference
+is not a hardware execution measurement. A callback can occur before the API
+returns, leaving that completion without a captured return timestamp. Those
+outputs retain their frame-ready samples but supply no submission sample.
+Each metric therefore has its own sample count and pooled duration sum; missing
+timestamps never become zeros or inferred callback values. Both counts appear
+in the overlay and reports.
+
+The existing JSON key `native_vt` retains its frame-ready meaning and values;
+`native_submission` is an additional field under `moonlight_decode_time` and
+the companion's per-build/per-run means. The final adapter log retains
+`VT-submit-to-callback-mean-us` and adds `VT-submit-to-return-mean-us` plus both
+sample counts. No completion, output ownership, admission, or decode scheduling
+behavior changes with this reporting addition.
+
 The regular Qt/FFmpeg overlay's **Average decoding time** has a broader boundary
 and uses recent statistics windows. The report's separately labeled
 **queue-inclusive proxy** averages recorded complete-frame scheduled arrival to
 the harness output callback, including startup. It approximates that boundary
 but does not measure the app's queue, output wrapping, or live statistics window.
-Neither replay value establishes actual network or presentation latency.
+Some FFmpeg GPU paths return an output surface before later rendering-side
+synchronization confirms GPU completion. The proxy therefore does not establish
+an identical readiness boundary for Intel and Apple. None of these replay
+values establishes actual network or presentation latency.
 
 To add these columns to an existing native comparison **without rerunning any
 tests, builds, fixture generation, or decoding**, use the offline report command:

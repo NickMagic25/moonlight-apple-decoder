@@ -57,6 +57,7 @@ private:
     std::atomic<mav_result> m_FatalResult{MAV_OK};
     std::atomic<uint64_t> m_Epoch{0}, m_HandoffDrops{0}, m_HandoffFrames{0}, m_HandoffNs{0};
     std::atomic<uint64_t> m_DecodeNs{0}, m_DecodeSamples{0}, m_HandoffSamples{0};
+    std::atomic<uint64_t> m_SubmissionNs{0}, m_SubmissionSamples{0};
     std::mutex m_OutputMutex;
     SDL_sem* m_OutputReady = nullptr;
     std::array<Output, 3> m_Outputs{};
