@@ -660,10 +660,17 @@ def report_markdown(result, path):
         lines += [f"## {case['name']}", '', f"Status: {case['status']}", '']
         settings = case['settings']
         reference = settings.get('reference_info')
-        if reference:
+        if reference is not None:
+            reference = reference if isinstance(reference, dict) else {}
+            metadata = reference.get('metadata')
+            metadata = metadata if isinstance(metadata, dict) else {}
+            decoder = metadata.get('decoder')
+            decoder = decoder if isinstance(decoder, str) and decoder.strip() else 'unavailable'
+            samples = reference.get('expected_samples')
+            samples = f'{samples:,}' if type(samples) is int and samples > 0 else 'unavailable'
             checked = [r.get('native', {}) for r in case['runs'] if r['phase'] == 'correctness']
-            lines += [f"Full-frame software reference: {reference['metadata']['decoder']}; "
-                      f"{reference['expected_samples']:,} samples expected per build; "
+            lines += [f"Full-frame software reference: {decoder}; "
+                      f"{samples} samples expected per build; "
                       'observed maximum code errors: ' + ', '.join(str(r.get('software_reference_max_code_error', 'unavailable'))
                                                                   for r in checked) + '.', '']
         ratio = case['bitrate']['measured_to_requested_ratio']

@@ -516,6 +516,30 @@ class RunnerTests(unittest.TestCase):
         self.assertIn('| case | FAIL |', markdown)
         self.assertIn('missing/invalid steady latency samples: vt_p95_ms', markdown)
 
+    def test_malformed_reference_details_still_produce_both_failure_reports(self):
+        for reference in ({}, 'invalid', [], True,
+                          {'metadata': None}, {'metadata': []}, {'metadata': 'invalid'},
+                          {'metadata': {}}, {'metadata': {'decoder': False}, 'expected_samples': True},
+                          {'metadata': {'decoder': ''}, 'expected_samples': '259200'},
+                          {'metadata': {'decoder': 123}, 'expected_samples': 259200.0},
+                          {'metadata': {'decoder': []}, 'expected_samples': -1}):
+            with self.subTest(reference=reference):
+                plan = self.plan(baseline=False)
+                path = self.out / self.case['fixture_info']['manifest']
+                manifest = json.loads(path.read_text())
+                manifest['generator']['content_profile'] = 'seeded-noise-frame-id-v1'
+                path.write_text(json.dumps(manifest))
+                self.case['fixture_info'].update(manifest_sha256=RUNNER.sha(path),
+                                                  generator=manifest['generator'])
+                self.case['reference_info'] = reference
+                result = RUNNER.analyze(plan, self.out)
+                self.assertEqual(result['cases'][0]['status'], 'INCOMPLETE')
+                self.assertEqual(json.loads((self.out / 'results.json').read_text()), result)
+                markdown = (self.out / 'report.md').read_text()
+                self.assertIn('| case | INCOMPLETE |', markdown)
+                self.assertIn('Full-frame software reference: unavailable; unavailable samples expected per build', markdown)
+                self.assertIn('software reference', ' '.join(result['cases'][0]['issues']))
+
     def test_markdown_and_json_agree_on_bitrate_and_failed_or_incomplete_status(self):
         for mutation in ('pass', 'baseline_fail', 'candidate_fail', 'missing_run', 'missing_fixture'):
             with self.subTest(mutation=mutation):
