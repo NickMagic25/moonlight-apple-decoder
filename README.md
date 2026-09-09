@@ -39,6 +39,10 @@ ownership/concurrency contract in the public header.
 
 See [C++23 and Swift 6.3 validation](docs/toolchain-upgrade.md) for the upgrade's
 regression coverage and consumer compatibility checks.
+The [resolution/frame-rate matrix](docs/toolchain-matrix.md) covers 1080p60/120,
+3440x1440p120/240, and 4K60/120, including the AV1 startup-budget limitation and
+its C++17 comparison. The [performance opportunities review](docs/toolchain-performance-opportunities.md)
+outlines further experiments enabled by the newer toolchains.
 
 Portable parser and mock lifecycle tests also build on Linux. Linux tests and
 simulator builds never establish VideoToolbox hardware performance.

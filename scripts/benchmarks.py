@@ -3,7 +3,7 @@ import argparse,json,os,pathlib,subprocess,sys,math
 from validation import ROOT,build,fixture,run
 from environment import capture
 PRESETS={}
-for size,w,h,rates in [('1080p',1920,1080,[120]),('1440p',2560,1440,[120,240]),('3440x1440p',3440,1440,[240]),('4k',3840,2160,[60,120])]:
+for size,w,h,rates in [('1080p',1920,1080,[60,120]),('1440p',2560,1440,[120,240]),('3440x1440p',3440,1440,[120,240]),('4k',3840,2160,[60,120])]:
     for fps in rates:
         for codec in ['av1','hevc']:
             PRESETS[f'{size}{fps}-{codec}']=(w,h,fps,codec,'sdr8')

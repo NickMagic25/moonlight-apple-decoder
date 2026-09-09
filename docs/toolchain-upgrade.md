@@ -70,3 +70,7 @@ Metal; hardware checks passed with normal macOS hardware-service access.
 This establishes offline regression coverage on the tested Mac. It does not
 establish physical iOS/tvOS decoding, Linux runtime behavior, older macOS runtime
 compatibility, live host streaming, or a performance improvement.
+
+The subsequent [resolution/frame-rate matrix](toolchain-matrix.md) adds paced
+1080p60/120, ultrawide 120/240, and 4K60/120 coverage. It documents a pre-existing
+AV1 startup-budget failure at ultrawide 240 fps and a separate queue-32 mitigation.
