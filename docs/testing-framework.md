@@ -29,6 +29,7 @@ The supplied configurations are:
 | [`benchmarks/full-matrix.yaml`](../benchmarks/full-matrix.yaml) | 1080p60/120, 3440×1440p120/240, and 4K60/120; AV1/HEVC and SDR/HDR10; 24 cases |
 | [`benchmarks/full-matrix-q32.yaml`](../benchmarks/full-matrix-q32.yaml) | The two AV1 3440×1440p240 cases with additional startup arrival-age headroom |
 | [`benchmarks/smoke.yaml`](../benchmarks/smoke.yaml) | Small AV1/HEVC streams that exercise an explicit encoder bitrate target |
+| [`benchmarks/toolchain-confirmation.yaml`](../benchmarks/toolchain-confirmation.yaml) | Six balanced 20-second pairs for the three latency flags from the initial toolchain comparison |
 
 For example, this creates the six requested resolution/rate combinations with
 both codecs and dynamic ranges, using explicit stream bitrate targets:

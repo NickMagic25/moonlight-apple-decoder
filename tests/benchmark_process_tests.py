@@ -9,6 +9,7 @@ import signal
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 from unittest import mock
 
@@ -140,6 +141,12 @@ class EncoderProcessTests(unittest.TestCase):
             def spawn(*args, **kwargs):
                 process = original(*args, **kwargs)
                 created.append(process)
+                # Cold framework/Python startup on hosted macOS can exceed the
+                # short timeout under test. Start that timeout only after the
+                # real encoder child has acquired its lock and recorded IDs.
+                deadline = time.monotonic() + 15
+                while not metadata.is_file() and process.poll() is None and time.monotonic() < deadline:
+                    time.sleep(0.02)
                 return process
 
             try:
