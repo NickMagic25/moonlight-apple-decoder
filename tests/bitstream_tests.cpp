@@ -174,5 +174,20 @@ void malformed_properties() {
         }
     }
 }
+void transactional_parser_tests() {
+    for(bool fragmented:{false,true})for(auto codec:{Codec::AV1,Codec::HEVC}) {
+        Bitstream parser(codec);auto initial=accept(parser,codec==Codec::AV1?av1_key_unit():hevc_key());
+        std::vector<uint8_t> rejected;
+        if(codec==Codec::AV1) {
+            rejected=av1_sequence(10,256,144);auto header=av1_frame();header[0]=0x1a;append(rejected,header);
+        } else { rejected=sps(8,256);append(rejected,slice(19,true,33)); }
+        Prepared out;std::string error;size_t boundary=rejected.size()/2;
+        Span spans[]={{rejected.data(),boundary},{rejected.data()+boundary,rejected.size()-boundary}};
+        auto result=fragmented?parser.prepare(spans,2,out,error):parser.prepare(rejected.data(),rejected.size(),out,error);
+        check(result!=ParseResult::Ok&&out.samples.empty()&&out.bytes.empty(),"public parser rejects error after updating candidate sequence");
+        auto next=accept(parser,codec==Codec::AV1?av1_frame(false):slice(1,true,0,1));
+        check(next.format==initial.format&&!next.config_changed,"public parser retains original cache after late rejection");
+    }
 }
-int main() {av1_tests();hevc_tests();malformed_properties();std::cout<<"PASS bitstream "<<checks<<" checks\n";}
+}
+int main() {av1_tests();hevc_tests();transactional_parser_tests();malformed_properties();std::cout<<"PASS bitstream "<<checks<<" checks\n";}

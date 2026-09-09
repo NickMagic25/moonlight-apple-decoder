@@ -31,6 +31,11 @@ void callback(void* p,const mav_completion* c) {
 void notification(void* p){++static_cast<Sink*>(p)->notifications;}
 void create(Sink& sink,unsigned max=2){mav_config c;mav_config_default(&c,MAV_CODEC_AV1);c.completion=callback;c.capacity_available=notification;c.context=&sink;c.max_frames_in_flight=max;CHECK(mav_decoder_create(&c,&sink.decoder)==MAV_OK);}
 mav_result submit(Sink& sink,const std::vector<uint8_t>& data,uint64_t id=1){mav_span span{data.data(),data.size()};mav_access_unit u;mav_access_unit_default(&u,MAV_CODEC_AV1);u.spans=&span;u.span_count=1;u.frame_id=id;return mav_decoder_submit_copy(sink.decoder,&u);}
+mav_result submit_fragmented(Sink& sink,const std::vector<uint8_t>& data,uint64_t id,bool fragmented){
+    if(!fragmented)return submit(sink,data,id);
+    size_t boundary=data.size()/2;mav_span spans[]={{data.data(),boundary},{data.data()+boundary,data.size()-boundary}};
+    mav_access_unit u;mav_access_unit_default(&u,MAV_CODEC_AV1);u.spans=spans;u.span_count=2;u.frame_id=id;return mav_decoder_submit_copy(sink.decoder,&u);
+}
 mav_metrics metrics(Sink& sink){mav_metrics m{};m.struct_size=sizeof(m);m.version=MAV_ABI_VERSION;CHECK(mav_decoder_get_metrics(sink.decoder,&m)==MAV_OK);return m;}
 void destroy(Sink& s){CHECK(mav_decoder_destroy(s.decoder)==MAV_OK);s.decoder=nullptr;CHECK(mav_test::retained()==0);}
 int main(){
@@ -84,6 +89,33 @@ int main(){
         CHECK(s.completions.size()==2);CHECK(s.completions[0].status==MAV_COMPLETION_FAILED);
         CHECK(s.completions[1].status==MAV_COMPLETION_CANCELLED);CHECK(metrics(s).failed==1&&metrics(s).cancelled==1);
         CHECK(submit(s,inter)==MAV_NEED_RANDOM_ACCESS);destroy(s);}
+    for(bool fragmented:{false,true}) {
+        // Parse succeeds before this format change is rejected for pending work.
+        // A following inter frame must still use the old accepted configuration.
+        {Sink s;create(s);mav_test::mode(Mode::Delayed);CHECK(submit(s,key,1)==MAV_OK);
+            CHECK(submit_fragmented(s,mav_test::av1_key_unit(10,128,64),2,fragmented)==MAV_WOULD_BLOCK);
+            CHECK(metrics(s).accepted==1);CHECK(mav_decoder_drain(s.decoder)==MAV_OK);
+            CHECK(submit_fragmented(s,inter,3,fragmented)==MAV_OK);CHECK(mav_decoder_drain(s.decoder)==MAV_OK);
+            CHECK(s.completions.back().bit_depth==8&&metrics(s).session_creations==1);destroy(s);}
+        // A valid sequence is consumed before the missing tile group is found.
+        {Sink s;create(s);mav_test::mode(Mode::Inline);CHECK(submit(s,key,1)==MAV_OK);
+            auto invalid=mav_test::av1_sequence(10,128,64);auto header=mav_test::av1_frame();header[0]=0x1a;mav_test::append(invalid,header);
+            CHECK(submit_fragmented(s,invalid,2,fragmented)==MAV_MALFORMED_INPUT);CHECK(metrics(s).accepted==1);
+            CHECK(submit_fragmented(s,inter,3,fragmented)==MAV_OK);CHECK(s.completions.back().bit_depth==8&&metrics(s).session_creations==1);destroy(s);}
+        // Configuration-only admission advances the parser, but the backend
+        // must still apply that configuration on the next random-access picture.
+        {Sink s;create(s);mav_test::mode(Mode::Inline);CHECK(submit(s,key,1)==MAV_OK);
+            CHECK(submit_fragmented(s,mav_test::av1_sequence(10,128,64),2,fragmented)==MAV_OK);
+            CHECK(s.completions.back().status==MAV_COMPLETION_NO_DISPLAY&&metrics(s).session_creations==1);
+            CHECK(submit_fragmented(s,inter,3,fragmented)==MAV_NEED_RANDOM_ACCESS);
+            CHECK(submit_fragmented(s,mav_test::av1_frame(),4,fragmented)==MAV_OK);
+            CHECK(s.completions.back().bit_depth==10&&metrics(s).session_creations==2&&metrics(s).accepted==3);destroy(s);}
+        // Backend rejection must not commit the parsed candidate either.
+        {Sink s;create(s);mav_test::mode(Mode::Inline);CHECK(submit(s,key,1)==MAV_OK);
+            mav_test::fail_next_configure();CHECK(submit_fragmented(s,mav_test::av1_key_unit(10,128,64),2,fragmented)==MAV_UNSUPPORTED);
+            CHECK(metrics(s).accepted==1);CHECK(submit_fragmented(s,mav_test::av1_frame(),3,fragmented)==MAV_OK);
+            CHECK(s.completions.back().bit_depth==8&&metrics(s).session_creations==2);destroy(s);}
+    }
     // A prior async error racing a large preparation must never be erased by
     // an inter-frame admission. Timings here only arrange concurrency, not perf.
     for(unsigned run=0;run<20;++run){Sink s;create(s);mav_test::mode(Mode::Delayed);

@@ -125,7 +125,9 @@ mav_result submit(mav_decoder* d,const mav_access_unit* u) {
     for(size_t n=0;n<u->span_count;++n){const auto& p=u->spans[n];if((!p.data&&p.size)||p.size>MAV_MAX_ACCESS_UNIT_BYTES-total)return reject(d,MAV_INVALID_ARGUMENT);total+=p.size;spans.push_back({p.data,p.size});}
     if(!total)return reject(d,MAV_INVALID_ARGUMENT);
     auto candidate=d->parser; Prepared p;std::string error;
-    auto parsed=candidate.prepare(spans.data(),spans.size(),p,error);
+    // The detached parser is committed below only after complete admission.
+    // Avoid a second transactional clone inside this already-isolated copy.
+    auto parsed=candidate.prepare_isolated(spans.data(),spans.size(),p,error);
     if(parsed!=ParseResult::Ok)return reject(d,parse_result(parsed));
     c.trace.preparation_end_ns=mav_monotonic_time_ns();c.trace.valid|=MAV_TRACE_PREPARATION;
     bool has_picture=!p.samples.empty();

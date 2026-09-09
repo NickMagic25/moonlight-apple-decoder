@@ -3,6 +3,7 @@
 #include <cstring>
 #include <limits>
 #include <map>
+#include <optional>
 #include <stdexcept>
 #include <tuple>
 #include <utility>
@@ -599,36 +600,44 @@ Bitstream::Bitstream(Bitstream&&) noexcept=default;
 Bitstream& Bitstream::operator=(Bitstream&&) noexcept=default;
 void Bitstream::clear() noexcept { *state_=State(state_->codec); }
 ParseResult Bitstream::prepare(const uint8_t* p,size_t n,Prepared& out,std::string& error) {
-    out=Prepared{}; error.clear();
-    if (!p || !n || n>MaxBytes) { error="empty, null, or oversized compressed access unit"; return ParseResult::Malformed; }
-    State candidate=*state_;
-    try {
-        ParseResult result=candidate.codec==Codec::AV1?candidate.av1(p,n,out):candidate.hevc(p,n,out);
-        *state_=std::move(candidate); return result;
-    } catch (const Error& e) { out=Prepared{}; error=e.message; return e.result; }
+    Span span{p,n}; return prepare_impl(&span,1,out,error,true);
 }
 ParseResult Bitstream::prepare(const Span* spans,size_t count,Prepared& out,std::string& error) {
-    if (!spans || !count || count>MaxUnits) { out=Prepared{}; error="invalid compressed span count"; return ParseResult::Malformed; }
-    if (count==1) return prepare(spans[0].data,spans[0].size,out,error);
+    return prepare_impl(spans,count,out,error,true);
+}
+ParseResult Bitstream::prepare_isolated(const Span* spans,size_t count,Prepared& out,std::string& error) {
+    return prepare_impl(spans,count,out,error,false);
+}
+ParseResult Bitstream::prepare_impl(const Span* spans,size_t count,Prepared& out,std::string& error,bool transactional) {
+    out=Prepared{}; error.clear();
+    if (!spans || !count || count>MaxUnits) { error="invalid compressed span count"; return ParseResult::Malformed; }
     size_t total=0;
     for (size_t i=0;i<count;++i) {
-        if ((!spans[i].data && spans[i].size) || spans[i].size>MaxBytes-total) { out=Prepared{}; error="null or oversized compressed spans"; return ParseResult::Malformed; }
+        if ((!spans[i].data && spans[i].size) || spans[i].size>MaxBytes-total) { error="null or oversized compressed spans"; return ParseResult::Malformed; }
         total+=spans[i].size;
     }
-    std::vector<uint8_t> assembled; assembled.reserve(total);
-    for (size_t i=0;i<count;++i) if (spans[i].size) assembled.insert(assembled.end(),spans[i].data,spans[i].data+spans[i].size);
-    if (state_->codec==Codec::AV1 && total) {
-        // Low-overhead AV1 needs no rewriting: span assembly is the final
-        // owned sample allocation. Parse it in place, then transfer ownership.
-        out=Prepared{}; error.clear(); State candidate=*state_;
-        try {
-            auto result=candidate.av1(assembled.data(),assembled.size(),out,false);
-            out.bytes=std::move(assembled);*state_=std::move(candidate);return result;
-        } catch (const Error& e) {out=Prepared{};error=e.message;return e.result;}
+    if (!total) { error="empty compressed access unit"; return ParseResult::Malformed; }
+    std::vector<uint8_t> assembled;
+    const uint8_t* data=spans[0].data;
+    if (count>1) {
+        assembled.reserve(total);
+        for (size_t i=0;i<count;++i) if (spans[i].size) assembled.insert(assembled.end(),spans[i].data,spans[i].data+spans[i].size);
+        data=assembled.data();
     }
-    ParseResult result=prepare(assembled.data(),assembled.size(),out,error);
-    if (result==ParseResult::Ok) { ++out.compressed_copy_count; out.compressed_copy_bytes+=total; }
-    return result;
+    std::optional<State> candidate;
+    if (transactional) candidate.emplace(*state_);
+    State& target=transactional?*candidate:*state_;
+    try {
+        auto result=target.codec==Codec::AV1?target.av1(data,total,out,count==1):target.hevc(data,total,out);
+        if (count>1) {
+            // AV1 assembly is its final sample allocation. HEVC must convert
+            // Annex B afterward, so preserve the existing two-copy metrics.
+            if (target.codec==Codec::AV1) out.bytes=std::move(assembled);
+            else { ++out.compressed_copy_count; out.compressed_copy_bytes+=total; }
+        }
+        if (transactional) *state_=std::move(*candidate);
+        return result;
+    } catch (const Error& e) { out=Prepared{}; error=e.message; return e.result; }
 }
 ParseResult validate_av1c(const uint8_t* p,size_t n,Format& f,std::string& error) {
     f=Format{}; error.clear();

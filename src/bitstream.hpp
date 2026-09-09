@@ -42,7 +42,7 @@ struct Prepared {
     uint32_t displayed_frames = 0;
     uint64_t compressed_copy_count = 0, compressed_copy_bytes = 0;
 };
-// Thread-confined parser. On error cached state is unchanged. Input max 64 MiB,
+// Thread-confined parser. prepare() preserves cached state on error. Input max 64 MiB,
 // max 4096 units; AV1 low-overhead sized OBUs, single layer and operating point.
 // Each accepted AU contains at most one displayed image; hidden AV1 frames are
 // split into child samples, preserving every original codec payload byte.
@@ -56,10 +56,15 @@ public:
     Bitstream& operator=(const Bitstream&);
     ParseResult prepare(const uint8_t*, size_t, Prepared&, std::string&);
     ParseResult prepare(const Span*, size_t, Prepared&, std::string&);
+    // Internal admission fast path: this object must already be an isolated
+    // candidate. Discard it after ANY rejection; errors may mutate its cache.
+    // The caller commits it only after the complete admission succeeds.
+    ParseResult prepare_isolated(const Span*, size_t, Prepared&, std::string&);
     void clear() noexcept;
 private:
     struct State;
     std::unique_ptr<State> state_;
+    ParseResult prepare_impl(const Span*, size_t, Prepared&, std::string&, bool transactional);
 };
 // Validates both the record header and its one sequence OBU for consistency.
 ParseResult validate_av1c(const uint8_t*, size_t, Format&, std::string&);
