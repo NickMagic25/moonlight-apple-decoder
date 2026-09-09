@@ -1,7 +1,22 @@
 #include "apple.hpp"
 #include <map>
 #include <mutex>
+#ifdef MAV_EXPERIMENT_VT_DISPATCH
+#include "experiment_vt.hpp"
+#endif
 namespace mav {
+#ifdef MAV_EXPERIMENT_VT_DISPATCH
+namespace {
+thread_local bool experiment_synchronous=false;
+thread_local std::vector<ExperimentVTCall> experiment_calls;
+thread_local uint64_t experiment_overflow=0;
+}
+void experiment_vt_begin(bool synchronous,size_t capacity) {
+    experiment_synchronous=synchronous;experiment_calls.clear();experiment_calls.reserve(capacity);experiment_overflow=0;
+}
+const std::vector<ExperimentVTCall>& experiment_vt_calls(){return experiment_calls;}
+uint64_t experiment_vt_overflow(){return experiment_overflow;}
+#endif
 class VideoToolboxBackend final:public Backend {
     VTDecompressionSessionRef session_=nullptr;CMVideoFormatDescriptionRef format_=nullptr;
     BackendInfo info_;mav_color color_{};Format parsed_;
@@ -83,8 +98,16 @@ public:
             {std::lock_guard<std::mutex> l(mutex_);pending_.emplace(w.get(),w);}
             VTDecodeInfoFlags flags=0;
             w->submit_ns.store(mav_monotonic_time_ns());
-            status=VTDecompressionSessionDecodeFrame(session_,sample,kVTDecodeFrame_EnableAsynchronousDecompression,w.get(),&flags);
+            VTDecodeFrameFlags decode_flags=kVTDecodeFrame_EnableAsynchronousDecompression;
+#ifdef MAV_EXPERIMENT_VT_DISPATCH
+            if(experiment_synchronous)decode_flags=0;
+#endif
+            status=VTDecompressionSessionDecodeFrame(session_,sample,decode_flags,w.get(),&flags);
             w->return_ns.store(mav_monotonic_time_ns());
+#ifdef MAV_EXPERIMENT_VT_DISPATCH
+            if(experiment_calls.size()<experiment_calls.capacity())experiment_calls.push_back({w->submit_ns.load(),w->return_ns.load()});
+            else ++experiment_overflow;
+#endif
             // SDK guarantees no callback for a synchronous error. Map removal
             // is idempotent and ownership also survives an inline success.
             if(status)finish(w.get(),status,flags,nullptr,0);

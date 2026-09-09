@@ -14,13 +14,16 @@
 #include <iostream>
 #include <cmath>
 #include <memory>
+#ifdef MAV_EXPERIMENT_VT_DISPATCH
+#include "experiment_vt.hpp"
+#endif
 using namespace fixture;
-struct Record {mav_completion c{};uint64_t entry=0;CVPixelBufferRef retained=nullptr;};
+struct Record {mav_completion c{};uint64_t entry=0;uint32_t publicValid=0;CVPixelBufferRef retained=nullptr;};
 struct Sink {std::mutex lock;std::vector<Record> records;bool correctness=false;uint64_t overflow=0,retained=0,retainedPeak=0;std::condition_variable ready;bool finished=false;std::string validationError;CVPixelBufferRef ownershipProbe=nullptr;};
 static void complete(void* context,const mav_completion* c){
     uint64_t entry=mav_monotonic_time_ns();auto&s=*static_cast<Sink*>(context);std::lock_guard<std::mutex>g(s.lock);
     if(s.records.size()==s.records.capacity()){++s.overflow;return;}
-    Record r;r.c=*c;r.entry=entry;if(s.correctness&&c->pixel_buffer){if(s.retained>=32){++s.overflow;}else{r.retained=CVPixelBufferRetain(c->pixel_buffer);++s.retained;s.retainedPeak=std::max(s.retainedPeak,s.retained);if(!s.ownershipProbe)s.ownershipProbe=CVPixelBufferRetain(c->pixel_buffer);}}s.records.push_back(r);s.ready.notify_one();
+    Record r;r.c=*c;r.entry=entry;r.publicValid=c->trace.valid;if(s.correctness&&c->pixel_buffer){if(s.retained>=32){++s.overflow;}else{r.retained=CVPixelBufferRetain(c->pixel_buffer);++s.retained;s.retainedPeak=std::max(s.retainedPeak,s.retained);if(!s.ownershipProbe)s.ownershipProbe=CVPixelBufferRetain(c->pixel_buffer);}}s.records.push_back(r);s.ready.notify_one();
 }
 static NSDictionary* distribution(std::vector<double>v){if(v.empty())return @{@"count":@0,@"mean":NSNull.null,@"median":NSNull.null,@"p95":NSNull.null,@"p99":NSNull.null,@"min":NSNull.null,@"max":NSNull.null};std::sort(v.begin(),v.end());double sum=0;for(auto x:v)sum+=x;auto q=[&](double p){double i=p*(v.size()-1);size_t n=size_t(i);return v[n]+(v[std::min(n+1,v.size()-1)]-v[n])*(i-n);};return @{@"count":@(v.size()),@"mean":@(sum/v.size()),@"median":@(q(.5)),@"p95":@(q(.95)),@"p99":@(q(.99)),@"min":@(v.front()),@"max":@(v.back())};}
 static void verify(Record&r,const Manifest&m,id<MTLDevice>device,CVMetalTextureCacheRef cache){
@@ -72,11 +75,18 @@ static mav_color manifestFallback(const Manifest& manifest){
     return result;
 }
 int main(int argc,char**argv){@autoreleasepool{mav_decoder*decoder=nullptr;Sink sink;CVMetalTextureCacheRef cache=nullptr;std::thread consumer;ReferenceStats referenceStats;try{
-    std::map<std::string,std::string>o;for(int i=1;i<argc;++i){std::string k=argv[i];if(k=="--help"){std::cout<<"mav-replay --fixture manifest.json --output results/run --mode correctness|paced|throughput|fault [--inflight 2 --fps 120 --loops 1 --warmup 12 --power -1 --queue-depth 16 --seed 7 --jitter-us 0 --drop-every 0 --corrupt-every 0 --reset-every 0 --consumer-delay-ms 0 --loop-mode reset|continuous]\n";return 0;}if(i+1>=argc)throw std::runtime_error("option missing value");o[k]=argv[++i];}
+    std::map<std::string,std::string>o;for(int i=1;i<argc;++i){std::string k=argv[i];if(k=="--help"){std::cout<<"mav-replay --fixture manifest.json --output results/run --mode correctness|paced|throughput|fault [--inflight 2 --fps 120 --loops 1 --warmup 12 --power -1 --queue-depth 16 --seed 7 --jitter-us 0 --drop-every 0 --corrupt-every 0 --reset-every 0 --consumer-delay-ms 0 --loop-mode reset|continuous] [--vt-mode asynchronous|synchronous (diagnostic build)]\n";return 0;}if(i+1>=argc)throw std::runtime_error("option missing value");o[k]=argv[++i];}
     auto val=[&](std::string k,std::string d){return o.count(k)?o[k]:d;};if(!o.count("--fixture"))throw std::runtime_error("--fixture required");auto m=load(o["--fixture"]);std::string mode=val("--mode","correctness"),out=val("--output","results/replay");
     if(mode!="correctness"&&mode!="paced"&&mode!="throughput"&&mode!="fault")throw std::runtime_error("invalid mode");sink.correctness=mode=="correctness"||mode=="fault";
     std::string loopMode=val("--loop-mode","reset");if(loopMode!="reset"&&loopMode!="continuous")throw std::runtime_error("loop-mode must be reset or continuous");
     size_t loops=std::stoull(val("--loops","1")),warmup=std::stoull(val("--warmup","0"));if(!loops||loops>10000||loops*m.units.size()>1000000)throw std::runtime_error("too many submissions");
+    #ifdef MAV_EXPERIMENT_VT_DISPATCH
+    std::string vtMode=val("--vt-mode","asynchronous");
+    if(vtMode!="asynchronous"&&vtMode!="synchronous")throw std::runtime_error("vt-mode must be asynchronous or synchronous");
+    mav::experiment_vt_begin(vtMode=="synchronous",loops*m.units.size()*2);
+#else
+    if(o.count("--vt-mode"))throw std::runtime_error("vt-mode requires MAV_EXPERIMENT_VT_DISPATCH");
+#endif
     size_t total=loops*m.units.size(),queue=std::stoull(val("--queue-depth","16"));sink.records.reserve(total);
     double fps=std::stod(val("--fps",std::to_string(double(m.fps_num)/m.fps_den)));if(fps<=0||fps>10000||queue<1||queue>4096)throw std::runtime_error("invalid rate/queue depth");
     uint64_t interval=uint64_t(1e9/fps),jitter=std::stoull(val("--jitter-us","0"))*1000,dropEvery=std::stoull(val("--drop-every","0")),corruptEvery=std::stoull(val("--corrupt-every","0")),resetEvery=std::stoull(val("--reset-every","0")),consumerDelay=std::stoull(val("--consumer-delay-ms","0"));
@@ -117,14 +127,38 @@ int main(int argc,char**argv){@autoreleasepool{mav_decoder*decoder=nullptr;Sink 
     for(auto&r:sink.records){if(!ids.insert(r.c.frame_id).second||!expected.count(r.c.frame_id))throw std::runtime_error("duplicate or unexpected completion");if(mode!="fault"&&r.c.displayed_outputs!=expected[r.c.frame_id])++displayMismatches;if(r.c.status==MAV_COMPLETION_OUTPUT){++outputs;existing+=r.c.show_existing_frame;}else if(r.c.status==MAV_COMPLETION_NO_DISPLAY)++noDisplay;else ++failures;}
     bool passed=mode=="fault"?outputs>0:!(failures||drops||rejected||displayMismatches||outputs!=expectedOutputs||!metrics.hardware_validated);
     [[NSFileManager defaultManager]createDirectoryAtPath:ns(out).stringByDeletingLastPathComponent withIntermediateDirectories:YES attributes:nil error:nil];
-    std::ofstream csv(out+".csv");csv<<"frame_id,generation,status,result,trace_valid,internal_samples,displayed_outputs,show_existing,scheduled_arrival_ns,admission_ns,preparation_start_ns,preparation_end_ns,vt_submit_ns,vt_return_ns,callback_ns,handoff_ns,sink_entry_ns,hardware,bit_depth,pixel_format\n";
+    #ifdef MAV_EXPERIMENT_VT_DISPATCH
+    // Inline callbacks precede VT return. Recover the actual return timestamp
+    // from a bounded submission-thread recorder AFTER timing has finished.
+    // Preserve the original public trace-valid mask in the CSV diagnostics.
+    if(mav::experiment_vt_overflow()||mav::experiment_vt_calls().size()!=metrics.internal_samples)
+        throw std::runtime_error("VT diagnostic call recorder overflow or count mismatch");
+    std::map<uint64_t,uint64_t> returnTimes;
+    std::ofstream calls(out+"-vt-calls.csv");calls<<"vt_submit_ns,vt_return_ns\n";
+    for(const auto& call:mav::experiment_vt_calls()){returnTimes.emplace(call.submit_ns,call.return_ns);calls<<call.submit_ns<<','<<call.return_ns<<'\n';}
+    uint64_t recoveredReturns=0;
+    for(auto& record:sink.records)if(record.c.internal_samples==1&&!(record.c.trace.valid&MAV_TRACE_VT_RETURN)){
+        auto found=returnTimes.find(record.c.trace.vt_submit_ns);
+        if(found!=returnTimes.end()){record.c.trace.vt_return_ns=found->second;record.c.trace.valid|=MAV_TRACE_VT_RETURN;++recoveredReturns;}
+    }
+#endif
+    std::ofstream csv(out+".csv");csv<<"frame_id,generation,status,result,trace_valid,internal_samples,displayed_outputs,show_existing,scheduled_arrival_ns,admission_ns,preparation_start_ns,preparation_end_ns,vt_submit_ns,vt_return_ns,callback_ns,handoff_ns,sink_entry_ns,hardware,bit_depth,pixel_format,public_trace_valid\n";
     std::vector<double>decode,prep,queueWait,submission,available,handoff,coldDecodes;id cold=NSNull.null;std::map<uint64_t,uint64_t>firstInGeneration;for(auto&r:sink.records)if(r.c.status==MAV_COMPLETION_OUTPUT){auto&first=firstInGeneration[r.c.generation];uint64_t index=reinterpret_cast<uintptr_t>(r.c.caller_context);if(!first||index<first)first=index;}
-    for(auto&r:sink.records){auto&c=r.c;auto&t=c.trace;csv<<c.frame_id<<','<<c.generation<<','<<c.status<<','<<c.result<<','<<t.valid<<','<<c.internal_samples<<','<<c.displayed_outputs<<','<<c.show_existing_frame<<','<<t.scheduled_arrival_ns<<','<<t.admission_ns<<','<<t.preparation_start_ns<<','<<t.preparation_end_ns<<','<<t.vt_submit_ns<<','<<t.vt_return_ns<<','<<t.callback_ns<<','<<t.handoff_ns<<','<<r.entry<<','<<c.hardware_accelerated<<','<<c.bit_depth<<','<<c.pixel_format<<'\n';
+    for(auto&r:sink.records){auto&c=r.c;auto&t=c.trace;csv<<c.frame_id<<','<<c.generation<<','<<c.status<<','<<c.result<<','<<t.valid<<','<<c.internal_samples<<','<<c.displayed_outputs<<','<<c.show_existing_frame<<','<<t.scheduled_arrival_ns<<','<<t.admission_ns<<','<<t.preparation_start_ns<<','<<t.preparation_end_ns<<','<<t.vt_submit_ns<<','<<t.vt_return_ns<<','<<t.callback_ns<<','<<t.handoff_ns<<','<<r.entry<<','<<c.hardware_accelerated<<','<<c.bit_depth<<','<<c.pixel_format<<','<<r.publicValid<<'\n';
         if(c.status!=MAV_COMPLETION_OUTPUT||c.internal_samples!=1||c.show_existing_frame)continue;bool coldGeneration=firstInGeneration[c.generation]==reinterpret_cast<uintptr_t>(c.caller_context);if((t.valid&(MAV_TRACE_CALLBACK|MAV_TRACE_VT_SUBMIT))==(MAV_TRACE_CALLBACK|MAV_TRACE_VT_SUBMIT)&&t.callback_ns>=t.vt_submit_ns){if(coldGeneration){coldDecodes.push_back(t.callback_ns-t.vt_submit_ns);if(cold==NSNull.null)cold=@(t.callback_ns-t.vt_submit_ns);}if(!coldGeneration&&reinterpret_cast<uintptr_t>(c.caller_context)-1>=warmup)decode.push_back(t.callback_ns-t.vt_submit_ns);}if(coldGeneration||reinterpret_cast<uintptr_t>(c.caller_context)-1<warmup)continue;
         if(t.valid&MAV_TRACE_PREPARATION)prep.push_back(t.preparation_end_ns-t.preparation_start_ns);if((t.valid&MAV_TRACE_ARRIVAL)&&t.admission_ns>=t.scheduled_arrival_ns)queueWait.push_back(t.admission_ns-t.scheduled_arrival_ns);if((t.valid&(MAV_TRACE_VT_SUBMIT|MAV_TRACE_VT_RETURN))==(MAV_TRACE_VT_SUBMIT|MAV_TRACE_VT_RETURN))submission.push_back(t.vt_return_ns-t.vt_submit_ns);if((t.valid&(MAV_TRACE_ARRIVAL|MAV_TRACE_CALLBACK))==(MAV_TRACE_ARRIVAL|MAV_TRACE_CALLBACK)&&t.callback_ns>=t.scheduled_arrival_ns)available.push_back(t.callback_ns-t.scheduled_arrival_ns);if((t.valid&MAV_TRACE_CALLBACK)&&r.entry>=t.callback_ns)handoff.push_back(r.entry-t.callback_ns);
     }
     char model[128]={};size_t modelSize=sizeof(model);sysctlbyname("hw.model",model,&modelSize,nullptr,0);double seconds=double(end-start)/1e9;
     NSDictionary*result=@{@"status":passed?@"PASS":@"FAIL",@"mode":ns(mode),@"codec":ns(m.codec),@"variant":ns(m.variant),@"width":@(m.width),@"height":@(m.height),@"bit_depth":@(m.depth),@"chroma":@"420",@"fixture_sha256":ns(m.hash),@"model":ns(model),@"os":NSProcessInfo.processInfo.operatingSystemVersionString,@"clock":@"mav_monotonic_time_ns CLOCK_UPTIME_RAW",@"requested_fps":@(fps),@"offered":@(offered),@"submitted":@(submitted),@"completed":@(metrics.completed),@"internal_samples":@(metrics.internal_samples),@"displayed_outputs":@(outputs),@"no_display":@(noDisplay),@"show_existing":@(existing),@"rejected":@(rejected),@"failed_or_cancelled_or_dropped":@(failures),@"scheduler_drops":@(drops),@"expected_display_mismatches":@(displayMismatches),@"resets":@(resets),@"backpressure":@(backpressure),@"peak_outstanding":@(metrics.peak_outstanding),@"compressed_copy_count":@(metrics.compressed_copy_count),@"compressed_copy_bytes":@(metrics.compressed_copy_bytes),@"trace_overflow":@(sink.overflow),@"hardware_validated":@(metrics.hardware_validated),@"pixel_format":@(metrics.pixel_format),@"inflight":@(cfg.max_frames_in_flight),@"power_requested":@(cfg.power_efficiency),@"power_status":@(metrics.power_efficiency_status),@"power_effective":@(metrics.power_efficiency_effective),@"realtime_status":@(metrics.realtime_status),@"realtime_effective":@(metrics.realtime_effective),@"warmup_frames":@(warmup),@"loops":@(loops),@"loop_mode":ns(loopMode),@"run_seconds":@(seconds),@"actual_offered_fps":@(offered/seconds),@"admission_fps":@(submitted/seconds),@"decoded_fps":@(outputs/seconds),@"cold_vt_submit_to_callback_ns":cold,@"cold_generation_vt_submit_to_callback_ns":distribution(coldDecodes),@"steady_excludes_first_output_each_generation":@YES,@"vt_submit_to_callback_ns":distribution(decode),@"preparation_ns":distribution(prep),@"queue_wait_ns":distribution(queueWait),@"submission_call_ns":distribution(submission),@"complete_au_to_output_ns":distribution(available),@"callback_to_client_handoff_ns":distribution(handoff),@"scheduler_lateness_ns":distribution(schedulerLateness),@"render_ns":NSNull.null,@"presentation_ns":NSNull.null,@"thermal_state":@(NSProcessInfo.processInfo.thermalState),@"power_state":NSNull.null,@"manifest_fallback_color_valid":@(cfg.fallback_color.valid),@"scheduler_lateness_population":@"all offered arrivals, including cold, warmup and losses",@"software_reference_samples":@(referenceStats.count),@"software_reference_max_code_error":referenceStats.count?@(referenceStats.max):NSNull.null,@"software_reference_mean_code_error":referenceStats.count?@(double(referenceStats.sum)/referenceStats.count):NSNull.null,@"software_reference_tolerance":@(m.depth==10?8:2),@"correctness_sink":@(sink.correctness),@"consumer_retention_delay_ms":@(consumerDelay),@"consumer_delay_semantics":@"bounded 32-buffer validation worker delayed per output",@"retained_peak":@(sink.retainedPeak),@"retained_after_destroy_verified":@(sink.correctness),@"iosurface_metal_verified":@(sink.correctness)};
+    #ifdef MAV_EXPERIMENT_VT_DISPATCH
+    NSMutableDictionary* annotated=[result mutableCopy];
+    annotated[@"experiment_vt_mode"]=ns(vtMode);
+    annotated[@"experiment_vt_return_records"]=@(mav::experiment_vt_calls().size());
+    annotated[@"experiment_vt_trace_overflow"]=@(mav::experiment_vt_overflow());
+    annotated[@"experiment_recovered_return_timestamps"]=@(recoveredReturns);
+    annotated[@"experiment_return_trace_semantics"]=@"Missing return timestamps enriched after run from exact VT call recorder; inline callbacks legitimately precede return";
+    result=annotated;
+#endif
     json(out+".json",result);for(auto&r:sink.records)if(r.retained)CVPixelBufferRelease(r.retained);if(cache)CFRelease(cache);cache=nullptr;if(sink.ownershipProbe)CVPixelBufferRelease(sink.ownershipProbe);sink.ownershipProbe=nullptr;
     std::cout<<(passed?"PASS ":"FAIL ")<<m.codec<<" "<<m.variant<<" outputs="<<outputs<<" accepted="<<submitted<<" median_vt_ms="<<([result[@"vt_submit_to_callback_ns"][@"count"] unsignedLongLongValue]?std::to_string([result[@"vt_submit_to_callback_ns"][@"median"] doubleValue]/1e6):"unavailable")<<" result="<<out<<".json\n";return passed?0:1;
 }catch(const std::exception&e){if(decoder)mav_decoder_destroy(decoder);{std::lock_guard<std::mutex>lock(sink.lock);sink.finished=true;}sink.ready.notify_all();if(consumer.joinable())consumer.join();if(sink.ownershipProbe)CVPixelBufferRelease(sink.ownershipProbe);for(auto&r:sink.records)if(r.retained)CVPixelBufferRelease(r.retained);if(cache)CFRelease(cache);std::string failOut="results/replay";for(int i=1;i+1<argc;++i)if(std::string(argv[i])=="--output")failOut=argv[i+1];[[NSFileManager defaultManager]createDirectoryAtPath:ns(failOut).stringByDeletingLastPathComponent withIntermediateDirectories:YES attributes:nil error:nil];try{json(failOut+".json",@{@"status":@"FAIL",@"reason":ns(e.what()),@"completed_records":@(sink.records.size()),@"vt_submit_to_callback_ns":NSNull.null});}catch(...){}std::cerr<<"FAIL/BLOCKED: "<<e.what()<<"\n";return 1;}}}
