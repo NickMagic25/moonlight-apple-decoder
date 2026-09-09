@@ -1,0 +1,634 @@
+{
+  "schema_version": 1,
+  "kind": "system-trace-diagnostic",
+  "scope": "Existing root-captured traces only; no replay, capture, build or encoder launched during analysis.",
+  "provenance": {
+    "manifest": {
+      "path": "fixtures/generated/av1-sdr8-1920x1080p120-120/manifest.json",
+      "sha256": "b171afeafb5a5c00cc50154fd93a6d262fa8e1bb121afb59240e6ecb48133ea5"
+    },
+    "binary": {
+      "path": "build/mav-replay",
+      "sha256_observed_at_analysis": "5dc0e8c128b0038df862bba7d6366f387c29550a3b060ba93373cecabc4a69a9",
+      "limitation": "Hash taken after both captures, not embedded in the xctrace export; capture-time identity requires the surrounding benchmark provenance."
+    }
+  },
+  "runs": {
+    "av1-paced": {
+      "target": {
+        "name": "mav-replay",
+        "pid": 91838,
+        "arguments": "--fixture fixtures/generated/av1-sdr8-1920x1080p120-120/manifest.json --mode paced --fps 120 --loops 10 --loop-mode continuous --warmup 120 --inflight 2 --queue-depth 32 --output results/experiment-profile/av1-paced",
+        "return_exit_status": 0
+      },
+      "capture": {
+        "start-date": "2026-09-09T01:26:38.782-04:00",
+        "end-date": "2026-09-09T01:26:48.782-04:00",
+        "duration": "10.000000",
+        "end-reason": "Target app exited",
+        "instruments-version": "16.0 (17F113)",
+        "template-name": "System Trace",
+        "recording-mode": "Windowed (5 seconds)",
+        "time-limit": "12 seconds"
+      },
+      "sources": {
+        "toc": {
+          "path": "results/experiment-profile/av1-paced-toc.xml",
+          "sha256": "1d15ef19af28db35f69bcfbfda5c19ee087d81c0b6bd839591bc7d9023c5ac78"
+        },
+        "result": {
+          "path": "results/experiment-profile/av1-paced.json",
+          "sha256": "d2cd7ccec36b3047bcbda83394963f96588205c6f375ba5902807e03fbbf8e25"
+        },
+        "csv": {
+          "path": "results/experiment-profile/av1-paced.csv",
+          "sha256": "dcdef854ce6077133933c62dee80c7444729e222b736939291ef24e24f2e4c8e"
+        }
+      },
+      "replay_diagnostic": {
+        "status": "PASS",
+        "mode": "paced",
+        "codec": "av1",
+        "width": 1920,
+        "height": 1080,
+        "bit_depth": 8,
+        "fixture_sha256": "3d1967dd29917f4c042cd617a0795dd409e942fcd10e6f09396b297e6c4b6a05",
+        "requested_fps": 120,
+        "loops": 10,
+        "loop_mode": "continuous",
+        "warmup_frames": 120,
+        "inflight": 2,
+        "run_seconds": 9.993949084,
+        "offered": 1200,
+        "submitted": 1200,
+        "completed": 1200,
+        "displayed_outputs": 1200,
+        "failed_or_cancelled_or_dropped": 0,
+        "scheduler_drops": 0,
+        "rejected": 0,
+        "trace_overflow": 0,
+        "hardware_validated": 1,
+        "vt_submit_to_callback_ns": {
+          "count": 1080,
+          "max": 6462625,
+          "mean": 1693985.2212962962,
+          "median": 1641875,
+          "min": 730792,
+          "p95": 1869902.3999999997,
+          "p99": 6071808.11
+        },
+        "submission_call_ns": {
+          "count": 1080,
+          "max": 1965125,
+          "mean": 696372.8694444444,
+          "median": 708187.5,
+          "min": 123958,
+          "p95": 844015.2,
+          "p99": 929032.5
+        },
+        "thermal_state": 0
+      },
+      "tables": {
+        "thread-state": {
+          "export_path": "results/experiment-profile/av1-paced-thread-state.xml",
+          "export_sha256": "f7f7a185c6e8ccb650206d1fb66fd5613a757511c672a214527a0a8aa208400e",
+          "target_rows": 17433,
+          "trace_relative_start_range_ns": [
+            0,
+            9997963833
+          ],
+          "max_interval_end_ns": 10000000000,
+          "counts_or_state_duration_ns": {
+            "Unknown": 5023912749,
+            "Idle": 9833370913,
+            "Runnable": 55370569,
+            "Running": 392936251,
+            "Blocked": 14694082818,
+            "Interrupted": 7671287,
+            "Preempted": 1468871,
+            "Terminated": 9981574043
+          },
+          "threads": {
+            "15416885": {
+              "states_ns": {
+                "Unknown": 19029333,
+                "Idle": 4891880624,
+                "Runnable": 14409537,
+                "Running": 54674640,
+                "Interrupted": 1727368,
+                "Preempted": 843289,
+                "Blocked": 6584,
+                "Terminated": 5017428625
+              },
+              "runnable_intervals_ns": {
+                "count": 1221,
+                "sum": 14409537,
+                "median": 11500,
+                "p95": 16000,
+                "max": 338083
+              },
+              "samples": 0
+            },
+            "15416887": {
+              "states_ns": {
+                "Unknown": 19043958,
+                "Blocked": 9685008650,
+                "Runnable": 24644302,
+                "Running": 266469259,
+                "Interrupted": 2556749,
+                "Preempted": 240540,
+                "Terminated": 2036542
+              },
+              "runnable_intervals_ns": {
+                "count": 2437,
+                "sum": 24644302,
+                "median": 10959,
+                "p95": 14875,
+                "max": 27291
+              },
+              "samples": 0
+            },
+            "15416886": {
+              "states_ns": {
+                "Unknown": 4985839458,
+                "Idle": 4920859082,
+                "Runnable": 16212355,
+                "Running": 70762100,
+                "Interrupted": 3362253,
+                "Preempted": 385042,
+                "Blocked": 534543,
+                "Terminated": 2045167
+              },
+              "runnable_intervals_ns": {
+                "count": 1218,
+                "sum": 16212355,
+                "median": 12958.0,
+                "p95": 17208,
+                "max": 194791
+              },
+              "samples": 0
+            },
+            "15416898": {
+              "states_ns": {
+                "Running": 132250,
+                "Blocked": 5008531749,
+                "Runnable": 21251,
+                "Terminated": 4958027542
+              },
+              "runnable_intervals_ns": {
+                "count": 3,
+                "sum": 21251,
+                "median": 4834,
+                "p95": 4834,
+                "max": 11750
+              },
+              "samples": 0
+            },
+            "15416972": {
+              "states_ns": {
+                "Running": 898002,
+                "Interrupted": 24917,
+                "Idle": 20631207,
+                "Runnable": 83124,
+                "Blocked": 1292,
+                "Terminated": 2036167
+              },
+              "runnable_intervals_ns": {
+                "count": 5,
+                "sum": 83124,
+                "median": 10333,
+                "p95": 26583,
+                "max": 31750
+              },
+              "samples": 0
+            }
+          }
+        },
+        "time-profile": {
+          "export_path": "results/experiment-profile/av1-paced-time-profile.xml",
+          "export_sha256": "5d4cb114f896c2018010c85649099fd3817eb99e8951ea3a45cfb6839f277ba4",
+          "target_rows": 442,
+          "trace_relative_start_range_ns": [
+            40669666,
+            9978671375
+          ],
+          "max_interval_end_ns": null,
+          "counts_or_state_duration_ns": {
+            "samples": 442,
+            "weight_ns": 442000000
+          },
+          "threads": {
+            "15416887": {
+              "states_ns": {},
+              "runnable_intervals_ns": {
+                "count": 0
+              },
+              "samples": 304
+            },
+            "15416885": {
+              "states_ns": {},
+              "runnable_intervals_ns": {
+                "count": 0
+              },
+              "samples": 56
+            },
+            "15416886": {
+              "states_ns": {},
+              "runnable_intervals_ns": {
+                "count": 0
+              },
+              "samples": 80
+            },
+            "15416972": {
+              "states_ns": {},
+              "runnable_intervals_ns": {
+                "count": 0
+              },
+              "samples": 2
+            }
+          },
+          "sampling_interval_us_from_toc": 1000,
+          "running_samples_only": true,
+          "inclusive_stack_sample_counts": [
+            {
+              "frame": "_dispatch_worker_thread",
+              "samples": 304
+            },
+            {
+              "frame": "thread_start",
+              "samples": 304
+            },
+            {
+              "frame": "_pthread_start",
+              "samples": 304
+            },
+            {
+              "frame": "_dispatch_lane_serial_drain",
+              "samples": 226
+            },
+            {
+              "frame": "_dispatch_lane_invoke",
+              "samples": 226
+            },
+            {
+              "frame": "_dispatch_mach_invoke",
+              "samples": 224
+            },
+            {
+              "frame": "_dispatch_root_queue_drain",
+              "samples": 224
+            },
+            {
+              "frame": "_dispatch_mach_msg_invoke",
+              "samples": 201
+            },
+            {
+              "frame": "_dispatch_client_callout4",
+              "samples": 192
+            },
+            {
+              "frame": "_xpc_connection_mach_event",
+              "samples": 192
+            },
+            {
+              "frame": "_xpc_connection_call_event_handler",
+              "samples": 165
+            },
+            {
+              "frame": "0x194f5aac8",
+              "samples": 151
+            },
+            {
+              "frame": "start_wqthread",
+              "samples": 138
+            },
+            {
+              "frame": "qos_class_main",
+              "samples": 102
+            },
+            {
+              "frame": "0x194d47758",
+              "samples": 83
+            },
+            {
+              "frame": "_dispatch_set_priority_and_voucher_slow",
+              "samples": 64
+            },
+            {
+              "frame": "mach_msg2_trap",
+              "samples": 60
+            },
+            {
+              "frame": "mach_msg2_internal",
+              "samples": 60
+            },
+            {
+              "frame": "CVPixelBuffer::setAttachment(__CFString const*, void const*, CVAttachmentMode) (.cold.1)",
+              "samples": 56
+            },
+            {
+              "frame": "CVPixelBuffer::setAttachment(__CFString const*, void const*, CVAttachmentMode)",
+              "samples": 56
+            },
+            {
+              "frame": "IOSurfaceClientSetValue",
+              "samples": 54
+            },
+            {
+              "frame": "io_connect_method",
+              "samples": 52
+            },
+            {
+              "frame": "IOConnectCallMethod",
+              "samples": 52
+            },
+            {
+              "frame": "_kernelrpc_mach_port_deallocate_trap",
+              "samples": 47
+            },
+            {
+              "frame": "mach_port_deallocate",
+              "samples": 47
+            }
+          ],
+          "pixelbuffer_attachment_example_stack": [
+            "mach_msg2_trap",
+            "mach_msg2_internal",
+            "io_connect_method",
+            "IOConnectCallMethod",
+            "IOSurfaceClientSetValue",
+            "CVPixelBuffer::setAttachment(__CFString const*, void const*, CVAttachmentMode) (.cold.1)",
+            "CVPixelBuffer::setAttachment(__CFString const*, void const*, CVAttachmentMode)",
+            "0x194d47758",
+            "0x194f5aac8",
+            "_xpc_connection_call_event_handler",
+            "_xpc_connection_mach_event",
+            "_dispatch_client_callout4",
+            "_dispatch_mach_msg_invoke",
+            "_dispatch_lane_serial_drain",
+            "_dispatch_mach_invoke",
+            "_dispatch_lane_serial_drain",
+            "_dispatch_lane_invoke",
+            "_dispatch_root_queue_drain",
+            "_dispatch_worker_thread",
+            "_pthread_start",
+            "thread_start"
+          ],
+          "submit_api_stack_sample_count": 0
+        },
+        "syscall": {
+          "export_path": "results/experiment-profile/av1-paced-syscall.xml",
+          "export_sha256": "9466a5c5bef49e7d8f201fc5509dcd56483d3cdc23136282df477d69578e1dd5",
+          "target_rows": 26824,
+          "trace_relative_start_range_ns": [
+            19026916,
+            9978717291
+          ],
+          "max_interval_end_ns": 9997958000,
+          "counts_or_state_duration_ns": {
+            "semaphore_signal_trap": 2427,
+            "workq_kernreturn": 2447,
+            "bsdthread_ctl": 4867,
+            "mach_port_request_notification_trap": 5,
+            "kevent_qos": 2436,
+            "mach_port_deallocate_trap": 3655,
+            "semaphore_timedwait_trap": 2430,
+            "mach_port_mod_refs_trap": 3,
+            "mach_port_construct_trap": 7,
+            "kevent_id": 19,
+            "proc_info": 6,
+            "thread_get_special_reply_port": 3,
+            "mach_msg2_trap": 4852,
+            "mach_vm_map_trap": 1,
+            "mach_vm_protect_trap": 1,
+            "bsdthread_create": 1,
+            "thread_selfid": 2,
+            "pthread_sigmask": 1,
+            "psynch_cvsignal": 1201,
+            "sys_ulock_wait": 1,
+            "sys_ulock_wake": 8,
+            "sysctl": 4,
+            "host_self_trap": 5,
+            "iokit_user_client": 2418,
+            "psynch_cvbroad": 6,
+            "psynch_mutexdrop": 1,
+            "disable_threadsignal": 2,
+            "mach_port_destruct_trap": 5,
+            "mach_port_type_trap": 3,
+            "sys_ulock_wait2": 7
+          },
+          "threads": {
+            "15416885": {
+              "states_ns": {},
+              "runnable_intervals_ns": {
+                "count": 0
+              },
+              "samples": 0
+            },
+            "15416887": {
+              "states_ns": {},
+              "runnable_intervals_ns": {
+                "count": 0
+              },
+              "samples": 0
+            },
+            "15416898": {
+              "states_ns": {},
+              "runnable_intervals_ns": {
+                "count": 0
+              },
+              "samples": 0
+            },
+            "15416886": {
+              "states_ns": {},
+              "runnable_intervals_ns": {
+                "count": 0
+              },
+              "samples": 0
+            },
+            "15416972": {
+              "states_ns": {},
+              "runnable_intervals_ns": {
+                "count": 0
+              },
+              "samples": 0
+            }
+          }
+        }
+      }
+    },
+    "av1-throughput": {
+      "target": {
+        "name": "mav-replay",
+        "pid": 91984,
+        "arguments": "--fixture fixtures/generated/av1-sdr8-1920x1080p120-120/manifest.json --mode throughput --fps 120 --loops 150 --loop-mode continuous --warmup 120 --inflight 2 --queue-depth 32 --output results/experiment-profile/av1-throughput",
+        "return_exit_status": 0
+      },
+      "capture": {
+        "start-date": "2026-09-09T01:28:08.890-04:00",
+        "end-date": "2026-09-09T01:28:17.065-04:00",
+        "duration": "8.174446",
+        "end-reason": "Target app exited",
+        "instruments-version": "16.0 (17F113)",
+        "template-name": "System Trace",
+        "recording-mode": "Windowed (5 seconds)",
+        "time-limit": "12 seconds"
+      },
+      "sources": {
+        "toc": {
+          "path": "results/experiment-profile/av1-throughput-toc.xml",
+          "sha256": "818c9850026bf04d76b7302398aa944715946651ae36841678a3d05de4cc7510"
+        },
+        "result": {
+          "path": "results/experiment-profile/av1-throughput.json",
+          "sha256": "c011010b33cb73e0abcb4f037ce691fa4b154a6536a19a8321395334ae618567"
+        },
+        "csv": {
+          "path": "results/experiment-profile/av1-throughput.csv",
+          "sha256": "7f0bb76e6ce2a26570421387dd901c4de3cdcc322a0dbf64314450732404af0c"
+        }
+      },
+      "replay_diagnostic": {
+        "status": "PASS",
+        "mode": "throughput",
+        "codec": "av1",
+        "width": 1920,
+        "height": 1080,
+        "bit_depth": 8,
+        "fixture_sha256": "3d1967dd29917f4c042cd617a0795dd409e942fcd10e6f09396b297e6c4b6a05",
+        "requested_fps": 120,
+        "loops": 150,
+        "loop_mode": "continuous",
+        "warmup_frames": 120,
+        "inflight": 2,
+        "run_seconds": 7.43110325,
+        "offered": 18000,
+        "submitted": 18000,
+        "completed": 18000,
+        "displayed_outputs": 18000,
+        "failed_or_cancelled_or_dropped": 0,
+        "scheduler_drops": 0,
+        "rejected": 0,
+        "trace_overflow": 0,
+        "hardware_validated": 1,
+        "vt_submit_to_callback_ns": {
+          "count": 17880,
+          "max": 5314875,
+          "mean": 804064.9507270694,
+          "median": 662250,
+          "min": 542875,
+          "p95": 738179.4499999998,
+          "p99": 4974218.71
+        },
+        "submission_call_ns": {
+          "count": 17880,
+          "max": 357667,
+          "mean": 93231.12997762863,
+          "median": 84417,
+          "min": 73875,
+          "p95": 171710.09999999998,
+          "p99": 207558.63999999993
+        },
+        "thermal_state": 0
+      },
+      "tables": {
+        "thread-state": {
+          "export_path": "results/experiment-profile/av1-throughput-thread-state.xml",
+          "export_sha256": "e0351bac5afaaac9e9cc7edd830bf765b532e583df137dc0852f90997270f696",
+          "target_rows": 37,
+          "trace_relative_start_range_ns": [
+            8135173833,
+            8173307750
+          ],
+          "max_interval_end_ns": 8174445867,
+          "counts_or_state_duration_ns": {
+            "Running": 394291,
+            "Blocked": 101374,
+            "Runnable": 50085,
+            "Idle": 75545083,
+            "Interrupted": 2209,
+            "Preempted": 57792,
+            "Terminated": 2282401
+          },
+          "threads": {
+            "15419843": {
+              "states_ns": {
+                "Running": 139083,
+                "Blocked": 100457,
+                "Runnable": 44126,
+                "Idle": 37805000,
+                "Preempted": 38084,
+                "Interrupted": 1000,
+                "Terminated": 1144284
+              },
+              "runnable_intervals_ns": {
+                "count": 5,
+                "sum": 44126,
+                "median": 6125,
+                "p95": 9292,
+                "max": 17209
+              },
+              "samples": 0
+            },
+            "15419844": {
+              "states_ns": {
+                "Running": 255208,
+                "Interrupted": 1209,
+                "Preempted": 19708,
+                "Idle": 37740083,
+                "Runnable": 5959,
+                "Blocked": 917,
+                "Terminated": 1138117
+              },
+              "runnable_intervals_ns": {
+                "count": 1,
+                "sum": 5959,
+                "median": 5959,
+                "p95": 5959,
+                "max": 5959
+              },
+              "samples": 0
+            }
+          }
+        },
+        "time-profile": {
+          "export_path": "results/experiment-profile/av1-throughput-time-profile.xml",
+          "export_sha256": "1032776b11f2171897c8d491108034208d271f7384d2a14ba43f687d45b86cf3",
+          "target_rows": 0,
+          "trace_relative_start_range_ns": null,
+          "max_interval_end_ns": null,
+          "counts_or_state_duration_ns": {},
+          "threads": {},
+          "sampling_interval_us_from_toc": 1000,
+          "running_samples_only": true,
+          "inclusive_stack_sample_counts": [],
+          "pixelbuffer_attachment_example_stack": null,
+          "submit_api_stack_sample_count": 0
+        }
+      }
+    }
+  },
+  "clock_alignment": {
+    "established": false,
+    "csv_clock": "CLOCK_UPTIME_RAW",
+    "trace_clock": "xctrace relative timestamps",
+    "method": "No offset inferred from process start, wall dates, first samples or CSV timestamps. No frame-to-thread-state join attempted."
+  },
+  "findings": [
+    "Paced trace exposes an XPC/VideoToolbox pixel-buffer-receive dispatch worker with substantial blocked intervals between short running bursts. Blocked duration includes idle time and cannot be treated as time waiting for the hardware decode of a frame.",
+    "Target Runnable intervals are directly observable, but without per-frame alignment cannot explain the decode interval or attribute the cadence gap to priority/descheduling.",
+    "Paced sampled stacks include CoreMedia XPC pixel-buffer reconstruction, IOSurface, and CVPixelBuffer attachment work. These are concrete receive-path work candidates, not measured per-frame bottlenecks.",
+    "The throughput export contains no target CPU samples; compare neither sample shares nor scheduling coverage as if both captures were complete."
+  ],
+  "limits": [
+    "System Trace reports Windowed (5 seconds) for both captures; elapsed target duration does not guarantee continuous event or stack coverage. Actual exported target ranges and row counts are retained.",
+    "Time-profile is statistical 1ms sampling of running threads only. It does not measure hardware engine execution or blocked stacks continuously.",
+    "No main submit-side API stack appears in the sampled target frames. No new claim about inside-VT waits or causal priority behavior is supported.",
+    "Raw exports include system metadata locally; this evidence embeds only the target process and relevant library stack names, not a personal process inventory.",
+    "Instrumented replay timings are diagnostic only and must not be pooled into uninstrumented performance results. One capture per mode is not a repeated controlled comparison.",
+    "Thread-state duration totals are per-thread sums, not elapsed wall time; Unknown, Terminated and Idle intervals remain separate.",
+    "Syscall CPU/wait columns are not interpreted as an additive latency decomposition; some exported values exceed the enclosing call interval.",
+    "Throughput syscall export was omitted because absence of target CPU samples and bounded investigation time prevent a useful causal comparison."
+  ],
+  "recommendation": "Use an explicit shared-clock/signpost anchor around submit and callback, and verify target-thread/event coverage in a new diagnostic capture before assigning the cadence gap to scheduling or IPC; no production QoS change is justified by these captures."
+}

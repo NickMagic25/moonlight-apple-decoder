@@ -12,6 +12,21 @@ from environment import capture
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 
+def read_result(path):
+    """Validate the result fields used by the runner without altering evidence."""
+    result = json.loads(path.read_text())
+    if not isinstance(result, dict) or result.get('status') not in ('PASS', 'FAIL'):
+        raise ValueError('result must be a JSON object with PASS or FAIL status')
+    timing = result.get('vt_submit_to_callback_ns')
+    if timing is not None:
+        if not isinstance(timing, dict):
+            raise ValueError('vt_submit_to_callback_ns must be an object or null')
+        median = timing.get('median')
+        if median is not None and (type(median) not in (int, float) or not math.isfinite(median)):
+            raise ValueError('VT median must be a finite number or null')
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--phase', choices=['correctness', 'timed'], required=True)
@@ -44,7 +59,7 @@ def main():
     summary = dict(schema_version=1, phase=args.phase, seconds_requested=args.seconds,
                    repetitions=args.repetitions, inflight=2, queue_depth=32, warmup=120,
                    environments={str(ROOT): environment}, fixtures=fixtures, runs=[],
-                   ordering='Rotate tile-setting order per repetition; reverse even repetitions; serial runs.',
+                   ordering='Rotate tile-setting order per repetition; three repetitions place each setting once in each position; serial runs.',
                    interpretation='Fixed CQ/source/settings except tile columns; consult separate bitrate, PSNR and actual geometry evidence.')
     def save():
         (directory / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n')
@@ -52,8 +67,6 @@ def main():
     for case, settings in groups.items():
         for repetition in range(args.repetitions if args.phase == 'timed' else 1):
             order = settings[repetition % len(settings):] + settings[:repetition % len(settings)]
-            if repetition % 2:
-                order.reverse()
             for setting, fixture_id in order:
                 fixture = fixtures[fixture_id]
                 assert hashlib.sha256((ROOT / 'build/mav-replay').read_bytes()).hexdigest() == environment['binaries']['mav-replay']
@@ -67,16 +80,24 @@ def main():
                 print(f'START {case} {setting} rep{repetition+1}', flush=True)
                 with prefix.with_suffix('.log').open('w') as log:
                     result = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, cwd=ROOT)
-                record = json.loads(prefix.with_suffix('.json').read_text()) if prefix.with_suffix('.json').exists() else {}
-                summary['runs'].append(dict(case=case, setting=setting, fixture_id=fixture_id, repetition=repetition+1,
-                                            command=command, exit_code=result.returncode, result_file=str(prefix.with_suffix('.json'))))
+                run = dict(case=case, setting=setting, fixture_id=fixture_id, repetition=repetition+1,
+                           command=command, exit_code=result.returncode, result_file=str(prefix.with_suffix('.json')))
+                summary['runs'].append(run)
+                # Persist the completed invocation before touching potentially partial output.
+                save()
+                try:
+                    record = read_result(prefix.with_suffix('.json'))
+                except (OSError, UnicodeError, ValueError, OverflowError) as error:
+                    run['result_error'] = f'{type(error).__name__}: {error}'
+                    record = dict(status='MISSING_OR_INVALID_RESULT')
+                run['result_status'] = record['status']
                 save()
                 median = (record.get('vt_submit_to_callback_ns') or {}).get('median')
                 print(f"RESULT {case} {setting} {record.get('status', 'ERROR')} "
                       f"{record.get('displayed_outputs')}/{record.get('offered')} VT p50={median/1e6 if median else None} ms", flush=True)
-                if args.phase == 'correctness' and result.returncode:
+                if args.phase == 'correctness' and (result.returncode or run['result_status'] != 'PASS'):
                     raise RuntimeError(f'correctness failed: {prefix.with_suffix(".log")}')
-    return int(any(run['exit_code'] for run in summary['runs']))
+    return int(any(run['exit_code'] or run['result_status'] != 'PASS' for run in summary['runs']))
 
 
 if __name__ == '__main__':

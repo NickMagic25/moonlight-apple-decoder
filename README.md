@@ -55,6 +55,9 @@ session creation and actual hardware output are checked separately.
 
 [Latency optimization investigation](docs/optimization-investigation.md) compares
 paced and saturated decode and ranks the next experiments toward the 1 ms goal.
+The [isolated experiment results](docs/experiment-results.md) compare those
+branches, including 4K60 SDR/HDR correctness and hardware timing, with commands
+and evidence for choosing which changes to prioritize.
 
 ## Architecture and consumer compatibility
 
