@@ -26,19 +26,22 @@ The supplied configurations are:
 
 | File | Coverage |
 | --- | --- |
+| [`benchmarks/bitrate-matrix.yaml`](../benchmarks/bitrate-matrix.yaml) | All six resolution/frame-rate modes, AV1/HEVC, SDR/HDR10, and 50/100/250/350 Mbps encoder targets; 96 cases |
 | [`benchmarks/full-matrix.yaml`](../benchmarks/full-matrix.yaml) | 1080p60/120, 3440×1440p120/240, and 4K60/120; AV1/HEVC and SDR/HDR10; 24 cases |
 | [`benchmarks/full-matrix-q32.yaml`](../benchmarks/full-matrix-q32.yaml) | The two AV1 3440×1440p240 cases with additional startup arrival-age headroom |
 | [`benchmarks/smoke.yaml`](../benchmarks/smoke.yaml) | Small AV1/HEVC streams that exercise an explicit encoder bitrate target |
 | [`benchmarks/toolchain-confirmation.yaml`](../benchmarks/toolchain-confirmation.yaml) | Six balanced 20-second pairs for the three latency flags from the initial toolchain comparison |
 
 For example, this creates the six requested resolution/rate combinations with
-both codecs and dynamic ranges, using explicit stream bitrate targets:
+both codecs, both dynamic ranges, and each requested bitrate target: 96 cases.
+Bitrates use decimal megabits per second (Mbps).
 
 ```yaml
 schema_version: 1
 defaults:
   codec: [av1, hevc]
   dynamic_range: [sdr, hdr10]
+  bitrate_mbps: [50, 100, 250, 350]
   gop: 60
   decoder:
     inflight: 2
@@ -54,21 +57,19 @@ run:
   timeout_seconds: 180
 thresholds:
   decoded_fps_ratio: 0.99
+  bitrate_tolerance_pct: 20
   latency_relative_pct: 5.0
   latency_absolute_ms: 0.1
 cases:
   - name: 1080p
     resolution: 1920x1080
     fps: [60, 120]
-    bitrate_kbps: 20000
   - name: ultrawide
     resolution: 3440x1440
     fps: [120, 240]
-    bitrate_kbps: 60000
   - name: 4k
     resolution: 3840x2160
     fps: [60, 120]
-    bitrate_kbps: 80000
 ```
 
 Lists expand into a Cartesian product within each case. A case overrides
@@ -87,7 +88,7 @@ Content-sensitive changes need additional representative-content validation.
 | `fps` | Encoder timing and paced replay arrival rate |
 | `codec` | Native `av1` or `hevc` hardware path |
 | `dynamic_range` | `sdr` is 8-bit BT.709; `hdr10` is 10-bit BT.2020/PQ with HDR metadata |
-| `bitrate_kbps` | Encoder target in decimal kilobits/second; `null` retains the existing fixture generator's defaults |
+| `bitrate_mbps` | Encoder target in decimal megabits/second, from `0.001` to `1000` inclusive in `0.001` Mbps increments; `null` retains the existing fixture generator's defaults |
 | `gop` | Encoded random-access/keyframe interval in frames |
 | `frames` | Number of encoded access units in the fixture before looping |
 | `decoder.inflight` | Maximum admitted, unresolved access units |
@@ -96,11 +97,39 @@ Content-sensitive changes need additional representative-content validation.
 | `decoder.consumer_delay_ms` | Retention delay in the correctness sink; paced timing does not simulate a delayed renderer |
 | `decoder.jitter_us` and `seed` | Reproducible synthetic arrival jitter and its seed |
 
-Requested bitrate and measured payload bitrate are separate evidence fields.
-Rate control targets a long-term average and does not guarantee an exact rate
-for every short synthetic fixture. Changing bitrate regenerates the stream;
-baseline and candidate always receive the same saved bytes. The full toolchain
-matrix keeps `bitrate_kbps: null` to retain the earlier test's encoding policy.
+Use numeric YAML values, for example `bitrate_mbps: 50` or
+`bitrate_mbps: 50.125`; values with unit suffixes are not accepted. One Mbps is
+1,000,000 bits/second. The native fixture generator uses `--bitrate-mbps` with
+the same units and precision. The old `bitrate_kbps` YAML key is rejected so an
+old value cannot silently become a target 1,000 times larger.
+Previously captured kbps fixture manifests and `plan.json` archives remain
+readable. Analysis converts their explicitly labeled units in memory and leaves
+the archived inputs unchanged.
+
+Requested bitrate and measured payload bitrate are separate evidence fields,
+both expressed in Mbps. AV1 CBR and capped HEVC average-bitrate control target a
+stream rate; neither guarantees that a short synthetic fixture achieves
+the requested bitrate. A case labeled 350 Mbps means the encoder was asked for
+350 Mbps, and its measured rate must be checked before claiming that the
+decoder sustained that input rate. Changing bitrate regenerates the stream;
+baseline and candidate always receive the same saved bytes. The historical
+full toolchain matrix keeps `bitrate_mbps: null` to retain the earlier test's
+encoding policy. Fixtures with an explicit bitrate use deterministic textured
+luma while preserving the frame-ID strip checked by the correctness sink; the
+texture makes these streams less compressible than the legacy pattern. This
+is still synthetic content and does not establish behavior for every game.
+The [fixture documentation](fixtures.md) records the encoder buffers, caps,
+content profile, and unchanged legacy encoder policy.
+
+`thresholds.bitrate_tolerance_pct` sets the allowed deviation of measured payload
+bitrate from the requested target. It accepts `0` through `100` and defaults to
+`20`, meaning the rate must be within ±20% of the target. A 350 Mbps case must
+therefore measure between 280 and 420 Mbps to establish bitrate coverage under
+the default gate. A case whose decode checks pass but whose encoded rate falls
+outside that range is `INCONCLUSIVE`, and the overall comparison cannot pass.
+The reports preserve the successful decode measurements separately from the
+failed bitrate-coverage gate. A `null` bitrate target skips this gate because no
+specific encoded rate was requested.
 
 An optional `fixture` path names an existing manifest relative to the YAML file.
 Its metadata must match the declared stream settings; it is validated and copied
@@ -148,14 +177,14 @@ Validate YAML without requiring binaries or hardware:
 
 ```sh
 .local/benchmark-venv/bin/python scripts/compare-decoders.py \
-  --config benchmarks/full-matrix.yaml --dry-run
+  --config benchmarks/bitrate-matrix.yaml --dry-run
 ```
 
 Run a paired comparison, substituting the independent baseline build path:
 
 ```sh
 .local/benchmark-venv/bin/python scripts/compare-decoders.py \
-  --config benchmarks/full-matrix.yaml \
+  --config benchmarks/bitrate-matrix.yaml \
   --candidate-build build-candidate \
   --baseline-build /path/to/baseline-build \
   --fixture-build build-candidate \
@@ -174,13 +203,25 @@ Each new run uses a fresh results directory so previous evidence survives.
 is not resumable run state, so use another results directory for a timed run.
 `--analyze-only --results-dir results/comparison-001` rebuilds reports from an
 existing results directory. The normal command handles preparation and
-measurement in one invocation. The entire
-24-case comparison with three 10-second repetitions per build spends about
-24 minutes in paced replay, in addition to preparation and correctness checks.
+measurement in one invocation. The 96-case bitrate matrix uses three 10-second
+repetitions per build: 576 timed trials and about 96 minutes of paced replay,
+in addition to preparation and correctness checks. The historical 24-case
+matrix takes about 24 minutes of paced replay with the same settings.
 
 ## Reading the evidence
 
-`results.json`, `report.md`, and `junit.xml` summarize the same recorded runs.
+Every normal comparison writes both human-readable `report.md` and
+machine-readable `results.json` into the selected `--results-dir`, including
+comparisons that complete with failed or incomplete cases. `junit.xml` provides
+CI test results from the same recorded runs. The Markdown report includes each
+case's requested and measured bitrate, bitrate-coverage result, status, and
+decode-latency comparison; the JSON retains the structured settings,
+measurements, and comparison gates, including bitrate deviation and the applied
+tolerance.
+`--dry-run` only validates and expands configuration, and `--prepare-only`
+prepares fixtures; neither produces a timed comparison report. Invalid command
+arguments or configuration fail before a comparison starts.
+
 `plan.json` records the expanded settings and fixture identity; per-build
 environment records capture compiler/SDK, build configuration, source and
 executable identity, model, OS, and power/thermal observations. Raw native JSON,
@@ -189,6 +230,8 @@ reanalysis. Archive the whole results directory to preserve these relationships.
 
 The report separates these questions:
 
+* Did the encoded payload rate meet the requested bitrate within the configured
+  tolerance?
 * Did correctness and hardware validation pass, with complete output accounting
   and no rejected frames, scheduler drops, resets, or failed output?
 * Did decoded throughput meet the configured fraction of the requested rate?
@@ -211,8 +254,9 @@ and 5% of baseline before its latency gate trips.
 The case statuses are `PASS`, `REGRESSION`, `BASELINE_FAILURE`, `INCONCLUSIVE`,
 `INCOMPLETE`, and candidate-only `FAIL`. A baseline failure prevents a clean
 regression conclusion even when the candidate passes. Missing or changed raw
-evidence cannot produce a pass; non-nominal or unavailable thermal state makes
-otherwise successful timed results inconclusive. The overall result passes
+evidence cannot produce a pass; non-nominal or unavailable thermal state, or
+encoded bitrate outside the configured target tolerance, makes otherwise
+successful timed results inconclusive. The overall result passes
 only when every case passes. Any non-pass result exits with status 1;
 configuration/argument errors exit with status 2, so CI does not silently ignore
 an existing baseline failure or incomplete comparison.
@@ -270,11 +314,15 @@ The workflow validates all YAML examples and runs the Python framework tests,
 checks out the two exact commits, builds and tests them sequentially with the
 same Release options, verifies tiny SDR/HDR fixture
 generation with explicit bitrate targets and preserved import metadata, then
-calls the local runner. All encoding finishes before timed comparison. A
+calls the local runner. The default configuration is the 96-case bitrate matrix;
+the job allows up to six hours for builds, fixture generation, correctness
+checks, and the 96 minutes of paired timed replay. All encoding finishes before
+timed comparison. A
 workflow-wide concurrency group prevents overlapping jobs from this workflow;
 keep unrelated workloads off the same device as well. Results, fixture bytes,
 JUnit output, build logs, CMake caches, and compile commands upload even when
-the comparison fails. The Markdown report is also copied into the job summary.
+the comparison fails. Both `report.md` and `results.json` are included in the
+artifact, and the Markdown report is also copied into the job summary.
 Artifacts are retained for 30 days; download or archive evidence that must last
 longer. A missing runner or unsupported hardware leaves this job unable to
 establish performance; portable checks cannot substitute for it.

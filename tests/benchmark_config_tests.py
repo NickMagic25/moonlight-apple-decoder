@@ -2,6 +2,7 @@
 """Portable tests of benchmark YAML semantics, limits and rejection behavior."""
 
 import copy
+import itertools
 import pathlib
 import sys
 import tempfile
@@ -47,7 +48,7 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(result["thresholds"], benchmark_config.THRESHOLD_DEFAULTS)
         self.assertEqual(result["cases"], [{
             "name": "1920x1080p60-av1-sdr-legacy", "width": 1920, "height": 1080,
-            "fps": 60, "codec": "av1", "dynamic_range": "sdr", "bitrate_kbps": None,
+            "fps": 60, "codec": "av1", "dynamic_range": "sdr", "bitrate_mbps": None,
             "gop": 60, "frames": 120, "fixture": None,
             "decoder": benchmark_config.DECODER_DEFAULTS,
         }])
@@ -64,22 +65,67 @@ class ConfigTests(unittest.TestCase):
             self.assertEqual({(c["codec"], c["dynamic_range"]) for c in cases}, {
                 ("av1", "sdr"), ("av1", "hdr10"), ("hevc", "sdr"), ("hevc", "hdr10"),
             })
-            self.assertTrue(all(c["frames"] == max(120, fps) and c["bitrate_kbps"] is None for c in cases))
+            self.assertTrue(all(c["frames"] == max(120, fps) and c["bitrate_mbps"] is None for c in cases))
 
     def test_small_examples_preserve_target_bitrate_and_queue_policy(self):
         smoke = benchmark_config.load_config(ROOT / "benchmarks/smoke.yaml")
         self.assertEqual(len(smoke["cases"]), 2)
         self.assertEqual({c["codec"] for c in smoke["cases"]}, {"av1", "hevc"})
-        self.assertTrue(all(c["bitrate_kbps"] == 1000 for c in smoke["cases"]))
+        self.assertTrue(all(c["bitrate_mbps"] == 1.0 for c in smoke["cases"]))
         followup = benchmark_config.load_config(ROOT / "benchmarks/full-matrix-q32.yaml")
         self.assertEqual(len(followup["cases"]), 2)
         self.assertTrue(all(c["decoder"]["queue_depth"] == 32 for c in followup["cases"]))
         self.assertTrue(all(c["codec"] == "av1" and c["fps"] == 240 for c in followup["cases"]))
 
+    def test_bitrate_matrix_covers_every_mode_codec_range_and_requested_rate(self):
+        result = benchmark_config.load_config(ROOT / "benchmarks/bitrate-matrix.yaml")
+        modes = {
+            (1920, 1080, 60), (1920, 1080, 120), (3440, 1440, 120),
+            (3440, 1440, 240), (3840, 2160, 60), (3840, 2160, 120),
+        }
+        expected = {(width, height, fps, codec, dynamic_range, bitrate)
+                    for (width, height, fps), codec, dynamic_range, bitrate in itertools.product(
+                        modes, ("av1", "hevc"), ("sdr", "hdr10"), (50, 100, 250, 350))}
+        actual = {(c["width"], c["height"], c["fps"], c["codec"],
+                   c["dynamic_range"], c["bitrate_mbps"]) for c in result["cases"]}
+        self.assertEqual(len(result["cases"]), 96)
+        self.assertEqual(actual, expected)
+        self.assertEqual(result["run"], {"seconds": 10, "repetitions": 3,
+                                         "warmup_frames": 120, "timeout_seconds": 180})
+        self.assertEqual(result["thresholds"]["bitrate_tolerance_pct"], 20.0)
+        self.assertTrue(all(c["decoder"]["queue_depth"] == 16 for c in result["cases"]))
+
+    def test_mbps_normalization_preserves_exact_thousandths_and_canonical_names(self):
+        for value, label in ((0.001, "0.001"), (0.029, "0.029"), (1.001, "1.001"),
+                             (50, "50"), (50.0, "50"), (50.125, "50.125"),
+                             (999.999, "999.999"), (1000, "1000")):
+            with self.subTest(value=value):
+                data = copy.deepcopy(BASE)
+                data["cases"] = [{"bitrate_mbps": value}]
+                case = self.load(data)["cases"][0]
+                self.assertIs(type(case["bitrate_mbps"]), float)
+                self.assertEqual(case["bitrate_mbps"], value)
+                self.assertNotIn("bitrate_kbps", case)
+                self.assertEqual(case["name"], "1920x1080p60-av1-sdr-{}mbps".format(label))
+        data["cases"] = [{"bitrate_mbps": [50, 50.0]}]
+        self.reject(data, message="duplicate expanded case name")
+        data["cases"] = [{"bitrate_mbps": 50.00000000000001}]
+        self.reject(data, message="0.001 Mbps precision")
+
+    def test_legacy_kbps_key_has_actionable_migration_error(self):
+        for location in ("defaults", "cases"):
+            data = copy.deepcopy(BASE)
+            target = data["defaults"] if location == "defaults" else data["cases"][0]
+            target["bitrate_kbps"] = 50000
+            self.reject(data, message="bitrate_kbps is unsupported; use bitrate_mbps.*divide.*1000")
+            # Supplying both units is also an error, rather than silently ignoring one.
+            target["bitrate_mbps"] = 50
+            self.reject(data, message="bitrate_kbps is unsupported")
+
     def test_cartesian_axes_and_decoder_merge_do_not_share_mutable_state(self):
         data = copy.deepcopy(BASE)
         data["defaults"].update({"fps": [60, 120], "codec": ["hevc", "av1"],
-                                "dynamic_range": ["sdr", "hdr10"], "bitrate_kbps": [None, 10000],
+                                "dynamic_range": ["sdr", "hdr10"], "bitrate_mbps": [None, 10],
                                 "decoder": {"inflight": 3, "queue_depth": 16}})
         data["cases"] = [{"name": "desk", "resolution": "3440x1440", "decoder": {"queue_depth": 32}}]
         result = self.load(data)
@@ -138,7 +184,7 @@ class ConfigTests(unittest.TestCase):
     def test_invalid_numeric_stream_and_decoder_values(self):
         fields = {
             "fps": [True, 60.0, "60", 0, 1001, float("nan")],
-            "bitrate_kbps": [True, 0, -1, 1000001, 1000.1, "10000"],
+            "bitrate_mbps": [True, 0, -1, 0.0009, 1000.001, 1.0001, "50", float("nan"), float("inf"), 10 ** 1000],
             "frames": [True, 1, 100001], "gop": [True, 0, 100001],
             "codec": ["h264", "AV1", True], "dynamic_range": ["dolby_vision", "hdr", True],
         }
@@ -180,6 +226,7 @@ class ConfigTests(unittest.TestCase):
             "decoded_fps_ratio": [True, 0, 1.01, float("nan"), "0.99"],
             "latency_relative_pct": [True, -1, 1001, 10 ** 1000, float("inf")],
             "latency_absolute_ms": [True, -1, 1001, float("-inf")],
+            "bitrate_tolerance_pct": [True, -1, 100.001, "20", float("nan"), float("inf"), 10 ** 1000],
         }.items():
             for value in values:
                 with self.subTest(field=field, value=value):
@@ -189,6 +236,16 @@ class ConfigTests(unittest.TestCase):
         data = copy.deepcopy(BASE)
         data["thresholds"] = {"latency_relative_pct": 0, "latency_absolute_ms": 0}
         self.assertEqual(self.load(data)["thresholds"]["latency_relative_pct"], 0.0)
+
+    def test_bitrate_tolerance_default_and_inclusive_numeric_bounds(self):
+        self.assertEqual(self.load(BASE)["thresholds"]["bitrate_tolerance_pct"], 20.0)
+        for tolerance in (0, 0.001, 20, 99.999, 100):
+            with self.subTest(tolerance=tolerance):
+                data = copy.deepcopy(BASE)
+                data["thresholds"] = {"bitrate_tolerance_pct": tolerance}
+                normalized = self.load(data)["thresholds"]["bitrate_tolerance_pct"]
+                self.assertIs(type(normalized), float)
+                self.assertEqual(normalized, tolerance)
 
     def test_native_loop_limit_and_rounded_duration_are_validated(self):
         data = copy.deepcopy(BASE)

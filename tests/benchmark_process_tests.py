@@ -102,7 +102,7 @@ class EncoderProcessTests(unittest.TestCase):
                 out.mkdir()
                 (build / 'mav-fixture').write_bytes(b'fixture-generator-identity')
                 case = dict(name='test', fixture=None, width=256, height=144, fps=30,
-                            frames=12, gop=6, bitrate_kbps=1000, codec='hevc', dynamic_range='sdr')
+                            frames=12, gop=6, bitrate_mbps=1, codec='hevc', dynamic_range='sdr')
 
                 def fail(command, log, timeout):
                     target = pathlib.Path(command[command.index('--output') + 1])

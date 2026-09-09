@@ -12,7 +12,7 @@ on:
       configuration:
         description: Reviewed YAML path in the selected candidate branch
         required: true
-        default: benchmarks/full-matrix.yaml
+        default: benchmarks/bitrate-matrix.yaml
         type: string
 
 permissions:
@@ -27,7 +27,7 @@ jobs:
   compare:
     name: Paired physical VideoToolbox comparison
     runs-on: [self-hosted, macOS, ARM64, moonlight-video]
-    timeout-minutes: 120
+    timeout-minutes: 360
     env:
       BASELINE_SHA: ${{ inputs.baseline_sha }}
       CONFIGURATION: ${{ inputs.configuration }}

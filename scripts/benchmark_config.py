@@ -9,6 +9,7 @@ import itertools
 import math
 import pathlib
 import re
+from decimal import Decimal
 
 try:
     import yaml
@@ -21,10 +22,10 @@ except ImportError as error:
 
 MAX_CONFIG_BYTES = 1024 * 1024
 MAX_CASES = 256
-EXPANDABLE = ("fps", "codec", "dynamic_range", "bitrate_kbps")
+EXPANDABLE = ("fps", "codec", "dynamic_range", "bitrate_mbps")
 STREAM_KEYS = {
     "resolution", "width", "height", "fps", "codec", "dynamic_range",
-    "bitrate_kbps", "gop", "frames", "fixture", "decoder",
+    "bitrate_mbps", "gop", "frames", "fixture", "decoder",
 }
 DECODER_DEFAULTS = {
     "inflight": 2, "queue_depth": 16, "power": -1,
@@ -36,7 +37,7 @@ RUN_DEFAULTS = {
 }
 THRESHOLD_DEFAULTS = {
     "decoded_fps_ratio": 0.99, "latency_relative_pct": 5.0,
-    "latency_absolute_ms": 0.1,
+    "latency_absolute_ms": 0.1, "bitrate_tolerance_pct": 20.0,
 }
 
 
@@ -93,8 +94,20 @@ def _choice(value, location, options):
     return value
 
 
+def _bitrate_mbps(value, location):
+    """Keep the public unit in Mbps without rounding encoder kbps targets."""
+    _number(value, location, 0.001, 1000)
+    kbps = Decimal(str(value)) * 1000
+    if kbps != kbps.to_integral_value():
+        raise ConfigError(location + " must have at most 0.001 Mbps precision (1 kbps)")
+    return int(kbps) / 1000.0
+
+
 def _stream_mapping(value, location, allow_name=False):
     """Normalize resolution before merging, so case dimensions override defaults."""
+    if isinstance(value, dict) and "bitrate_kbps" in value:
+        raise ConfigError(location + ".bitrate_kbps is unsupported; use bitrate_mbps in decimal "
+                          "megabits per second (divide the old kbps value by 1000)")
     result = dict(_mapping(value, location, STREAM_KEYS | ({"name"} if allow_name else set())))
     if "resolution" in result:
         if "width" in result or "height" in result:
@@ -138,9 +151,9 @@ def _one_case(value, location, directory):
     result["fps"] = _integer(value["fps"], location + ".fps", 1, 1000)
     result["codec"] = _choice(value["codec"], location + ".codec", ("av1", "hevc"))
     result["dynamic_range"] = _choice(value["dynamic_range"], location + ".dynamic_range", ("sdr", "hdr10"))
-    bitrate = value.get("bitrate_kbps")
-    result["bitrate_kbps"] = None if bitrate is None else _integer(
-        bitrate, location + ".bitrate_kbps", 1, 1000000)
+    bitrate = value.get("bitrate_mbps")
+    result["bitrate_mbps"] = None if bitrate is None else _bitrate_mbps(
+        bitrate, location + ".bitrate_mbps")
     result["gop"] = _integer(value.get("gop", 60), location + ".gop", 1, 100000)
     result["frames"] = _integer(value.get("frames", max(120, result["fps"])), location + ".frames", 2, 100000)
     fixture = value.get("fixture")
@@ -156,7 +169,7 @@ def _one_case(value, location, directory):
     if "name" in value and (not isinstance(prefix, str) or not re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}", prefix)):
         raise ConfigError(location + ".name must contain 1 to 64 letters, digits, underscores or hyphens and start with a letter or digit")
     generated = "{width}x{height}p{fps}-{codec}-{dynamic_range}-{bitrate}".format(
-        bitrate="legacy" if bitrate is None else "{}kbps".format(bitrate), **result)
+        bitrate="legacy" if bitrate is None else "{:g}mbps".format(result["bitrate_mbps"]), **result)
     result["name"] = "{}-{}".format(prefix, generated) if prefix else generated
     return result
 
@@ -202,7 +215,7 @@ def load_config(path):
     thresholds = dict(THRESHOLD_DEFAULTS)
     thresholds.update(_mapping(document.get("thresholds", {}), "thresholds", THRESHOLD_DEFAULTS))
     for key, bounds in {"decoded_fps_ratio": (0.01, 1.0), "latency_relative_pct": (0.0, 1000.0),
-                        "latency_absolute_ms": (0.0, 1000.0)}.items():
+                        "latency_absolute_ms": (0.0, 1000.0), "bitrate_tolerance_pct": (0.0, 100.0)}.items():
         thresholds[key] = _number(thresholds[key], "thresholds." + key, *bounds)
     case_inputs = document.get("cases")
     if not isinstance(case_inputs, list) or not 1 <= len(case_inputs) <= MAX_CASES:
@@ -219,7 +232,7 @@ def load_config(path):
         axes = []
         for key in EXPANDABLE:
             if key not in merged:
-                if key == "bitrate_kbps":
+                if key == "bitrate_mbps":
                     merged[key] = None
                 else:
                     raise ConfigError("{} is missing required setting: {}".format(location, key))

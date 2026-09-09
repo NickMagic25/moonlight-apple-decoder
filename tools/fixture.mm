@@ -14,6 +14,16 @@
 #include <crt_externs.h>
 
 using namespace fixture;
+// Explicit bitrate workloads need enough changing detail for rate control to
+// spend the requested bits. Keep the legacy frame-ID strip exactly intact so
+// both old and new replay binaries retain their independent identity check.
+static uint16_t source_luma(uint32_t x,uint32_t y,uint32_t w,uint32_t h,uint64_t frame,uint32_t depth,bool bitrate_workload){
+    if(!bitrate_workload||y<h/8)return luma(x,y,w,h,frame,depth);
+    // Fixed unsigned arithmetic gives the same source on every platform/run.
+    uint32_t value=0x6d617631u^(x*0x9e3779b9u)^(y*0x85ebca6bu)^(uint32_t(frame)*0xc2b2ae35u)^uint32_t(frame>>32);
+    value^=value>>16;value*=0x7feb352du;value^=value>>15;value*=0x846ca68bu;value^=value>>16;
+    return depth==10?uint16_t(64+value%877):uint16_t(16+value%220);
+}
 struct Encoded {uint64_t id;std::vector<uint8_t> data;};
 struct EncodeState {std::mutex lock;std::vector<Encoded> units;std::string error;};
 static void output(void* context,void* frame,OSStatus status,VTEncodeInfoFlags flags,CMSampleBufferRef sample){
@@ -35,7 +45,7 @@ static void output(void* context,void* frame,OSStatus status,VTEncodeInfoFlags f
     s.units.push_back(std::move(e));(void)flags;
 }
 static void property(VTCompressionSessionRef s,CFStringRef k,CFTypeRef v){auto e=VTSessionSetProperty(s,k,v);if(e)throw std::runtime_error("VT encoder property "+utf((__bridge NSString*)k)+" rejected: "+std::to_string(e));}
-static std::vector<Encoded> hevc(uint32_t w,uint32_t h,uint32_t depth,uint32_t fps,uint32_t frames,uint32_t gop,uint64_t bitrate){
+static std::vector<Encoded> hevc(uint32_t w,uint32_t h,uint32_t depth,uint32_t fps,uint32_t frames,uint32_t gop,uint64_t bitrate,bool bitrate_workload){
     EncodeState state;VTCompressionSessionRef session=nullptr;
     NSDictionary* spec=@{(__bridge NSString*)kVTVideoEncoderSpecification_RequireHardwareAcceleratedVideoEncoder:@YES};
     auto status=VTCompressionSessionCreate(nullptr,w,h,kCMVideoCodecType_HEVC,(__bridge CFDictionaryRef)spec,nullptr,nullptr,output,&state,&session);
@@ -45,6 +55,7 @@ static std::vector<Encoded> hevc(uint32_t w,uint32_t h,uint32_t depth,uint32_t f
         property(session,kVTCompressionPropertyKey_RealTime,kCFBooleanTrue);property(session,kVTCompressionPropertyKey_AllowFrameReordering,kCFBooleanFalse);
         property(session,kVTCompressionPropertyKey_ExpectedFrameRate,(__bridge CFNumberRef)@(fps));property(session,kVTCompressionPropertyKey_MaxKeyFrameInterval,(__bridge CFNumberRef)@(gop));
         property(session,kVTCompressionPropertyKey_AverageBitRate,(__bridge CFNumberRef)@(bitrate));
+        if(bitrate_workload)property(session,kVTCompressionPropertyKey_DataRateLimits,(__bridge CFArrayRef)@[@(bitrate*3/20),@1]);
         property(session,kVTCompressionPropertyKey_ColorPrimaries,depth==10?kCVImageBufferColorPrimaries_ITU_R_2020:kCVImageBufferColorPrimaries_ITU_R_709_2);
         property(session,kVTCompressionPropertyKey_TransferFunction,depth==10?kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ:kCVImageBufferTransferFunction_ITU_R_709_2);
         property(session,kVTCompressionPropertyKey_YCbCrMatrix,depth==10?kCVImageBufferYCbCrMatrix_ITU_R_2020:kCVImageBufferYCbCrMatrix_ITU_R_709_2);
@@ -56,7 +67,7 @@ static std::vector<Encoded> hevc(uint32_t w,uint32_t h,uint32_t depth,uint32_t f
             if(status)throw std::runtime_error("source pixel buffer "+std::to_string(status));
             CVPixelBufferLockBaseAddress(pixel,0);
             auto p=(uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixel,0);auto stride=CVPixelBufferGetBytesPerRowOfPlane(pixel,0);
-            for(uint32_t y=0;y<h;++y)for(uint32_t x=0;x<w;++x){auto v=luma(x,y,w,h,f,depth);if(depth==10)reinterpret_cast<uint16_t*>(p+y*stride)[x]=v<<6;else p[y*stride+x]=uint8_t(v);}
+            for(uint32_t y=0;y<h;++y)for(uint32_t x=0;x<w;++x){auto v=source_luma(x,y,w,h,f,depth,bitrate_workload);if(depth==10)reinterpret_cast<uint16_t*>(p+y*stride)[x]=v<<6;else p[y*stride+x]=uint8_t(v);}
             p=(uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixel,1);stride=CVPixelBufferGetBytesPerRowOfPlane(pixel,1);
             for(uint32_t y=0;y<h/2;++y)for(uint32_t x=0;x<w;++x){if(depth==10)reinterpret_cast<uint16_t*>(p+y*stride)[x]=uint16_t(512)<<6;else p[y*stride+x]=128;}
             CVPixelBufferUnlockBaseAddress(pixel,0);
@@ -118,10 +129,14 @@ static std::vector<Encoded> ivf(const std::string& path,uint32_t w,uint32_t h){
 static std::vector<Encoded> av1(const std::string& out,const std::string& encoder,uint32_t w,uint32_t h,uint32_t depth,uint32_t fps,uint32_t frames,uint32_t gop,uint32_t bitrate,std::string& version,NSArray<NSString*>* __strong& arguments){
     std::string raw=out+"/source.yuv",encoded=out+"/encoded.ivf";
     {std::ofstream file(raw,std::ios::binary);std::vector<uint8_t> row(w*(depth==10?2:1));
-        for(uint32_t f=0;f<frames;++f){for(uint32_t y=0;y<h;++y){for(uint32_t x=0;x<w;++x){auto v=luma(x,y,w,h,f,depth);if(depth==10){row[x*2]=v;row[x*2+1]=v>>8;}else row[x]=v;}file.write((char*)row.data(),row.size());}
+        for(uint32_t f=0;f<frames;++f){for(uint32_t y=0;y<h;++y){for(uint32_t x=0;x<w;++x){auto v=source_luma(x,y,w,h,f,depth,bitrate!=0);if(depth==10){row[x*2]=v;row[x*2+1]=v>>8;}else row[x]=v;}file.write((char*)row.data(),row.size());}
         std::fill(row.begin(),row.end(),128);if(depth==10)for(size_t x=0;x<row.size();x+=2){row[x]=0;row[x+1]=2;}
         for(uint32_t y=0;y<h/2;++y)file.write((char*)row.data(),row.size());}if(!file)throw std::runtime_error("source write failed");}
-    NSMutableArray<NSString*>* args=[NSMutableArray arrayWithArray:@[@"--codec=av1",@"--ivf",@"--i420",@"--passes=1",@"--usage=0",@"--cpu-used=6",@"--enable-tpl-model=0",@"--threads=6",@"--test-decode=fatal",@"--row-mt=1",@"--tile-columns=1",@"--lag-in-frames=0",@"--enable-keyframe-filtering=0",@"--auto-alt-ref=0",ns(bitrate?"--end-usage=vbr":"--end-usage=q"),ns(bitrate?"--target-bitrate="+std::to_string(bitrate):"--cq-level=12"),@"--disable-warning-prompt",ns("--width="+std::to_string(w)),ns("--height="+std::to_string(h)),ns("--fps="+std::to_string(fps)+"/1"),ns("--limit="+std::to_string(frames)),ns("--bit-depth="+std::to_string(depth)),ns("--input-bit-depth="+std::to_string(depth)),ns("--kf-max-dist="+std::to_string(gop)),ns("--kf-min-dist="+std::to_string(gop)),ns("--color-primaries="+std::to_string(depth==10?9:1)),ns("--transfer-characteristics="+std::to_string(depth==10?16:1)),ns("--matrix-coefficients="+std::to_string(depth==10?9:1)),ns("--output="+encoded),ns(raw)]];
+    NSMutableArray<NSString*>* args=[NSMutableArray arrayWithArray:@[@"--codec=av1",@"--ivf",@"--i420",@"--passes=1",ns(bitrate?"--usage=1":"--usage=0"),ns(bitrate?"--cpu-used=8":"--cpu-used=6"),@"--enable-tpl-model=0",@"--threads=6",@"--test-decode=fatal",@"--row-mt=1",@"--tile-columns=1",@"--lag-in-frames=0",@"--enable-keyframe-filtering=0",@"--auto-alt-ref=0",ns(bitrate?"--end-usage=cbr":"--end-usage=q"),ns(bitrate?"--target-bitrate="+std::to_string(bitrate):"--cq-level=12"),@"--disable-warning-prompt",ns("--width="+std::to_string(w)),ns("--height="+std::to_string(h)),ns("--fps="+std::to_string(fps)+"/1"),ns("--limit="+std::to_string(frames)),ns("--bit-depth="+std::to_string(depth)),ns("--input-bit-depth="+std::to_string(depth)),ns("--kf-max-dist="+std::to_string(gop)),ns("--kf-min-dist="+std::to_string(gop)),ns("--color-primaries="+std::to_string(depth==10?9:1)),ns("--transfer-characteristics="+std::to_string(depth==10?16:1)),ns("--matrix-coefficients="+std::to_string(depth==10?9:1)),ns("--output="+encoded),ns(raw)]];
+    if(bitrate){
+        NSArray<NSString*>* rateArguments=@[@"--max-intra-rate=300",@"--max-inter-rate=300",@"--undershoot-pct=10",@"--overshoot-pct=10",@"--buf-sz=1000",@"--buf-initial-sz=500",@"--buf-optimal-sz=500",@"--drop-frame=0"];
+        for(NSString* argument in rateArguments)[args insertObject:argument atIndex:args.count-1];
+    }
     arguments=args;
     auto log=run(ns(encoder),args);auto help=run(ns(encoder),@[@"--help"]);auto at=help.find("AOMedia Project AV1 Encoder");version=at==std::string::npos?"AOM encoder version unavailable":help.substr(at,help.find('\n',at)-at);write(out+"/encoder.log",{log.begin(),log.end()});json(out+"/encoder-arguments.json",args);
     auto units=ivf(encoded,w,h);if(units.size()!=frames)throw std::runtime_error("encoder did not produce one low-delay temporal unit per input frame");
@@ -144,18 +159,18 @@ static void save(const Options& options,std::vector<Encoded>& units,const std::s
     if(units.size()>2&&!inters&&options.gop!=1)throw std::runtime_error("fixture has no reference-dependent inter frames");
     if(depth==10&&(!final.color.mastering_valid||!final.color.content_light_valid))throw std::runtime_error("HDR fixture missing mastering/content light metadata");
     write(dir+"/payload.bin",payload);
-    id requestedBitrate=options.bitrate_kbps?(id)@(*options.bitrate_kbps):(id)[NSNull null];
+    id requestedBitrate=options.bitrate_kbps?(id)@(double(*options.bitrate_kbps)/1000.0):(id)[NSNull null];
     id targetBitrate=codec=="hevc"?(id)@(options.hevc_target_bitrate_bps()):(options.bitrate_kbps?(id)@(uint64_t(*options.bitrate_kbps)*1000):(id)[NSNull null]);
-    NSDictionary* encoderSettings=codec=="av1"?@{@"arguments":encoderArguments}:@{@"hardware_required":@YES,@"realtime":@YES,@"allow_frame_reordering":@NO,@"average_bitrate_bps":targetBitrate,@"expected_frame_rate":@(fps),@"max_key_frame_interval":@(options.gop),@"profile":depth==10?@"Main10_AutoLevel":@"Main_AutoLevel"};
-    NSDictionary* generator=@{@"name":@"mav-fixture",@"pattern":@"moving-gradient-detail-square-frame-id-v1",@"encoder":ns(encoder),@"os":NSProcessInfo.processInfo.operatingSystemVersionString,@"low_delay_verified":@YES,@"random_access_count":@(keys),@"inter_count":@(inters),@"requested_bitrate_kbps":requestedBitrate,@"target_bitrate_bps":targetBitrate,@"measured_bitrate_bps":@(double(payload.size())*8.0*fps/units.size()),@"bitrate_measurement":@"encoded payload bytes including codec headers and HDR metadata divided by generated presentation duration; no transport overhead",@"rate_control":codec=="hevc"?@"average_bitrate":(options.bitrate_kbps?@"vbr":@"constant_quality"),@"settings":@{@"codec":ns(codec),@"variant":ns(options.variant),@"width":@(w),@"height":@(h),@"fps":@(fps),@"frames":@(options.frames),@"gop":@(options.gop),@"bitrate_kbps":requestedBitrate,@"chroma":@"420"},@"encoder_settings":encoderSettings};
+    NSDictionary* encoderSettings=codec=="av1"?@{@"arguments":encoderArguments}:@{@"hardware_required":@YES,@"realtime":@YES,@"allow_frame_reordering":@NO,@"average_bitrate_bps":targetBitrate,@"data_rate_limits":options.bitrate_kbps?(id)@[@(options.hevc_target_bitrate_bps()*3/20),@1]:(id)[NSNull null],@"expected_frame_rate":@(fps),@"max_key_frame_interval":@(options.gop),@"profile":depth==10?@"Main10_AutoLevel":@"Main_AutoLevel"};
+    NSDictionary* generator=@{@"name":@"mav-fixture",@"pattern":@"moving-gradient-detail-square-frame-id-v1",@"content_profile":options.bitrate_kbps?@"seeded-noise-frame-id-v1":@"moving-gradient-detail-square-frame-id-v1",@"content_seed":options.bitrate_kbps?(id)@(0x6d617631u):(id)[NSNull null],@"encoder":ns(encoder),@"os":NSProcessInfo.processInfo.operatingSystemVersionString,@"low_delay_verified":@YES,@"random_access_count":@(keys),@"inter_count":@(inters),@"requested_bitrate_mbps":requestedBitrate,@"target_bitrate_bps":targetBitrate,@"measured_bitrate_bps":@(double(payload.size())*8.0*fps/units.size()),@"measured_bitrate_mbps":@(double(payload.size())*8.0*fps/units.size()/1000000.0),@"bitrate_measurement":@"encoded payload bytes including codec headers and HDR metadata divided by generated presentation duration; no transport overhead",@"rate_control":codec=="hevc"?@"average_bitrate":(options.bitrate_kbps?@"cbr":@"constant_quality"),@"settings":@{@"codec":ns(codec),@"variant":ns(options.variant),@"width":@(w),@"height":@(h),@"fps":@(fps),@"frames":@(options.frames),@"gop":@(options.gop),@"bitrate_mbps":requestedBitrate,@"chroma":@"420"},@"encoder_settings":encoderSettings};
     NSDictionary*doc=@{@"schema_version":@1,@"codec":ns(codec),@"variant":depth==10?@"hdr10":@"sdr8",@"profile":@(final.profile),@"framing":codec=="av1"?@"av1-low-overhead-obu":@"hevc-annex-b",@"width":@(w),@"height":@(h),@"bit_depth":@(depth),@"chroma":@"420",@"frame_rate":@{@"num":@(fps),@"den":@1},@"timebase":@{@"num":@1,@"den":@(fps)},@"color":@{@"primaries":@(final.color.primaries),@"transfer":@(final.color.transfer),@"matrix":@(final.color.matrix),@"full_range":@(final.color.full_range),@"mastering_base64":[[NSData dataWithBytes:final.color.mastering.data() length:24] base64EncodedStringWithOptions:0],@"content_light_base64":[[NSData dataWithBytes:final.color.content_light.data() length:4] base64EncodedStringWithOptions:0],@"mastering_valid":@(final.color.mastering_valid),@"content_light_valid":@(final.color.content_light_valid)},@"payload_file":@"payload.bin",@"payload_sha256":ns(sha(payload.data(),payload.size())),@"access_units":access,@"generator":generator};
     json(dir+"/manifest.json",doc);(void)load(dir+"/manifest.json");
     std::cout<<"PASS "<<codec<<" "<<(depth==10?"hdr10":"sdr8")<<" "<<w<<"x"<<h<<" "<<units.size()<<" AUs: "<<dir<<"/manifest.json\n";
 }
 int main(int argc,char**argv){@autoreleasepool{try{
-    auto options=parse_options(argc,argv);if(options.help){std::cout<<"mav-fixture --codec av1|hevc --variant sdr8|hdr10 --output DIR [--width 1920 --height 1080 --fps 120 --frames 120 --gop 60 --bitrate-kbps 20000 --aomenc PATH]\nBitrate is an encoder target in decimal kbps (1..1000000); measured payload bitrate is recorded separately. Omit for legacy encoder defaults.\nImport verified capture: --import MANIFEST --output DIR\n";return 0;}
+    auto options=parse_options(argc,argv);if(options.help){std::cout<<"mav-fixture --codec av1|hevc --variant sdr8|hdr10 --output DIR [--width 1920 --height 1080 --fps 120 --frames 120 --gop 60 --bitrate-mbps 50 --aomenc PATH]\nBitrate is an encoder target in decimal Mbps (0.001..1000, at most 3 decimal places); measured payload bitrate is recorded separately. Omit for legacy encoder defaults.\nImport verified capture: --import MANIFEST --output DIR\n";return 0;}
     const auto& dir=options.output;NSError*e=nil;if(![[NSFileManager defaultManager]createDirectoryAtPath:ns(dir) withIntermediateDirectories:YES attributes:nil error:&e])throw std::runtime_error(utf(e.description));
     if(!options.import_manifest.empty()){auto m=load(options.import_manifest);mav::Bitstream parser(m.codec=="av1"?mav::Codec::AV1:mav::Codec::HEVC);for(auto&a:m.units){mav::Prepared p;std::string error;if(a.discontinuity)parser.clear();if(parser.prepare(m.payload.data()+a.offset,a.size,p,error)!=mav::ParseResult::Ok||p.displayed_frames!=a.displays||p.random_access!=a.random||p.format.width!=m.width||p.format.height!=m.height||p.format.bit_depth!=m.depth)throw std::runtime_error("capture manifest disagrees with encoded access units: "+error);}NSMutableDictionary* document=[m.document mutableCopy];document[@"payload_file"]=@"payload.bin";document[@"import_provenance"]=@{@"source_payload_sha256":ns(m.hash),@"operation":@"verified complete access-unit import; original timing and expected display sequence preserved"};write(dir+"/payload.bin",m.payload);json(dir+"/manifest.json",document);std::cout<<"PASS imported verified complete access units\n";return 0;}
     auto w=options.width,h=options.height,fps=options.fps,frames=options.frames,gop=options.gop,depth=options.variant=="hdr10"?10u:8u;
-    std::string version="Apple VTCompressionSession HEVC (OS-versioned)";NSArray<NSString*>* arguments=nil;auto units=options.codec=="av1"?av1(dir,options.aomenc,w,h,depth,fps,frames,gop,options.bitrate_kbps.value_or(0),version,arguments):hevc(w,h,depth,fps,frames,gop,options.hevc_target_bitrate_bps());save(options,units,version,arguments);return 0;
+    std::string version="Apple VTCompressionSession HEVC (OS-versioned)";NSArray<NSString*>* arguments=nil;auto units=options.codec=="av1"?av1(dir,options.aomenc,w,h,depth,fps,frames,gop,options.bitrate_kbps.value_or(0),version,arguments):hevc(w,h,depth,fps,frames,gop,options.hevc_target_bitrate_bps(),options.bitrate_kbps.has_value());save(options,units,version,arguments);return 0;
 }catch(const std::exception&e){std::cerr<<"BLOCKED/FAIL: "<<e.what()<<"\n";return 1;}}}

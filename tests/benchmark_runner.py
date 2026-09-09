@@ -27,7 +27,7 @@ SPEC.loader.exec_module(RUNNER)
 
 def case_config(name="case"):
     return dict(name=name, width=320, height=180, fps=60, codec="av1", dynamic_range="sdr",
-                bitrate_kbps=None, gop=60, frames=3, fixture=None,
+                bitrate_mbps=None, gop=60, frames=3, fixture=None,
                 decoder=dict(benchmark_config.DECODER_DEFAULTS),
                 fixture_info=dict(payload_sha256="0" * 64, manifest_sha256="1" * 64,
                                   manifest="fixtures/manifest.json"))
@@ -239,7 +239,7 @@ class RunnerTests(unittest.TestCase):
                                     "--queue-depth": "32", "--power": "0", "--consumer-delay-ms": "8",
                                     "--jitter-us": "1000", "--seed": "23"})
             self.assertEqual(count, offered)
-            self.assertNotIn("--bitrate-kbps", command, "bitrate belongs to fixture encoding")
+            self.assertNotIn("--bitrate-mbps", command, "bitrate belongs to fixture encoding")
 
     def test_paired_gate_uses_run_differences_and_both_allowances(self):
         def metrics(values):
@@ -269,7 +269,7 @@ class RunnerTests(unittest.TestCase):
                         timebase=dict(num=1, den=self.case["fps"]), payload_file=payload.name,
                         payload_sha256=RUNNER.sha(payload),
                         generator=dict(pattern="moving-gradient-detail-square-frame-id-v1",
-                                       requested_bitrate_kbps=self.case["bitrate_kbps"]),
+                                       requested_bitrate_mbps=self.case["bitrate_mbps"]),
                         access_units=[dict(frame_id=index, expected_visible_frame_id=index,
                                            expected_display_count=1, pts=index, dts=index, duration=1,
                                            discontinuity=False, random_access=index % self.case["gop"] == 0,
@@ -336,6 +336,131 @@ class RunnerTests(unittest.TestCase):
         self.assertEqual(result["cases"][0]["comparisons"], {})
         plan["runs"][-1]["exit_code"] = 1
         self.assertEqual(RUNNER.analyze(plan, self.out)["cases"][0]["status"], "FAIL")
+
+    def test_markdown_and_json_agree_on_bitrate_and_failed_or_incomplete_status(self):
+        for mutation in ('pass', 'baseline_fail', 'candidate_fail', 'missing_run', 'missing_fixture'):
+            with self.subTest(mutation=mutation):
+                self.case['bitrate_mbps'] = 350.0
+                plan = self.plan()
+                if mutation == 'candidate_fail':
+                    plan['runs'][-1]['exit_code'] = 1
+                elif mutation == 'baseline_fail':
+                    plan['runs'][1]['exit_code'] = 1
+                elif mutation == 'missing_run':
+                    plan['runs'].pop()
+                elif mutation == 'missing_fixture':
+                    (self.out / self.case['fixture_info']['manifest']).unlink()
+                result = RUNNER.analyze(plan, self.out)
+                machine = json.loads((self.out / 'results.json').read_text())
+                markdown = (self.out / 'report.md').read_text()
+                self.assertEqual(machine, result)
+                self.assertIn('Overall: **' + machine['status'] + '**', markdown)
+                case = machine['cases'][0]
+                self.assertEqual(case['status'], {'pass': 'INCONCLUSIVE',
+                    'baseline_fail': 'BASELINE_FAILURE', 'candidate_fail': 'REGRESSION',
+                    'missing_run': 'INCOMPLETE', 'missing_fixture': 'INCOMPLETE'}[mutation])
+                self.assertIn('| case | ' + case['status'] + ' | 350.000 |', markdown)
+                self.assertEqual(case['bitrate']['requested_mbps'], 350.0)
+                self.assertIn('[results.json](results.json)', markdown)
+                self.assertIn('Requested Mbps', markdown)
+                self.assertIn('Measured Mbps', markdown)
+                if mutation == 'missing_fixture':
+                    self.assertIsNone(case['bitrate']['measured_mbps'])
+                    self.assertIsNone(case['bitrate']['measured_to_requested_ratio'])
+                else:
+                    # Three payload bytes at 60 fps represent 480 bits/s.
+                    self.assertEqual(case['bitrate']['measured_mbps'], 0.00048)
+                    self.assertAlmostEqual(case['bitrate']['measured_to_requested_ratio'], .00048 / 350)
+                if mutation == 'pass':
+                    self.assertEqual(case['status'], 'INCONCLUSIVE', 'a low-bitrate stream cannot establish the requested workload')
+                    self.assertFalse(case['bitrate']['coverage_passed'])
+                    self.assertTrue(all(run['passed'] for run in case['runs']))
+                    self.assertIn('requested bitrate coverage was not established', markdown)
+
+    def test_legacy_plan_analysis_converts_units_without_changing_archived_inputs(self):
+        for kbps in (None, 29, 50000, 350000):
+            with self.subTest(kbps=kbps):
+                self.case['bitrate_mbps'] = None if kbps is None else kbps / 1000
+                plan = self.plan()
+                case = plan['cases'][0]
+                case.pop('bitrate_mbps')
+                case['bitrate_kbps'] = kbps
+                info = case['fixture_info']
+                info['requested_bitrate_kbps'] = kbps
+                info['measured_bitrate_kbps'] = .48
+                fixture_path = self.out / info['manifest']
+                manifest = json.loads(fixture_path.read_text())
+                generator = manifest['generator']
+                generator.pop('requested_bitrate_mbps')
+                generator['requested_bitrate_kbps'] = kbps
+                fixture_path.write_text(json.dumps(manifest))
+                info['manifest_sha256'] = RUNNER.sha(fixture_path)
+                plan['config']['cases'] = [copy.deepcopy(case)]
+                original = copy.deepcopy(plan)
+                fixture_before = fixture_path.read_bytes()
+                result = RUNNER.analyze(plan, self.out)
+                self.assertEqual(result['cases'][0]['status'], 'PASS' if kbps is None else 'INCONCLUSIVE')
+                self.assertEqual(result['cases'][0]['bitrate']['requested_mbps'], None if kbps is None else kbps / 1000)
+                self.assertNotIn('bitrate_kbps', result['config']['cases'][0])
+                self.assertAlmostEqual(result['cases'][0]['settings']['fixture_info']['measured_bitrate_mbps'], .00048)
+                self.assertEqual(plan, original)
+                self.assertEqual(fixture_path.read_bytes(), fixture_before)
+                self.case.pop('bitrate_kbps')
+
+    def test_default_encoder_policy_has_no_fabricated_bitrate_target(self):
+        result = RUNNER.analyze(self.plan(), self.out)
+        self.assertEqual(result['status'], 'PASS')
+        self.assertIsNone(result['cases'][0]['bitrate']['requested_mbps'])
+        self.assertIsNone(result['cases'][0]['bitrate']['measured_to_requested_ratio'])
+        self.assertIn('| Default |', (self.out / 'report.md').read_text())
+
+    def test_bitrate_coverage_uses_measured_payload_and_configured_tolerance(self):
+        # The synthetic fixture measures .00048 Mbps, 52% below this target.
+        self.case['bitrate_mbps'] = .001
+        for tolerance, status in ((20, 'INCONCLUSIVE'), (52, 'PASS'), (60, 'PASS')):
+            with self.subTest(tolerance=tolerance):
+                self.thresholds['bitrate_tolerance_pct'] = tolerance
+                result = RUNNER.analyze(self.plan(), self.out)
+                case = result['cases'][0]
+                self.assertEqual(case['status'], status)
+                self.assertEqual(case['bitrate']['coverage_passed'], status == 'PASS')
+                self.assertEqual(case['bitrate']['tolerance_pct'], tolerance)
+
+    def test_bitrate_tolerance_boundaries_are_inclusive_without_accepting_outside_rates(self):
+        for measured, passed in ((45, True), (55, True), (50, True),
+                                 (44.999999, False), (55.000001, False)):
+            with self.subTest(measured=measured):
+                self.assertEqual(RUNNER.bitrate_covered(50, measured, 10), passed)
+        self.assertTrue(RUNNER.bitrate_covered(50, 50, 0))
+        self.assertFalse(RUNNER.bitrate_covered(50, 50.000001, 0))
+        self.assertIsNone(RUNNER.bitrate_covered(None, 50, 20))
+        self.assertIsNone(RUNNER.bitrate_covered(50, None, 20))
+
+    def test_bitrate_overshoot_cannot_establish_target_coverage(self):
+        self.case['bitrate_mbps'] = .001
+        plan = self.plan()
+        info = self.case['fixture_info']
+        path = self.out / info['manifest']
+        manifest = json.loads(path.read_text())
+        payload = path.parent / manifest['payload_file']
+        payload.write_bytes(b'four' * 3)
+        manifest['payload_sha256'] = RUNNER.sha(payload)
+        for index, unit in enumerate(manifest['access_units']):
+            unit.update(offset=4 * index, length=4)
+        path.write_text(json.dumps(manifest))
+        info.update(manifest_sha256=RUNNER.sha(path), payload_sha256=RUNNER.sha(payload))
+        for run in plan['runs']:
+            result_path = self.out / run['result_file']
+            native = json.loads(result_path.read_text())
+            native['fixture_sha256'] = info['payload_sha256']
+            result_path.write_text(json.dumps(native))
+            run['result_file_sha256'] = RUNNER.sha(result_path)
+        result = RUNNER.analyze(plan, self.out)
+        case = result['cases'][0]
+        self.assertTrue(all(run['passed'] for run in case['runs']))
+        self.assertEqual(case['bitrate']['measured_mbps'], .00192)
+        self.assertEqual(case['status'], 'INCONCLUSIVE')
+        self.assertFalse(case['bitrate']['coverage_passed'])
 
     def main_mocked(self, identical=False, fail_correctness=False):
         config_path = self.out / "input.yaml"

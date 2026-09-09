@@ -6,7 +6,7 @@ defaults:
   fps: 240
   codec: av1
   dynamic_range: [sdr, hdr10]
-  bitrate_kbps: null
+  bitrate_mbps: null
   gop: 60
   decoder:
     inflight: 2

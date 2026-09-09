@@ -6,8 +6,10 @@ timing. Every attempted invocation is journaled before execution; raw evidence
 is never rewritten by analysis. A missing run or failed baseline cannot pass.
 """
 import argparse
+import copy
 import csv
 import datetime
+from decimal import Decimal
 import hashlib
 import json
 import math
@@ -94,6 +96,49 @@ def build_info(build, label, revision, out):
                 environment=environment)
 
 
+def requested_mbps(fields, key='bitrate_mbps', legacy_key='bitrate_kbps'):
+    """Read explicit units without treating booleans or conflicting labels as rates."""
+    requested = fields.get(key)
+    if requested is not None:
+        if (type(requested) not in (int, float) or not 0.001 <= requested <= 1000
+                or not math.isfinite(requested)
+                or Decimal(str(requested)) * 1000 != (Decimal(str(requested)) * 1000).to_integral_value()):
+            raise ValueError('invalid requested bitrate in Mbps')
+    if legacy_key in fields:
+        legacy = fields[legacy_key]
+        if legacy is not None and (type(legacy) is not int or not 1 <= legacy <= 1000000):
+            raise ValueError('invalid legacy requested bitrate in kbps')
+        converted = None if legacy is None else legacy / 1000
+        if key in fields and requested != converted:
+            raise ValueError('conflicting requested bitrate units')
+        requested = converted
+    return requested
+
+
+def normalize_plan_bitrates(plan):
+    """Allow analysis of earlier kbps archives without rewriting source evidence."""
+    plan = copy.deepcopy(plan)
+    for case in plan['cases'] + plan['config'].get('cases', []):
+        case['bitrate_mbps'] = requested_mbps(case)
+        case.pop('bitrate_kbps', None)
+        info = case.get('fixture_info', {})
+        if 'requested_bitrate_kbps' in info:
+            info['requested_bitrate_mbps'] = requested_mbps(info, 'requested_bitrate_mbps', 'requested_bitrate_kbps')
+            del info['requested_bitrate_kbps']
+        if 'measured_bitrate_kbps' in info:
+            info['measured_bitrate_mbps'] = info.pop('measured_bitrate_kbps') / 1000
+    return plan
+
+
+def bitrate_covered(requested, measured, tolerance):
+    if requested is None or measured is None:
+        return None
+    # Compare the recorded decimal values so an inclusive +10% boundary such
+    # as 55 Mbps versus 50 Mbps is not rejected by binary float division.
+    return (abs(Decimal(str(measured)) - Decimal(str(requested))) * 100
+            <= Decimal(str(requested)) * Decimal(str(tolerance)))
+
+
 def verify_fixture(path, case):
     """Check requested settings and byte identity before the native parser gate."""
     manifest = read_json(path)
@@ -131,13 +176,15 @@ def verify_fixture(path, case):
             raise ValueError('fixture must use sequential one-output frames and the requested GOP')
     if manifest['timebase'] != dict(num=1, den=case['fps']):
         raise ValueError('fixture timebase differs from requested frame rate')
-    requested = generator.get('requested_bitrate_kbps')
-    if requested != case['bitrate_kbps']:
+    # Previously generated fixtures used kbps. Interpret that explicit unit,
+    # never relabel its numeric value as Mbps or modify the archived manifest.
+    requested = requested_mbps(generator, 'requested_bitrate_mbps', 'requested_bitrate_kbps')
+    if requested != case['bitrate_mbps']:
         raise ValueError('fixture requested bitrate differs from YAML; regenerate with matching settings')
     return dict(manifest_sha256=sha(path), payload_sha256=sha(payload),
                 payload_file=manifest['payload_file'], frames=len(units),
-                requested_bitrate_kbps=requested,
-                measured_bitrate_kbps=payload.stat().st_size * 8 * case['fps'] / len(units) / 1000,
+                requested_bitrate_mbps=requested,
+                measured_bitrate_mbps=payload.stat().st_size * 8 * case['fps'] / len(units) / 1000000,
                 generator=generator), payload
 
 
@@ -166,11 +213,11 @@ def prepare_fixture(case, fixture_build, aomenc, out, timeout):
     else:
         legacy = ROOT / 'fixtures/generated' / (
             f"{case['codec']}-{variant}-{case['width']}x{case['height']}p{case['fps']}-{case['frames']}") / 'manifest.json'
-        if case['bitrate_kbps'] is None and case['gop'] == 60 and legacy.is_file():
+        if case['bitrate_mbps'] is None and case['gop'] == 60 and legacy.is_file():
             path = legacy
         else:
             binary = fixture_build / 'mav-fixture'
-            settings = {key: case[key] for key in ('width', 'height', 'fps', 'codec', 'dynamic_range', 'bitrate_kbps', 'gop', 'frames')}
+            settings = {key: case[key] for key in ('width', 'height', 'fps', 'codec', 'dynamic_range', 'bitrate_mbps', 'gop', 'frames')}
             settings['generator_sha256'] = sha(binary)
             if case['codec'] == 'av1':
                 settings['aomenc_sha256'] = sha(aomenc)
@@ -184,8 +231,8 @@ def prepare_fixture(case, fixture_build, aomenc, out, timeout):
                            '--fps', str(case['fps']), '--frames', str(case['frames']), '--gop', str(case['gop'])]
                 if case['codec'] == 'av1':
                     command += ['--aomenc', str(aomenc)]
-                if case['bitrate_kbps'] is not None:
-                    command += ['--bitrate-kbps', str(case['bitrate_kbps'])]
+                if case['bitrate_mbps'] is not None:
+                    command += ['--bitrate-mbps', format(case['bitrate_mbps'], '.3f').rstrip('0').rstrip('.')]
                 try:
                     with (out / f"{case['name']}-encode.log").open('w') as log:
                         result = run_encoder(command, log, timeout=max(600, timeout))
@@ -417,11 +464,13 @@ def paired_metrics(baseline, candidate, thresholds):
 
 
 def analyze(plan, out):
+    plan = normalize_plan_bitrates(plan)
     thresholds = plan['config']['thresholds']
     settings = list(plan['builds'])
     cases = []
     for case in plan['cases']:
         fixture_error = None
+        archived = None
         try:
             archived, _ = verify_fixture(out / case['fixture_info']['manifest'], case)
             for field in ('manifest_sha256', 'payload_sha256'):
@@ -430,7 +479,15 @@ def analyze(plan, out):
         except (OSError, ValueError, TypeError, KeyError, UnicodeError) as error:
             fixture_error = 'fixture evidence invalid: ' + str(error)
         records = [inspect_run(record, case, out, thresholds) for record in plan['runs'] if record['case'] == case['name']]
-        report = dict(name=case['name'], settings=case, runs=records, comparisons={}, issues=[])
+        requested = case['bitrate_mbps']
+        measured = archived['measured_bitrate_mbps'] if archived and not fixture_error else None
+        ratio = measured / requested if measured is not None and requested is not None else None
+        bitrate_tolerance = thresholds.get('bitrate_tolerance_pct', 20.0)
+        coverage_passed = bitrate_covered(requested, measured, bitrate_tolerance)
+        report = dict(name=case['name'], settings=case, runs=records, comparisons={}, issues=[],
+                      bitrate=dict(requested_mbps=requested, measured_mbps=measured,
+                                   measured_to_requested_ratio=ratio, tolerance_pct=bitrate_tolerance,
+                                   coverage_passed=coverage_passed))
         expected_runs = {(phase, setting, rep) for setting in settings
                          for phase, reps in [('correctness', [1]), ('timed', range(1, plan['config']['run']['repetitions'] + 1))]
                          for rep in reps}
@@ -455,6 +512,11 @@ def analyze(plan, out):
                 report['issues'].append('baseline failed; latency is descriptive and cannot establish a clean regression result')
             elif not passed['candidate']:
                 report['status'] = 'REGRESSION' if 'baseline' in passed else 'FAIL'
+            elif requested is not None and coverage_passed is not True:
+                report['status'] = 'INCONCLUSIVE'
+                report['issues'].append(f'measured payload bitrate {measured:.3f} Mbps is outside '
+                    f'the {requested:g} Mbps target ±{bitrate_tolerance:g}%; '
+                    'decode checks passed, but requested bitrate coverage was not established')
             elif any(not r.get('thermal_nominal', False) for group in timed.values() for r in group):
                 report['status'] = 'INCONCLUSIVE'
                 report['issues'].append('non-nominal or unavailable thermal state during timing')
@@ -490,9 +552,17 @@ def analyze(plan, out):
 def report_markdown(result, path):
     def number(value):
         return '—' if value is None else f'{value:.3f}'
-    lines = ['# Decoder comparison', '', f"Overall: **{result['status']}** ({result['comparison']}).", '', result['methodology'], '',
-             '| Case | Result | Baseline VT median / p95 / p99 ms | Candidate VT median / p95 / p99 ms | Paired median delta |',
-             '|---|---|---:|---:|---:|']
+    run_settings = result['config']['run']
+    lines = ['# Decoder comparison', '', f"Overall: **{result['status']}** ({result['comparison']}).", '',
+             f"Cases: {len(result['cases'])}; repetitions per build: {run_settings['repetitions']}; "
+             f"requested seconds per trial: {run_settings.get('seconds', '—')}; "
+             f"warmup offered frames: {run_settings.get('warmup_frames', '—')}.", '', result['methodology'], '',
+             'Machine-readable evidence: [results.json](results.json). Bitrates use decimal megabits per second '
+             '(1 Mbps = 1,000,000 bits/s). Requested bitrate is an encoder target; measured bitrate is the '
+             'encoded payload rate, excluding transport overhead. A clean decode run outside the configured '
+             'bitrate tolerance is INCONCLUSIVE for the requested workload.', '',
+             '| Case | Result | Requested Mbps | Measured Mbps | Baseline VT median / p95 / p99 ms | Candidate VT median / p95 / p99 ms | Paired median delta |',
+             '|---|---|---:|---:|---:|---:|---:|']
     for case in result['cases']:
         metrics = case['comparisons']
         cells = []
@@ -501,17 +571,34 @@ def report_markdown(result, path):
             cells.append(' / '.join(number(statistics.median([r['metrics'][f'vt_{q}_ms'] for r in values])) if values else '—'
                                     for q in ('median', 'p95', 'p99')))
         delta = metrics.get('vt_median_ms', {}).get('median_paired_delta_pct')
-        lines.append(f"| {case['name']} | {case['status']} | {cells[0]} | {cells[1]} | {number(delta)}% |")
+        bitrate = case['bitrate']
+        requested = 'Default' if bitrate['requested_mbps'] is None else number(bitrate['requested_mbps'])
+        lines.append(f"| {case['name']} | {case['status']} | {requested} | {number(bitrate['measured_mbps'])} | "
+                     f"{cells[0]} | {cells[1]} | {number(delta)}{'%' if delta is not None else ''} |")
     lines += ['', 'Threshold: the median paired increase must exceed both the absolute allowance '
               f"({result['thresholds']['latency_absolute_ms']} ms) and relative allowance "
               f"({result['thresholds']['latency_relative_pct']}% of baseline median) to flag a latency regression. "
               'Applied independently to VT and public completion median/p95/p99. All output accounting and delivered-rate gates must also pass.', '',
+              f"Explicit bitrate targets require measured payload rate within ±{result['thresholds'].get('bitrate_tolerance_pct', 20.0):g}%. "
+              'A null target retains the legacy encoder policy and does not impose a bitrate coverage gate.', '',
               'A PASS means the configured gates passed in this sample. It does not prove absence of a smaller regression. '
               'Public latency includes scheduled arrival, queuing and callback delivery; VT latency ends at the internal decoder callback.', '']
     for case in result['cases']:
         lines += [f"## {case['name']}", '', f"Status: {case['status']}", '']
+        settings = case['settings']
+        ratio = case['bitrate']['measured_to_requested_ratio']
+        lines += [f"Stream: {settings['width']}×{settings['height']} at {settings['fps']} fps; "
+                  f"{settings['codec'].upper()}, {settings['dynamic_range'].upper()}. "
+                  f"Measured bitrate: {number(case['bitrate']['measured_mbps'])} Mbps."
+                  + (f" Encoder target: {number(case['bitrate']['requested_mbps'])} Mbps; "
+                     f"measured/target: {ratio * 100:.1f}%." if ratio is not None else ''), '']
         if case['issues']:
             lines += case['issues'] + ['']
+        for run in case['runs']:
+            if run['errors']:
+                lines += [f"- {run['phase']} / {run['setting']} / {run['repetition']}: " + '; '.join(run['errors'])]
+        if any(run['errors'] for run in case['runs']):
+            lines.append('')
         lines += ['| Build / run | Outputs / offered | FPS | Drops / failed | First output ms |', '|---|---:|---:|---:|---:|']
         for run in case['runs']:
             if run['phase'] != 'timed':
@@ -525,7 +612,7 @@ def report_markdown(result, path):
                 lines += ['', f"Observed threshold breach: {name}: {metric['median_paired_delta_ms']:+.3f} ms "
                           f"({metric['median_paired_delta_pct']:+.2f}%)."]
         lines.append('')
-    path.write_text('\n'.join(lines) + '\n')
+    path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
 
 
 def main(argv=None):
@@ -630,7 +717,7 @@ def main(argv=None):
         print('Comparison stopped: ' + str(error), file=sys.stderr)
     write_json(out / 'plan.json', plan)
     result = analyze(plan, out)
-    print(f"{result['status']}: {out / 'report.md'}", flush=True)
+    print(f"{result['status']}: {out / 'report.md'}\nMachine-readable: {out / 'results.json'}", flush=True)
     return int(result['status'] != 'PASS')
 
 

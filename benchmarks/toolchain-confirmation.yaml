@@ -3,7 +3,7 @@
 # Keep these results separate from the original measurements, including flags.
 schema_version: 1
 defaults:
-  bitrate_kbps: null
+  bitrate_mbps: null
   gop: 60
   decoder:
     inflight: 2

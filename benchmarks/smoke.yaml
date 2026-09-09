@@ -1,4 +1,4 @@
-# Small hardware smoke test with an actual encoder target, in decimal kbps.
+# Small hardware smoke test with an actual encoder target, in decimal Mbps.
 # Both decoders in a comparison receive the same encoded bytes.
 schema_version: 1
 defaults:
@@ -6,7 +6,7 @@ defaults:
   fps: 60
   codec: [av1, hevc]
   dynamic_range: sdr
-  bitrate_kbps: 1000
+  bitrate_mbps: 1
   frames: 120
   gop: 60
   decoder:

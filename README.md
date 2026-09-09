@@ -64,9 +64,13 @@ coverage fails when a required codec/variant is unavailable. Hardware-required
 session creation and actual hardware output are checked separately.
 
 The [YAML testing framework](docs/testing-framework.md) configures resolution,
-frame rate, codec, dynamic range, bitrate, and decoder settings for local and CI
-runs. It compares two builds using identical fixtures and alternating run order,
-and preserves raw measurements with JSON, Markdown, and JUnit reports.
+frame rate, codec, dynamic range, bitrate in Mbps, and decoder settings for local
+and CI runs. The [bitrate matrix](benchmarks/bitrate-matrix.yaml) covers all six
+resolution/frame-rate modes with 50, 100, 250, and 350 Mbps targets for AV1/HEVC
+and SDR/HDR10 (96 cases). Requested targets and measured encoded rates are
+reported separately. It compares two builds using identical fixtures and
+alternating run order, and writes human-readable `report.md`, machine-readable
+`results.json`, and JUnit results alongside the raw measurements.
 The [full paired toolchain comparison](docs/toolchain-paired-comparison.md)
 records all requested modes, the queue-32 startup control, and balanced
 confirmation of the initial latency flags.
