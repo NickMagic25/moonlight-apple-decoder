@@ -116,6 +116,92 @@ class RunnerTests(unittest.TestCase):
                 self.assertFalse(result["passed"])
                 self.assertTrue(any(key in error for error in result["errors"]))
 
+    def reference_case(self, dynamic_range='sdr'):
+        self.case['dynamic_range'] = dynamic_range
+        self.case['fixture_info']['generator'] = dict(
+            pattern=RUNNER.REFERENCE_PATTERN, content_profile='seeded-noise-frame-id-v1')
+        self.case['reference_info'] = dict(raw_path='references/reference.raw', raw_sha256='a' * 64)
+
+    def reference_evidence(self, updates=None, dynamic_range='sdr'):
+        self.reference_case(dynamic_range)
+        rows = trace_rows()
+        depth = 8 if dynamic_range == 'sdr' else 10
+        for row in rows:
+            row['bit_depth'] = depth
+        native = native_result(self.case, 'correctness', rows)
+        native.update(bit_depth=depth, variant='sdr8' if dynamic_range == 'sdr' else 'hdr10',
+                      software_reference_samples=self.case['width'] * self.case['height'] * 3 // 2 * self.case['frames'],
+                      software_reference_max_code_error=0,
+                      software_reference_tolerance=2 if dynamic_range == 'sdr' else 8)
+        native.update(updates or {})
+        record = self.evidence(native, rows, phase='correctness')
+        record['command'] += ['--reference-raw', str(self.out / self.case['reference_info']['raw_path'])]
+        record['reference_raw_sha256'] = self.case['reference_info']['raw_sha256']
+        return record
+
+    def test_noise_correctness_requires_reference_even_when_native_claims_pass(self):
+        self.reference_case()
+        del self.case['reference_info']
+        checked = self.inspect(self.evidence(phase='correctness'))
+        self.assertFalse(checked['passed'])
+        self.assertIn('noise fixture lacks independent software reference evidence', ' '.join(checked['errors']))
+
+    def test_reference_correctness_requires_all_samples_and_exact_pixel_tolerance(self):
+        # The reference module validates metadata/raw provenance separately;
+        # this tests integration with the recorded native comparison evidence.
+        with mock.patch.object(RUNNER, 'validate_reference'):
+            for dynamic_range, tolerance in (('sdr', 2), ('hdr10', 8)):
+                record = self.reference_evidence(dynamic_range=dynamic_range)
+                checked = self.inspect(record)
+                self.assertTrue(checked['passed'], checked['errors'])
+                samples = self.case['width'] * self.case['height'] * 3 // 2 * self.case['frames']
+                for updates in ({'software_reference_samples': 0},
+                                {'software_reference_samples': samples - 1},
+                                {'software_reference_samples': samples + 1},
+                                {'software_reference_samples': True},
+                                {'software_reference_samples': float(samples)},
+                                {'software_reference_max_code_error': None},
+                                {'software_reference_max_code_error': -1},
+                                {'software_reference_max_code_error': tolerance + 1},
+                                {'software_reference_max_code_error': True},
+                                {'software_reference_tolerance': tolerance + 1}):
+                    with self.subTest(dynamic_range=dynamic_range, updates=updates):
+                        checked = self.inspect(self.reference_evidence(updates, dynamic_range))
+                        self.assertFalse(checked['passed'])
+                        self.assertIn('software reference', ' '.join(checked['errors']))
+
+    def test_reference_invocation_path_hash_and_metadata_must_match(self):
+        with mock.patch.object(RUNNER, 'validate_reference') as validate:
+            for mutation in ('missing_argument', 'different_path', 'different_hash', 'metadata_failure'):
+                with self.subTest(mutation=mutation):
+                    record = self.reference_evidence()
+                    validate.side_effect = None
+                    if mutation == 'missing_argument':
+                        record['command'] = record['command'][:-2]
+                    elif mutation == 'different_path':
+                        record['command'][-1] = str(self.out / 'another.raw')
+                    elif mutation == 'different_hash':
+                        record['reference_raw_sha256'] = 'b' * 64
+                    else:
+                        validate.side_effect = ValueError('software reference metadata changed')
+                    checked = self.inspect(record)
+                    self.assertFalse(checked['passed'])
+                    self.assertIn('reference', ' '.join(checked['errors']))
+
+    def test_reference_work_cannot_be_hidden_in_a_timed_run(self):
+        self.reference_case()
+        for mutation in ('command', 'sample_count'):
+            with self.subTest(mutation=mutation):
+                native = native_result(self.case)
+                if mutation == 'sample_count':
+                    native['software_reference_samples'] = 1
+                record = self.evidence(native)
+                if mutation == 'command':
+                    record['command'] += ['--reference-raw', str(self.out / 'reference.raw')]
+                checked = self.inspect(record)
+                self.assertFalse(checked['passed'])
+                self.assertIn('software reference work must not run during timing', checked['errors'])
+
     def test_native_fail_zero_exit_and_bad_process_states_never_pass(self):
         native = native_result(self.case)
         native.update(status="FAIL", reason="synthetic dropped frame")
@@ -127,6 +213,17 @@ class RunnerTests(unittest.TestCase):
                 record = self.evidence()
                 record.update(state=state, exit_code=exit_code)
                 self.assertFalse(self.inspect(record)["passed"])
+
+    def test_native_failure_diagnosis_survives_an_absent_csv_trace(self):
+        reason = 'visible frame identity mismatch: public 32 expected 32 observed 0'
+        record = self.evidence(dict(status='FAIL', reason=reason, completed_records=3))
+        (self.out / record['csv_file']).unlink()
+        record.update(csv_file_sha256=None, exit_code=1)
+        checked = self.inspect(record)
+        self.assertFalse(checked['passed'])
+        self.assertEqual(checked['native']['reason'], reason)
+        self.assertIn('native FAIL: ' + reason, checked['errors'])
+        self.assertIn('invalid evidence: csv_file missing or changed since execution', checked['errors'])
 
     def test_missing_malformed_and_nonfinite_evidence_never_passes(self):
         contents = [None, "{", "[]", "null", "{}", '{"status":"PASS","decoded_fps":NaN}',
@@ -328,6 +425,76 @@ class RunnerTests(unittest.TestCase):
                 self.assertEqual(result["status"], "FAIL")
                 self.assertEqual(result["cases"][0]["status"], "INCOMPLETE")
 
+    def test_archived_noise_profile_cannot_lose_reference_requirement_in_plan_metadata(self):
+        plan = self.plan()
+        path = self.out / self.case['fixture_info']['manifest']
+        manifest = json.loads(path.read_text())
+        manifest['generator']['content_profile'] = 'seeded-noise-frame-id-v1'
+        path.write_text(json.dumps(manifest))
+        self.case['fixture_info']['manifest_sha256'] = RUNNER.sha(path)
+        self.case['fixture_info']['generator'] = {}
+        result = RUNNER.analyze(plan, self.out)
+        self.assertEqual(result['cases'][0]['status'], 'INCOMPLETE')
+        self.assertIn('noise profile differs from the correctness plan', ' '.join(result['cases'][0]['issues']))
+
+    def derived_fixture(self):
+        self.plan()
+        source = self.out / self.case['fixture_info']['manifest']
+        manifest = json.loads(source.read_text())
+        manifest['generator']['content_profile'] = 'seeded-noise-frame-id-v1'
+        source.write_text(json.dumps(manifest))
+        self.case['fixture'] = str(source)
+        archive = self.out / 'archive'
+        info = RUNNER.prepare_fixture(self.case, self.out / 'unused-build',
+                                      self.out / 'unused-aomenc', archive, 180)
+        return source, archive, info
+
+    def test_derived_reference_manifest_and_reimport_preserve_encoder_manifest_and_payload(self):
+        source, archive, info = self.derived_fixture()
+        original = source.read_bytes()
+        original_manifest = json.loads(original)
+        derived_path = archive / info['manifest']
+        derived = json.loads(derived_path.read_text())
+        self.assertEqual((archive / info['source_manifest']).read_bytes(), original)
+        self.assertEqual(info['source_manifest_sha256'], RUNNER.sha(source))
+        self.assertEqual(derived['correctness_reference']['source_manifest_sha256'], RUNNER.sha(source))
+        self.assertEqual(derived['generator']['pattern'], RUNNER.REFERENCE_PATTERN)
+        self.assertEqual(derived['payload_sha256'], original_manifest['payload_sha256'])
+        self.assertEqual((derived_path.parent / derived['payload_file']).read_bytes(),
+                         (source.parent / original_manifest['payload_file']).read_bytes())
+        self.case['fixture'] = str(derived_path)
+        imported_out = self.out / 'reimport'
+        imported = RUNNER.prepare_fixture(self.case, self.out / 'unused-build',
+                                          self.out / 'unused-aomenc', imported_out, 180)
+        self.assertEqual((imported_out / imported['source_manifest']).read_bytes(), original)
+        self.assertEqual(imported['source_manifest_sha256'], RUNNER.sha(source))
+        self.assertEqual(imported['manifest_sha256'], info['manifest_sha256'])
+        self.assertEqual(imported['payload_sha256'], info['payload_sha256'])
+        self.assertEqual(source.read_bytes(), original)
+
+    def test_derived_reference_manifest_rejects_missing_or_changed_original_provenance(self):
+        source, archive, info = self.derived_fixture()
+        self.case['fixture_info'] = copy.deepcopy(info)
+        self.case['reference_info'] = dict(raw_path='references/reference.raw', raw_sha256='a' * 64,
+                                           expected_samples=259200, metadata=dict(decoder='libdav1d'))
+        plan = dict(state='FINISHED', builds={'candidate': {}}, cases=[self.case], runs=[],
+                    config=dict(thresholds=self.thresholds, run=dict(repetitions=1)))
+        with mock.patch.object(RUNNER, 'validate_reference'):
+            for mutation in ('missing_record', 'missing_file', 'changed_file'):
+                with self.subTest(mutation=mutation):
+                    self.case['fixture_info'] = copy.deepcopy(info)
+                    original = archive / info['source_manifest']
+                    original.write_bytes(source.read_bytes())
+                    if mutation == 'missing_record':
+                        self.case['fixture_info'].pop('source_manifest')
+                    elif mutation == 'missing_file':
+                        original.unlink()
+                    else:
+                        original.write_text('{}')
+                    result = RUNNER.analyze(plan, archive)
+                    self.assertEqual(result['cases'][0]['status'], 'INCOMPLETE')
+                    self.assertIn('fixture evidence invalid', ' '.join(result['cases'][0]['issues']))
+
     def test_candidate_only_is_explicit_and_failed_candidate_cannot_pass(self):
         plan = self.plan(baseline=False)
         result = RUNNER.analyze(plan, self.out)
@@ -336,6 +503,18 @@ class RunnerTests(unittest.TestCase):
         self.assertEqual(result["cases"][0]["comparisons"], {})
         plan["runs"][-1]["exit_code"] = 1
         self.assertEqual(RUNNER.analyze(plan, self.out)["cases"][0]["status"], "FAIL")
+
+    def test_partial_latency_metrics_still_produce_markdown_and_machine_readable_failure(self):
+        plan = self.plan(baseline=False)
+        native = native_result(self.case)
+        native['vt_submit_to_callback_ns']['p95'] = None
+        plan['runs'][-1].update(self.evidence(native))
+        result = RUNNER.analyze(plan, self.out)
+        self.assertEqual(result['cases'][0]['status'], 'FAIL')
+        self.assertEqual(json.loads((self.out / 'results.json').read_text()), result)
+        markdown = (self.out / 'report.md').read_text()
+        self.assertIn('| case | FAIL |', markdown)
+        self.assertIn('missing/invalid steady latency samples: vt_p95_ms', markdown)
 
     def test_markdown_and_json_agree_on_bitrate_and_failed_or_incomplete_status(self):
         for mutation in ('pass', 'baseline_fail', 'candidate_fail', 'missing_run', 'missing_fixture'):
@@ -462,7 +641,8 @@ class RunnerTests(unittest.TestCase):
         self.assertEqual(case['status'], 'INCONCLUSIVE')
         self.assertFalse(case['bitrate']['coverage_passed'])
 
-    def main_mocked(self, identical=False, fail_correctness=False):
+    def main_mocked(self, identical=False, fail_correctness=False, reference=False,
+                    fail_reference=False, fail_invoke=False):
         config_path = self.out / "input.yaml"
         config_path.write_text(yaml.safe_dump(dict(schema_version=1,
             defaults=dict(resolution="320x180", fps=60, codec="av1", dynamic_range="sdr", frames=3),
@@ -479,8 +659,19 @@ class RunnerTests(unittest.TestCase):
         def invoke(plan, out, case, setting, phase, repetition):
             record = dict(case=case["name"], setting=setting, phase=phase, repetition=repetition)
             observed.append(record.copy())
+            if fail_invoke and case['name'].startswith('first-') and phase == 'correctness':
+                raise ValueError('synthetic invocation failure')
             plan["runs"].append(record)
             return record
+
+        def prepare_reference(tool, manifest, case, out, timeout, execute):
+            observed.append(dict(phase='reference-prepare', case=case['name']))
+            if fail_reference and case['name'].startswith('first-'):
+                raise ValueError('synthetic software decode failure')
+            return dict(case_name=case['name'], raw_path=case['name'] + '.raw')
+
+        def cleanup_reference(info, out):
+            observed.append(dict(phase='reference-cleanup', case=info['case_name']))
 
         def inspect(record, case, out, thresholds):
             fail = fail_correctness and record["phase"] == "correctness" and record["setting"] == "baseline"
@@ -490,8 +681,13 @@ class RunnerTests(unittest.TestCase):
             analyzed.append(copy.deepcopy(plan))
             return dict(status="FAIL" if plan["state"] == "ERROR" else "PASS")
 
+        info = copy.deepcopy(self.case['fixture_info'])
+        if reference:
+            info['generator'] = dict(pattern=RUNNER.REFERENCE_PATTERN)
         with mock.patch.object(RUNNER, "build_info", side_effect=build_info), \
-             mock.patch.object(RUNNER, "prepare_fixture", return_value=self.case["fixture_info"]), \
+             mock.patch.object(RUNNER, "prepare_fixture", return_value=info), \
+             mock.patch.object(RUNNER, "prepare_reference", side_effect=prepare_reference), \
+             mock.patch.object(RUNNER, "cleanup_reference", side_effect=cleanup_reference), \
              mock.patch.object(RUNNER, "invoke", side_effect=invoke), \
              mock.patch.object(RUNNER, "inspect_run", side_effect=inspect), \
              mock.patch.object(RUNNER, "analyze", side_effect=analyze), \
@@ -517,6 +713,33 @@ class RunnerTests(unittest.TestCase):
         self.assertEqual(len(observed), 4)
         self.assertTrue(all(r["phase"] == "correctness" for r in observed))
         self.assertTrue(all("correctness gate failed" in case["error"] for case in plan["cases"]))
+
+    def test_software_preparation_and_cleanup_precede_all_timing(self):
+        code, observed, plan = self.main_mocked(reference=True)
+        self.assertEqual(code, 0)
+        self.assertEqual([item['phase'] for item in observed[:8]],
+                         ['reference-prepare', 'correctness', 'correctness', 'reference-cleanup'] * 2)
+        self.assertTrue(all(item['phase'] == 'timed' for item in observed[8:]))
+        self.assertTrue(all('reference_info' in case for case in plan['cases']))
+
+    def test_software_failure_skips_affected_timing_and_cleans_up_after_invocation_failure(self):
+        for failure in ('reference', 'invoke'):
+            with self.subTest(failure=failure):
+                # Each mocked execution needs an empty results directory.
+                previous = self.out / 'results'
+                if previous.exists():
+                    import shutil
+                    shutil.rmtree(previous)
+                _, observed, plan = self.main_mocked(reference=True,
+                    fail_reference=failure == 'reference', fail_invoke=failure == 'invoke')
+                first = plan['cases'][0]['name']
+                self.assertIn('correctness preparation failed', plan['cases'][0]['error'])
+                self.assertFalse(any(item['phase'] == 'timed' and item['case'] == first for item in observed))
+                first_events = [item['phase'] for item in observed if item['case'] == first]
+                self.assertEqual(first_events, ['reference-prepare'] if failure == 'reference' else
+                                 ['reference-prepare', 'correctness', 'reference-cleanup'])
+                timing = next(index for index, item in enumerate(observed) if item['phase'] == 'timed')
+                self.assertTrue(all(item['phase'] == 'timed' for item in observed[timing:]))
 
     def test_identical_baseline_candidate_binaries_do_not_validate_an_upgrade(self):
         code, observed, plan = self.main_mocked(identical=True)

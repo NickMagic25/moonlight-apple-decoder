@@ -5,7 +5,9 @@ settings through one or two decoder builds. It prepares all fixtures before
 timing, checks correctness, then alternates baseline/candidate order for each
 repetition. The output includes raw frame CSVs, native JSON, commands, fixture
 bytes and hashes, build/environment provenance, a Markdown report, aggregate
-JSON, and JUnit XML. The same command runs locally and on a physical CI runner.
+JSON, and JUnit XML. Explicit-bitrate noise fixtures also require an independent
+software reference for full-frame correctness checks. The same command runs
+locally and on a physical CI runner.
 
 This is a headless decoder test. It measures hardware decoding and delivery to
 the replay client's callback. Display refresh, render/presentation latency,
@@ -115,9 +117,12 @@ decoder sustained that input rate. Changing bitrate regenerates the stream;
 baseline and candidate always receive the same saved bytes. The historical
 full toolchain matrix keeps `bitrate_mbps: null` to retain the earlier test's
 encoding policy. Fixtures with an explicit bitrate use deterministic textured
-luma while preserving the frame-ID strip checked by the correctness sink; the
-texture makes these streams less compressible than the legacy pattern. This
-is still synthetic content and does not establish behavior for every game.
+luma and a frame-ID strip. The framework requires independent full-frame
+software reference validation for this noise profile: lossy encoding of this
+content cannot be validated by assuming that its decoded pixels still match
+the original marker pattern. Both builds receive the same compressed bytes and
+the same software-decoded reference. This is still synthetic content and does
+not establish behavior for every game.
 The [fixture documentation](fixtures.md) records the encoder buffers, caps,
 content profile, and unchanged legacy encoder policy.
 
@@ -133,12 +138,13 @@ specific encoded rate was requested.
 
 An optional `fixture` path names an existing manifest relative to the YAML file.
 Its metadata must match the declared stream settings; it is validated and copied
-into the evidence directory. An externally prepared fixture must retain the
-harness's visible frame-ID pattern, sequential frame IDs, one displayed output
-per access unit, the requested exact GOP, and the supported frame-rate timebase.
-The correctness sink checks that synthetic pattern, so arbitrary recorded
-Sunshine or game streams are not supported by this comparison path. Such
-captures need a separate content-validation strategy. Fixture identity includes
+into the evidence directory. An externally prepared fixture must use a supported
+harness content profile, sequential frame IDs, one displayed output per access
+unit, the requested exact GOP, and the supported frame-rate timebase. Legacy
+fixtures use the synthetic marker checks; the framework's archived noise
+fixtures require a software reference instead. Arbitrary recorded Sunshine or
+game streams are not supported by this comparison path. Such captures need a
+separate content-validation strategy. Fixture identity includes
 the validated manifest and payload hashes; a bitrate label alone does not
 establish content or encoding equivalence.
 
@@ -155,13 +161,17 @@ flags, and experimental settings for both revisions. Build and encode before
 running timed work; do not run another benchmark or a compiler on the device
 at the same time. Keep the Mac on AC power with a stable thermal state.
 
-For the candidate:
+For an explicit-bitrate comparison, first provide an existing FFmpeg development
+prefix containing `include/` and `lib/`, with software decoders for both AV1 and
+HEVC. `MAV_FFMPEG_ROOT` builds the optional `mav-reference-decode` helper; it adds
+no FFmpeg dependency to the production decoder. For the candidate:
 
 ```sh
 cmake -S . -B build-candidate -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
   -DBUILD_TESTING=ON -DMAV_BUILD_TOOLS=ON \
-  -DMAV_VT_EXPERIMENTS=OFF -DMAV_SANITIZE=OFF
+  -DMAV_VT_EXPERIMENTS=OFF -DMAV_SANITIZE=OFF \
+  -DMAV_FFMPEG_ROOT=/path/to/ffmpeg-development-prefix
 cmake --build build-candidate --parallel 3
 ctest --test-dir build-candidate --output-on-failure
 ./scripts/bootstrap-aom.sh
@@ -171,7 +181,10 @@ Configure an independent baseline source checkout with the same options, using
 its own build directory. Do not change the baseline's language standard: the
 source revision supplies that setting. A toolchain migration comparison should
 use the same installed compiler for both language modes. A change of compiler
-version or SDK is a different experiment and must be identified as such.
+version or SDK is a different experiment and must be identified as such. Only
+one reference helper is needed; the candidate helper can supply the reference
+for both decoder builds. The FFmpeg option can be omitted when testing only
+legacy marker fixtures with null bitrate targets.
 
 Validate YAML without requiring binaries or hardware:
 
@@ -188,6 +201,7 @@ Run a paired comparison, substituting the independent baseline build path:
   --candidate-build build-candidate \
   --baseline-build /path/to/baseline-build \
   --fixture-build build-candidate \
+  --reference-tool build-candidate/mav-reference-decode \
   --aomenc .local/aom-build/aomenc \
   --results-dir results/comparison-001
 ```
@@ -197,6 +211,22 @@ run cannot establish regression against an earlier revision. Optional
 `--candidate-revision` and `--baseline-revision` labels are preserved alongside
 the detected source revision, source hash, executable hash, and build settings;
 a label is not proof that a binary was built from that commit.
+
+`--reference-tool` defaults to `mav-reference-decode` in `--fixture-build`.
+The runner uses the helper's CMake cache to locate the FFmpeg runtime libraries
+when `DYLD_LIBRARY_PATH` is not already set. If the helper cannot supply the
+required software decoder, reference validation fails before timed comparison;
+it cannot substitute another VideoToolbox decode for an independent reference.
+
+For each noise fixture, the runner generates one raw planar YUV reference and
+checks every visible Y, U, and V sample from both builds against it. Maximum
+allowed differences are 2 code values for 8-bit and 8 for 10-bit output; exact
+expected sample counts are also required. After both correctness checks, the
+large raw reference is deleted before preparing the next case. Reserve at
+least 6 GB of scratch space for one reference with the supplied modes, plus
+space for compressed fixtures and reports; larger custom fixtures may need
+more. All reference generation and validation finish before serial timed
+replay starts, so software decoding does not contend with the performance run.
 
 Each new run uses a fresh results directory so previous evidence survives.
 `--prepare-only` validates and prepares fixtures without timed replay; its output
@@ -226,7 +256,15 @@ arguments or configuration fail before a comparison starts.
 environment records capture compiler/SDK, build configuration, source and
 executable identity, model, OS, and power/thermal observations. Raw native JSON,
 frame CSV, command logs, and fixture bytes remain available for review and
-reanalysis. Archive the whole results directory to preserve these relationships.
+reanalysis. For noise fixtures, the framework preserves the original manifest
+and a derived validation manifest that identifies reference-based correctness,
+records the original manifest hash, and points to the identical compressed
+bytes. A reference sidecar preserves the software decoder command, executable
+identity, library version/provenance, selected runtime library path, and raw
+reference hash. Full-frame comparison counts and errors remain in the native
+results. The temporary raw reference is not retained; it can be regenerated
+from the preserved fixture with the recorded software toolchain. Archive the
+whole results directory to preserve these relationships.
 
 The report separates these questions:
 
@@ -234,6 +272,8 @@ The report separates these questions:
   tolerance?
 * Did correctness and hardware validation pass, with complete output accounting
   and no rejected frames, scheduler drops, resets, or failed output?
+* For noise fixtures, did both builds match the independent software reference
+  across every expected sample within the allowed reconstruction difference?
 * Did decoded throughput meet the configured fraction of the requested rate?
 * How did steady-state VT submit-to-callback and caller-visible
   arrival-to-output latency change between the two builds?
@@ -298,6 +338,11 @@ Preinstall `aomenc` with high-bit-depth support outside the Actions checkout,
 which the checkout action cleans between jobs. Set repository Actions variable
 `MAV_AOMENC` to its executable path, or make it available on the runner's `PATH`.
 Optional `MAV_DEVELOPER_DIR` selects the Xcode Developer directory.
+For the default bitrate matrix, set repository Actions variable
+`MAV_FFMPEG_ROOT` to an existing FFmpeg development prefix outside the checkout,
+including the headers, libraries, and software AV1/HEVC decoders. The workflow
+fails early if an explicit-bitrate configuration is selected without this
+prefix. This provisioned dependency is used only by the reference helper.
 Provision dependencies and confirm hardware access before benchmarking; an SSH
 or service session without the needed device access is not a successful decode
 test environment.
@@ -315,13 +360,15 @@ checks out the two exact commits, builds and tests them sequentially with the
 same Release options, verifies tiny SDR/HDR fixture
 generation with explicit bitrate targets and preserved import metadata, then
 calls the local runner. The default configuration is the 96-case bitrate matrix;
-the job allows up to six hours for builds, fixture generation, correctness
-checks, and the 96 minutes of paired timed replay. All encoding finishes before
-timed comparison. A
+the job allows up to six hours for builds, fixture generation, independent
+reference generation, correctness checks, and the 96 minutes of paired timed
+replay. All encoding and software reference work finish before timed comparison. A
 workflow-wide concurrency group prevents overlapping jobs from this workflow;
 keep unrelated workloads off the same device as well. Results, fixture bytes,
 JUnit output, build logs, CMake caches, and compile commands upload even when
-the comparison fails. Both `report.md` and `results.json` are included in the
+the comparison fails. Reference provenance sidecars are retained; temporary raw
+references are removed after correctness validation. Both `report.md` and
+`results.json` are included in the
 artifact, and the Markdown report is also copied into the job summary.
 Artifacts are retained for 30 days; download or archive evidence that must last
 longer. A missing runner or unsupported hardware leaves this job unable to

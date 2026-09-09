@@ -69,7 +69,10 @@ and CI runs. The [bitrate matrix](benchmarks/bitrate-matrix.yaml) covers all six
 resolution/frame-rate modes with 50, 100, 250, and 350 Mbps targets for AV1/HEVC
 and SDR/HDR10 (96 cases). Requested targets and measured encoded rates are
 reported separately. It compares two builds using identical fixtures and
-alternating run order, and writes human-readable `report.md`, machine-readable
+alternating run order. Explicit-bitrate noise fixtures require full-frame
+comparison against an independent software reference before timing; the optional
+FFmpeg helper is a testing dependency only. Each comparison writes
+human-readable `report.md`, machine-readable
 `results.json`, and JUnit results alongside the raw measurements.
 The [full paired toolchain comparison](docs/toolchain-paired-comparison.md)
 records all requested modes, the queue-32 startup control, and balanced

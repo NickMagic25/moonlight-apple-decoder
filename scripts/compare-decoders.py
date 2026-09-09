@@ -24,6 +24,8 @@ import xml.etree.ElementTree as ET
 
 from benchmark_config import load_config
 from benchmark_analysis import caller_timings, distribution
+from benchmark_reference import (SOURCE_PATTERN, REFERENCE_PATTERN, requires_reference,
+                                 prepare_reference, validate_reference, cleanup_reference)
 from environment import capture
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -146,8 +148,8 @@ def verify_fixture(path, case):
         raise ValueError('fixture manifest must be an object')
     generator = manifest.get('generator')
     if (not isinstance(generator, dict)
-            or generator.get('pattern') != 'moving-gradient-detail-square-frame-id-v1'):
-        raise ValueError('fixture must use the supported visible-frame-ID pattern for correctness validation')
+            or generator.get('pattern') not in (SOURCE_PATTERN, REFERENCE_PATTERN)):
+        raise ValueError('fixture must use a supported correctness validation pattern')
     expected = dict(width=case['width'], height=case['height'], codec=case['codec'],
                     variant='sdr8' if case['dynamic_range'] == 'sdr' else 'hdr10',
                     bit_depth=8 if case['dynamic_range'] == 'sdr' else 10, chroma='420')
@@ -251,6 +253,27 @@ def prepare_fixture(case, fixture_build, aomenc, out, timeout):
     target_payload = destination / info['payload_file']
     target_payload.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(payload, target_payload)
+    if requires_reference(info['generator']) and info['generator']['pattern'] != REFERENCE_PATTERN:
+        # Lossy compression can erase synthetic source markers. Preserve the
+        # encoder's manifest, and require independent full-frame comparison for
+        # this derived replay manifest. Compressed payload bytes do not change.
+        shutil.copyfile(path, destination / 'source-manifest.json')
+        manifest = read_json(path)
+        manifest['generator']['pattern'] = REFERENCE_PATTERN
+        manifest['correctness_reference'] = dict(method='full-frame-software-comparison',
+                                                 source_manifest_sha256=info['manifest_sha256'])
+        write_json(destination / 'manifest.json', manifest)
+        info, _ = verify_fixture(destination / 'manifest.json', case)
+        info['source_manifest'] = str((destination / 'source-manifest.json').relative_to(out))
+        info['source_manifest_sha256'] = sha(path)
+    elif read_json(path).get('correctness_reference'):
+        original = path.parent / 'source-manifest.json'
+        declared = read_json(path)['correctness_reference']['source_manifest_sha256']
+        if sha(original) != declared or read_json(original)['payload_sha256'] != info['payload_sha256']:
+            raise ValueError('imported derived fixture has invalid original encoder provenance')
+        shutil.copyfile(original, destination / 'source-manifest.json')
+        info['source_manifest'] = str((destination / 'source-manifest.json').relative_to(out))
+        info['source_manifest_sha256'] = declared
     info.update(manifest=str((destination / 'manifest.json').relative_to(out)),
                 original_manifest=str(path), generation_command=command)
     return info
@@ -282,10 +305,19 @@ def invoke(plan, out, case, setting, phase, repetition):
     prefix = out / relative
     prefix.parent.mkdir(parents=True, exist_ok=True)
     command, offered = replay_command(build['binary'], manifest, prefix, case, plan['config']['run'], phase)
+    reference = None
+    if phase == 'correctness' and requires_reference(info['generator']):
+        reference = case.get('reference_info')
+        if not reference:
+            raise ValueError('noise fixture correctness requires an independent software reference')
+        validate_reference(reference, case, out, require_raw=True)
+        command += ['--reference-raw', str(out / reference['raw_path'])]
     record = dict(case=case['name'], setting=setting, phase=phase, repetition=repetition,
                   command=command, expected_offered=offered, result_file=str(relative) + '.json',
                   csv_file=str(relative) + '.csv', log_file=str(relative) + '.log',
                   started_at=now(), state='RUNNING', exit_code=None)
+    if reference:
+        record['reference_raw_sha256'] = reference['raw_sha256']
     plan['runs'].append(record)
     write_json(out / 'plan.json', plan)
     print(f"{phase} {case['name']} {setting} {repetition}", flush=True)
@@ -329,9 +361,8 @@ def inspect_run(record, case, out, thresholds):
         if (planned_warmup < 0 or planned_loops < 1 or planned_loop_mode != 'continuous'
                 or planned_loops * case['frames'] != record['expected_offered']):
             raise ValueError('planned warmup/loop settings are inconsistent')
-        for field in ('result_file', 'csv_file'):
-            if not record.get(field + '_sha256') or sha(out / record[field]) != record[field + '_sha256']:
-                raise ValueError(f'{field} missing or changed since execution')
+        if not record.get('result_file_sha256') or sha(out / record['result_file']) != record['result_file_sha256']:
+            raise ValueError('result_file missing or changed since execution')
         result = read_json(out / record['result_file'])
         if not isinstance(result, dict) or result.get('status') not in ('PASS', 'FAIL'):
             raise ValueError('missing/invalid native status')
@@ -340,6 +371,11 @@ def inspect_run(record, case, out, thresholds):
             errors.append('native FAIL: ' + result.get('reason', 'accounting/hardware gate failed'))
         if record['state'] != 'FINISHED' or record['exit_code'] != 0:
             errors.append(f"process {record['state']}, exit {record['exit_code']}")
+        # Early native correctness failures may emit only JSON. Keep the
+        # verified native diagnosis before rejecting the absent trace; otherwise
+        # a useful pixel/format error is hidden behind "CSV missing".
+        if not record.get('csv_file_sha256') or sha(out / record['csv_file']) != record['csv_file_sha256']:
+            raise ValueError('csv_file missing or changed since execution')
         for key in ('offered', 'submitted', 'completed', 'displayed_outputs', 'scheduler_drops',
                     'rejected', 'failed_or_cancelled_or_dropped', 'expected_display_mismatches', 'trace_overflow', 'resets'):
             if type(result.get(key)) is not int or result[key] < 0:
@@ -395,7 +431,26 @@ def inspect_run(record, case, out, thresholds):
             for key in ('correctness_sink', 'iosurface_metal_verified', 'retained_after_destroy_verified'):
                 if result.get(key) is not True:
                     errors.append(key + ' was not verified')
+            if requires_reference(case['fixture_info'].get('generator', {})):
+                reference = case.get('reference_info')
+                if not reference:
+                    raise ValueError('noise fixture lacks independent software reference evidence')
+                validate_reference(reference, case, out)
+                if (pathlib.Path(argument('--reference-raw')) != out / reference['raw_path']
+                        or record.get('reference_raw_sha256') != reference['raw_sha256']):
+                    errors.append('software reference invocation differs from verified reference')
+                expected_samples = case['width'] * case['height'] * 3 // 2 * case['frames']
+                tolerance = 2 if case['dynamic_range'] == 'sdr' else 8
+                if (type(result.get('software_reference_samples')) is not int
+                        or result['software_reference_samples'] != expected_samples):
+                    errors.append('software reference did not compare every output sample')
+                maximum = result.get('software_reference_max_code_error')
+                if (type(maximum) not in (int, float) or not 0 <= maximum <= tolerance
+                        or result.get('software_reference_tolerance') != tolerance):
+                    errors.append('software reference pixel tolerance failed or is missing')
         else:
+            if '--reference-raw' in command or result.get('software_reference_samples', 0) != 0:
+                errors.append('software reference work must not run during timing')
             if not positive_number(result.get('decoded_fps')):
                 raise ValueError('missing/invalid delivered frame rate')
             if result['decoded_fps'] < case['fps'] * thresholds['decoded_fps_ratio']:
@@ -476,6 +531,23 @@ def analyze(plan, out):
             for field in ('manifest_sha256', 'payload_sha256'):
                 if archived[field] != case['fixture_info'][field]:
                     raise ValueError('archived fixture ' + field + ' changed after preparation')
+            if requires_reference(archived['generator']):
+                if not requires_reference(case['fixture_info'].get('generator', {})):
+                    raise ValueError('archived noise profile differs from the correctness plan')
+                if not case.get('reference_info'):
+                    raise ValueError('noise fixture lacks independent software reference evidence')
+                validate_reference(case['reference_info'], case, out)
+            source = case['fixture_info'].get('source_manifest')
+            derivation = read_json(out / case['fixture_info']['manifest']).get('correctness_reference')
+            if derivation and (not source or derivation.get('source_manifest_sha256') !=
+                               case['fixture_info'].get('source_manifest_sha256')):
+                raise ValueError('derived fixture lost original encoder provenance')
+            if source:
+                original = out / source
+                if sha(original) != case['fixture_info']['source_manifest_sha256']:
+                    raise ValueError('original encoder manifest changed after preparation')
+                if read_json(original)['payload_sha256'] != archived['payload_sha256']:
+                    raise ValueError('derived manifest differs from original compressed payload')
         except (OSError, ValueError, TypeError, KeyError, UnicodeError) as error:
             fixture_error = 'fixture evidence invalid: ' + str(error)
         records = [inspect_run(record, case, out, thresholds) for record in plan['runs'] if record['case'] == case['name']]
@@ -567,7 +639,8 @@ def report_markdown(result, path):
         metrics = case['comparisons']
         cells = []
         for setting in ('baseline', 'candidate'):
-            values = [r for r in case['runs'] if r['phase'] == 'timed' and r['setting'] == setting and 'metrics' in r]
+            values = [r for r in case['runs'] if r['phase'] == 'timed' and r['setting'] == setting
+                      and all(f'vt_{q}_ms' in r.get('metrics', {}) for q in ('median', 'p95', 'p99'))]
             cells.append(' / '.join(number(statistics.median([r['metrics'][f'vt_{q}_ms'] for r in values])) if values else '—'
                                     for q in ('median', 'p95', 'p99')))
         delta = metrics.get('vt_median_ms', {}).get('median_paired_delta_pct')
@@ -586,6 +659,13 @@ def report_markdown(result, path):
     for case in result['cases']:
         lines += [f"## {case['name']}", '', f"Status: {case['status']}", '']
         settings = case['settings']
+        reference = settings.get('reference_info')
+        if reference:
+            checked = [r.get('native', {}) for r in case['runs'] if r['phase'] == 'correctness']
+            lines += [f"Full-frame software reference: {reference['metadata']['decoder']}; "
+                      f"{reference['expected_samples']:,} samples expected per build; "
+                      'observed maximum code errors: ' + ', '.join(str(r.get('software_reference_max_code_error', 'unavailable'))
+                                                                  for r in checked) + '.', '']
         ratio = case['bitrate']['measured_to_requested_ratio']
         lines += [f"Stream: {settings['width']}×{settings['height']} at {settings['fps']} fps; "
                   f"{settings['codec'].upper()}, {settings['dynamic_range'].upper()}. "
@@ -621,6 +701,7 @@ def main(argv=None):
     parser.add_argument('--candidate-build')
     parser.add_argument('--baseline-build')
     parser.add_argument('--fixture-build')
+    parser.add_argument('--reference-tool', help='mav-reference-decode built with MAV_FFMPEG_ROOT; defaults to fixture build')
     parser.add_argument('--candidate-revision')
     parser.add_argument('--baseline-revision')
     parser.add_argument('--aomenc', default=os.environ.get('AOMENC', str(ROOT / '.local/aom-build/aomenc')))
@@ -652,7 +733,7 @@ def main(argv=None):
     harness = out / 'harness'
     harness.mkdir()
     for name in ('compare-decoders.py', 'benchmark_config.py', 'benchmark_analysis.py',
-                 'environment.py', 'requirements-benchmarks.txt'):
+                 'benchmark_reference.py', 'environment.py', 'requirements-benchmarks.txt'):
         shutil.copyfile(ROOT / 'scripts' / name, harness / name)
     plan = dict(schema_version=1, created_at=now(), state='PREPARING', config=config, builds={},
                 cases=[dict(case) for case in config['cases']], runs=[],
@@ -676,6 +757,11 @@ def main(argv=None):
                 if left['cmake_cache'].get(key) != right['cmake_cache'].get(key):
                     raise ValueError('comparison build flags differ: ' + key)
         fixture_build = pathlib.Path(args.fixture_build or args.candidate_build).resolve()
+        reference_tool = pathlib.Path(args.reference_tool).resolve() if args.reference_tool else fixture_build / 'mav-reference-decode'
+        if (not args.prepare_only and any(case['bitrate_mbps'] is not None for case in plan['cases'])
+                and (not reference_tool.is_file() or not os.access(reference_tool, os.X_OK))):
+            raise ValueError('explicit bitrate fixtures require --reference-tool pointing to mav-reference-decode; '
+                             'build it with -DMAV_FFMPEG_ROOT=<FFmpeg development prefix>')
         aomenc = pathlib.Path(args.aomenc).resolve()
         for case in plan['cases']:
             print('prepare ' + case['name'], flush=True)
@@ -696,11 +782,22 @@ def main(argv=None):
         for case in plan['cases']:
             if 'error' in case:
                 continue
-            for setting in plan['builds']:
-                record = invoke(plan, out, case, setting, 'correctness', 1)
-                check = inspect_run(record, case, out, config['thresholds'])
-                if not check['passed']:
-                    case['error'] = 'correctness gate failed for ' + setting + ': ' + '; '.join(check['errors'])
+            try:
+                if requires_reference(case['fixture_info'].get('generator', {})):
+                    case['reference_info'] = prepare_reference(reference_tool,
+                        out / case['fixture_info']['manifest'], case, out,
+                        config['run']['timeout_seconds'], run_encoder)
+                    write_json(out / 'plan.json', plan)
+                for setting in plan['builds']:
+                    record = invoke(plan, out, case, setting, 'correctness', 1)
+                    check = inspect_run(record, case, out, config['thresholds'])
+                    if not check['passed']:
+                        case['error'] = 'correctness gate failed for ' + setting + ': ' + '; '.join(check['errors'])
+            except (OSError, ValueError, KeyError, subprocess.TimeoutExpired) as error:
+                case['error'] = 'correctness preparation failed: ' + str(error)
+            finally:
+                if case.get('reference_info'):
+                    cleanup_reference(case['reference_info'], out)
             write_json(out / 'plan.json', plan)
         for index, case in enumerate(plan['cases']):
             if 'error' in case:

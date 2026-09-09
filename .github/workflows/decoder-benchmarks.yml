@@ -32,6 +32,7 @@ jobs:
       BASELINE_SHA: ${{ inputs.baseline_sha }}
       CONFIGURATION: ${{ inputs.configuration }}
       MAV_AOMENC: ${{ vars.MAV_AOMENC }}
+      MAV_FFMPEG_ROOT: ${{ vars.MAV_FFMPEG_ROOT }}
       MAV_DEVELOPER_DIR: ${{ vars.MAV_DEVELOPER_DIR }}
     steps:
       - name: Check out the selected candidate commit
@@ -76,6 +77,24 @@ jobs:
           persist-credentials: false
       - name: Install benchmark parser dependency
         run: python -m pip install --requirement scripts/requirements-benchmarks.txt
+      - name: Validate independent software reference prerequisites
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os, pathlib, sys
+          sys.path.insert(0, str(pathlib.Path("scripts").resolve()))
+          from benchmark_config import load_config
+          config = load_config(os.environ["CONFIGURATION"])
+          required = any(case["bitrate_mbps"] is not None for case in config["cases"])
+          prefix = os.environ.get("MAV_FFMPEG_ROOT", "")
+          if required and not prefix:
+              raise SystemExit("Explicit-bitrate cases require an independent software reference. Set repository variable MAV_FFMPEG_ROOT to a preinstalled FFmpeg prefix with include/, lib/, and software AV1/HEVC decoders.")
+          if prefix:
+              root = pathlib.Path(prefix).resolve()
+              if not (root / "include/libavcodec/avcodec.h").is_file() or not (root / "lib").is_dir():
+                  raise SystemExit("MAV_FFMPEG_ROOT must contain include/libavcodec/avcodec.h and lib/; provision the FFmpeg development files before dispatching.")
+          PY
       - name: Test YAML configuration and comparison runner before building
         run: python -m unittest discover -s tests -p 'benchmark_*.py' -v
       - name: Validate example configurations without hardware
@@ -119,6 +138,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_TESTING=ON \
             -DMAV_BUILD_TOOLS=ON -DMAV_VT_EXPERIMENTS=OFF -DMAV_SANITIZE=OFF \
+            -DMAV_FFMPEG_ROOT="$MAV_FFMPEG_ROOT" \
             2>&1 | tee results/hardware-build/candidate-configure.log
           cmake --build build-ci-candidate --parallel 3 2>&1 | tee results/hardware-build/candidate-build.log
           ctest --test-dir build-ci-candidate --output-on-failure --output-junit "$PWD/build-ci-candidate/ctest.xml" \
@@ -138,11 +158,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          if [[ -n "$MAV_FFMPEG_ROOT" ]]; then
+            export DYLD_LIBRARY_PATH="$MAV_FFMPEG_ROOT/lib${DYLD_LIBRARY_PATH:+:$DYLD_LIBRARY_PATH}"
+          fi
           python scripts/compare-decoders.py \
             --config "$CONFIGURATION" \
             --candidate-build build-ci-candidate \
             --baseline-build build-ci-baseline \
             --fixture-build build-ci-candidate \
+            --reference-tool build-ci-candidate/mav-reference-decode \
             --candidate-revision "$GITHUB_SHA" \
             --baseline-revision "$BASELINE_SHA" \
             --aomenc "$AOMENC" \

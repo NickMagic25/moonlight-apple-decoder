@@ -113,7 +113,7 @@ class FixtureTests(unittest.TestCase):
         for generator in (None, {}, dict(pattern='unverified-capture')):
             with self.subTest(generator=generator):
                 self.change(lambda manifest: manifest.update(generator=generator))
-                with self.assertRaisesRegex(ValueError, 'supported visible-frame-ID pattern'):
+                with self.assertRaisesRegex(ValueError, 'supported correctness validation pattern'):
                     RUNNER.verify_fixture(self.path, self.case)
 
     def test_visible_identity_and_exact_gop_must_match(self):
