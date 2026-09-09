@@ -167,7 +167,17 @@ class EncoderProcessTests(unittest.TestCase):
                 self.assertEqual(created[0].returncode, -signal.SIGKILL)
                 with lock_path.open('r') as lock:
                     # The fake encoder holds this lock until it terminates.
-                    fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    # Reaping the parent does not wait for the descendant to
+                    # finish handling SIGKILL on a busy hosted runner.
+                    deadline = time.monotonic() + 5
+                    while True:
+                        try:
+                            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                            break
+                        except BlockingIOError:
+                            if time.monotonic() >= deadline:
+                                self.fail('native encoder descendant retained its lock after timeout')
+                            time.sleep(0.02)
                 # The parent was reaped and the child released its lock.
                 cleanup_complete = True
             finally:
