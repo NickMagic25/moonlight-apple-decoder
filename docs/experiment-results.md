@@ -1,5 +1,10 @@
 # Isolated latency experiments
 
+This is the historical comparison report from `b126a85`. Main subsequently
+adopts the scanner, parser-state and optional replay-pacing branches; see
+[adoption and combined validation](main-adoption.md). The measurements and
+reproduction instructions below still refer to their recorded branch revisions.
+
 The paced **1 ms median objective remains unmet** on this Apple M3. The HEVC
 scanner is a measurable, bounded preparation optimization; the scheduling,
 dispatch, parser-state, cold-start and encoder experiments are separate branches

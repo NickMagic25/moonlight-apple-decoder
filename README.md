@@ -58,6 +58,8 @@ paced and saturated decode and ranks the next experiments toward the 1 ms goal.
 The [isolated experiment results](docs/experiment-results.md) compare those
 branches, including 4K60 SDR/HDR correctness and hardware timing, with commands
 and evidence for choosing which changes to prioritize.
+Main adopts the HEVC scanner and parser-state optimizations plus optional replay
+pacing. See [adopted changes and combined validation](docs/main-adoption.md).
 
 ## Architecture and consumer compatibility
 
