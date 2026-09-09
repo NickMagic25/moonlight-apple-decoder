@@ -2,6 +2,7 @@
 """Plan the bounded AV1 tile sweep or summarize saved fixtures; never run tools."""
 import argparse
 import json
+import hashlib
 from pathlib import Path
 
 
@@ -55,9 +56,22 @@ def summarize(args):
             quality = settings.get("quality")
             if not quality:
                 raise ValueError(f"requested quality measurements unavailable: {path}")
+            geometry_path = path.parent / "tile-geometry.json"
+            geometry_verified = False
+            if geometry_path.exists():
+                geometry = json.loads(geometry_path.read_text())
+                ivf_hash = hashlib.sha256((path.parent / "encoded.ivf").read_bytes()).hexdigest()
+                if (geometry["status"] != "PASS" or not geometry["all_frames_match_expected_counts"] or
+                    not geometry["all_frame_geometry_consistent"] or geometry["ivf_sha256"] != ivf_hash or
+                    geometry["decoded_frames"] != len(manifest["access_units"]) or
+                    (geometry["width"], geometry["height"], geometry["expected_columns"], geometry["expected_rows"]) != (width, height, 1 << columns, 1)):
+                    raise ValueError(f"tile geometry probe is stale or failed: {geometry_path}")
+                geometry_verified = True
+            elif getattr(args, "require_geometry", False):
+                raise ValueError(f"required tile geometry probe missing: {geometry_path}")
             rows.append({"tile_columns_log2": columns,
                          "requested_columns": 1 << columns,
-                         "encoded_geometry_verified": False,
+                         "encoded_geometry_verified": geometry_verified,
                          "fixture_sha256": manifest["payload_sha256"],
                          "payload_bytes": settings["payload_bytes"],
                          "payload_bitrate_bps": settings["payload_bitrate_bps"],
@@ -72,7 +86,7 @@ def summarize(args):
     return {"status": "SAVED_FIXTURE_QUALITY_AND_SIZE_ONLY", "groups": groups,
             "limitations": ["Fixed CQ is not fixed bitrate or equal reconstruction quality.",
                             "PSNR is encoder-reported sample-domain fidelity, not HDR perceptual quality.",
-                            "Tile flags are requests; emitted geometry is not independently parsed here.",
+                            "Encoded geometry is verified only when the matching optional libaom probe passes.",
                             "Decode latency must come from separate centrally scheduled replay measurements."]}
 
 
@@ -84,6 +98,7 @@ def main():
     parser.add_argument("--aomenc", default=".local/aom-build/aomenc")
     parser.add_argument("--frames", type=int, default=120)
     parser.add_argument("--gop", type=int, default=60)
+    parser.add_argument("--require-geometry", action="store_true", help="Require matching tile-geometry.json for all nine saved IVF files")
     args = parser.parse_args()
     if not 3 <= args.frames <= 100000 or not 1 <= args.gop <= args.frames:
         parser.error("require 3..100000 frames and 1 <= gop <= frames")

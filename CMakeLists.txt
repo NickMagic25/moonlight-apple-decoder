@@ -11,6 +11,7 @@ if(MAV_SANITIZE)
  add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer)
  add_link_options(-fsanitize=address,undefined)
 endif()
+
 add_library(mav-bitstream STATIC src/bitstream.cpp)
 target_include_directories(mav-bitstream PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
 set_target_properties(mav-bitstream PROPERTIES POSITION_INDEPENDENT_CODE ON)
@@ -88,4 +89,14 @@ if(APPLE AND CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND MAV_BUILD_TOOLS AND MAV_FFM
  target_include_directories(mav-reference-decode PRIVATE "${MAV_AVCODEC_INCLUDE}")
  target_compile_options(mav-reference-decode PRIVATE -fobjc-arc)
  target_link_libraries(mav-reference-decode PRIVATE "${MAV_AVCODEC}" "${MAV_AVUTIL}" "-framework Foundation")
+endif()
+
+# Explicitly opt-in offline inspection only; no AOM dependency on the decoder.
+set(MAV_AOM_SOURCE "" CACHE PATH "AOM source root containing public aom/ headers")
+set(MAV_AOM_LIBRARY "" CACHE FILEPATH "Built libaom archive for offline tile inspection")
+if(APPLE AND CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND MAV_BUILD_TOOLS AND MAV_AOM_SOURCE AND MAV_AOM_LIBRARY)
+ add_executable(mav-tile-geometry tools/tile_geometry.mm)
+ target_include_directories(mav-tile-geometry PRIVATE "${MAV_AOM_SOURCE}")
+ target_compile_options(mav-tile-geometry PRIVATE -fobjc-arc)
+ target_link_libraries(mav-tile-geometry PRIVATE "${MAV_AOM_LIBRARY}" Threads::Threads "-framework Foundation")
 endif()
