@@ -45,6 +45,7 @@ class EncoderProcessTests(unittest.TestCase):
             parent = ('import subprocess,sys,time; '
                       f'subprocess.Popen([sys.executable,"-c",{child!r}],pass_fds=({write_fd},)); time.sleep(60)')
             created = []
+            cleanup_complete = False
             original = subprocess.Popen
 
             def spawn(*args, **kwargs):
@@ -69,13 +70,17 @@ class EncoderProcessTests(unittest.TestCase):
                 self.assertTrue(select.select([read_fd], [], [], 1)[0],
                                 'encoder descendant survived the parent timeout')
                 self.assertEqual(os.read(read_fd, 1024), b'')
+                # Both processes are gone. Do not signal a stale group ID;
+                # hosted macOS can return EPERM after that group disappears.
+                cleanup_complete = True
             finally:
                 os.close(read_fd)
                 if created:
-                    try:
-                        os.killpg(created[0].pid, signal.SIGKILL)
-                    except ProcessLookupError:
-                        pass
+                    if not cleanup_complete:
+                        try:
+                            os.killpg(created[0].pid, signal.SIGKILL)
+                        except (ProcessLookupError, PermissionError):
+                            pass
                     created[0].wait()
                 else:
                     os.close(write_fd)
@@ -136,6 +141,7 @@ class EncoderProcessTests(unittest.TestCase):
                        '--codec', 'av1', '--output', str(root / 'fixture'), '--aomenc', str(fake),
                        '--width', '64', '--height', '64', '--fps', '30', '--frames', '2']
             created = []
+            cleanup_complete = False
             original = subprocess.Popen
 
             def spawn(*args, **kwargs):
@@ -162,19 +168,22 @@ class EncoderProcessTests(unittest.TestCase):
                 with lock_path.open('r') as lock:
                     # The fake encoder holds this lock until it terminates.
                     fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                # The parent was reaped and the child released its lock.
+                cleanup_complete = True
             finally:
                 if created:
-                    if metadata.is_file():
+                    if not cleanup_complete and metadata.is_file():
                         pid = json.loads(metadata.read_text())['pid']
                         try:
                             if os.getsid(pid) == created[0].pid:
                                 os.kill(pid, signal.SIGKILL)
-                        except ProcessLookupError:
+                        except (ProcessLookupError, PermissionError):
                             pass
-                    try:
-                        os.killpg(created[0].pid, signal.SIGKILL)
-                    except ProcessLookupError:
-                        pass
+                    if not cleanup_complete:
+                        try:
+                            os.killpg(created[0].pid, signal.SIGKILL)
+                        except (ProcessLookupError, PermissionError):
+                            pass
                     created[0].wait()
 
 
