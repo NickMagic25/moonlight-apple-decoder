@@ -25,6 +25,21 @@ build/mav-replay --fixture fixtures/generated/example/manifest.json --mode corre
 
 Change `av1` to `hevc` and `hdr10` to `sdr8` to cover the other variants. The test pattern has gradients, moving detail, a translating square, and sixteen high-contrast frame-ID cells. AV1 uses a two-column tiled, good-quality CPU6 encode with zero lag, alternate-reference generation disabled, and fixed periodic keys; the parser verifies the result rather than trusting these settings. AOM's realtime CPU8 mode erased some 10-bit frame-ID cells in the compressed stream, confirmed independently with aomdec, so it is not used for baseline generation. HEVC disables encoder frame reordering and uses its actual sample attachments and parameter sets to derive complete Annex-B access units.
 
+AV1 layout experiments can explicitly set `--av1-tile-columns N` and
+`--av1-tile-rows N`, with each value in 0..6 and expressed as log2 of the requested
+tile count. Defaults remain column log2=1 and AOM's omitted row argument
+(default 0). All other compression settings, including fixed CQ 12, remain
+unchanged. `--aom-psnr 1` additionally requests the encoder's reconstruction PSNR;
+it defaults off. `--plan-only 1` writes `encoder-settings.json` without creating
+source pixels or launching an encoder. The settings distinguish planned from
+actual launch arguments and record bitrate and optional quality measurements
+after generation. They are also embedded in the generated manifest. Geometry
+in the encoded bitstream is not independently verified by this tool; tile
+arguments are requests, not measured layout evidence.
+
+See [the bounded encoder-layout experiment](encoder-layout-experiment.md) for the
+1080p120 SDR and 4K60 SDR/HDR comparison plan and HEVC control availability.
+
 Both HDR generators encode actual 10-bit 4:2:0 pixels with Main/Main10 profiles as appropriate and BT.2020/PQ signaling. The fixture tool supplies standards-defined AV1 HDR metadata OBUs or HEVC prefix SEI for a deterministic 1000-nit mastering display and MaxCLL/MaxFALL. These are compressed-stream metadata, not labels attached after decoding. VT accepted compression mastering properties but omitted some SEI on this machine; explicit fixture metadata closes that gap. AV1 MDCV RGB fixed-point units are converted to the public API's HEVC/SMPTE2086 G,B,R representation by the production parser.
 
 ## Manifest schema 1
