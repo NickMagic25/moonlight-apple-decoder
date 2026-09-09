@@ -2,7 +2,7 @@
 
 The production decoder has no encoder or FFmpeg dependency. The macOS `mav-fixture` tool uses `VTCompressionSession` for HEVC and the standalone AOM encoder for AV1. `mav-replay` reads complete access units and uses the installed public C API and the same native decoder linked into Moonlight Qt.
 
-Build with an available CMake 3.20+ and Xcode macOS SDK:
+Build with an available CMake 3.23+ and Xcode macOS SDK:
 
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release

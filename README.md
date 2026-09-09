@@ -9,7 +9,10 @@ dependency. Native H.264 is not implemented.
 ## Build
 
 Prerequisites: Apple SDK with the public AV1 declarations (Xcode 15+), CMake
-3.20+, C++17 compiler; Swift 5.9+ for SwiftPM. This work was built with SDK 26.5.
+3.23+, and a compiler supporting C++23 for both C++ and Objective-C++.
+SwiftPM requires Swift 6.3+ and compiles Swift sources in Swift 6 language mode;
+its `.cxx2b` setting selects C++23. The upgrade was validated with Xcode 26.6,
+Apple Clang 21, Swift 6.3.3, and SDK 26.5.
 The core supports macOS 11+, iOS/iPadOS 17+, tvOS 17+; AV1 hardware sessions are
 runtime gated (macOS 14+/iOS/tvOS 17+ plus actual hardware support). These are
 library targets, not a change to a consumer application's deployment target.
@@ -33,6 +36,9 @@ swift run -c release mav-swift-smoke
 The Swift target imports the C Clang module; Swift C++ interoperability is not
 required. See [Swift ownership smoke](examples/swift/main.swift) and the full
 ownership/concurrency contract in the public header.
+
+See [C++23 and Swift 6.3 validation](docs/toolchain-upgrade.md) for the upgrade's
+regression coverage and consumer compatibility checks.
 
 Portable parser and mock lifecycle tests also build on Linux. Linux tests and
 simulator builds never establish VideoToolbox hardware performance.
