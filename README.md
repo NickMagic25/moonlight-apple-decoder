@@ -63,6 +63,11 @@ results, and limits. Encoders run before replay, never during timing. Strict
 coverage fails when a required codec/variant is unavailable. Hardware-required
 session creation and actual hardware output are checked separately.
 
+The [YAML testing framework](docs/testing-framework.md) configures resolution,
+frame rate, codec, dynamic range, bitrate, and decoder settings for local and CI
+runs. It compares two builds using identical fixtures and alternating run order,
+and preserves raw measurements with JSON, Markdown, and JUnit reports.
+
 [Latency optimization investigation](docs/optimization-investigation.md) compares
 paced and saturated decode and ranks the next experiments toward the 1 ms goal.
 The [isolated experiment results](docs/experiment-results.md) compare those

@@ -1,0 +1,25 @@
+# Paired follow-up for the known 3440x1440@240 AV1 startup backlog.
+# Queue depth is arrival-age tolerance in frame intervals, not a speed change.
+schema_version: 1
+defaults:
+  resolution: 3440x1440
+  fps: 240
+  codec: av1
+  dynamic_range: [sdr, hdr10]
+  bitrate_kbps: null
+  gop: 60
+  decoder:
+    inflight: 2
+    queue_depth: 32
+    power: -1
+run:
+  seconds: 10
+  repetitions: 3
+  warmup_frames: 120
+  timeout_seconds: 180
+thresholds:
+  decoded_fps_ratio: 0.99
+  latency_relative_pct: 5.0
+  latency_absolute_ms: 0.1
+cases:
+  - name: ultrawide-q32

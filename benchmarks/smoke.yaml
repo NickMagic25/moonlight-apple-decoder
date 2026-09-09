@@ -1,0 +1,21 @@
+# Small hardware smoke test with an actual encoder target, in decimal kbps.
+# Both decoders in a comparison receive the same encoded bytes.
+schema_version: 1
+defaults:
+  resolution: 320x180
+  fps: 60
+  codec: [av1, hevc]
+  dynamic_range: sdr
+  bitrate_kbps: 1000
+  frames: 120
+  gop: 60
+  decoder:
+    inflight: 2
+    queue_depth: 32
+run:
+  seconds: 2
+  repetitions: 1
+  warmup_frames: 10
+  timeout_seconds: 180
+cases:
+  - name: bitrate-smoke
