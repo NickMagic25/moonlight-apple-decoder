@@ -1,11 +1,18 @@
 #include "apple.hpp"
+#ifdef MAV_VT_EXPERIMENTS
+#include "vt_experiment.hpp"
+#endif
 #include <map>
 #include <mutex>
 namespace mav {
 class VideoToolboxBackend final:public Backend {
     VTDecompressionSessionRef session_=nullptr;CMVideoFormatDescriptionRef format_=nullptr;
     BackendInfo info_;mav_color color_{};Format parsed_;
-    std::mutex mutex_;std::map<Work*,std::shared_ptr<Work>> pending_;
+    mutable std::mutex mutex_;std::map<Work*,std::shared_ptr<Work>> pending_;
+#ifdef MAV_VT_EXPERIMENTS
+    VTExperiment experiment_;
+    bool first_output_=false;
+#endif
     static void callback(void* context,void* source,OSStatus status,VTDecodeInfoFlags flags,CVImageBufferRef image,CMTime,CMTime) {
         // First instruction measuring callback ENTRY, before ownership/map work.
         uint64_t entry=mav_monotonic_time_ns();
@@ -14,13 +21,37 @@ class VideoToolboxBackend final:public Backend {
     void finish(Work* key,OSStatus status,VTDecodeInfoFlags flags,CVImageBufferRef image,uint64_t entry) {
         std::shared_ptr<Work> work;
         {std::lock_guard<std::mutex> l(mutex_);auto it=pending_.find(key);if(it==pending_.end())return;work=std::move(it->second);pending_.erase(it);}
+#ifdef MAV_VT_EXPERIMENTS
+        experiment_.completed(work.get(),entry,status,flags);
+#endif
         if(work->completion_claimed.exchange(true))return;
         BackendOutput out;out.result=vt_result(status);out.status=status;out.callback_ns=entry;
         out.dropped=(flags&kVTDecodeInfo_FrameDropped)!=0;
         if(image&&status==noErr) {
             out.width=static_cast<uint32_t>(CVPixelBufferGetWidth(image));out.height=static_cast<uint32_t>(CVPixelBufferGetHeight(image));out.pixel_format=CVPixelBufferGetPixelFormatType(image);
-            if(out.pixel_format!=info_.pixel_format||out.width!=parsed_.width||out.height!=parsed_.height) {out.result=MAV_UNSUPPORTED;}
-            else {out.image=image;out.color=image_color(image);attach_missing_color(image,color_);}
+            bool pixel_matches;
+#ifdef MAV_VT_EXPERIMENTS
+            bool first_output=false;
+            {std::lock_guard<std::mutex> l(mutex_);
+                first_output=!first_output_;first_output_=true;
+                pixel_matches=experiment_.native_pixel?experiment_.accepts_native_pixel(out.pixel_format):out.pixel_format==info_.pixel_format;
+                if(experiment_.native_pixel&&pixel_matches){
+                    if(!info_.pixel_format)info_.pixel_format=out.pixel_format;
+                    else pixel_matches=out.pixel_format==info_.pixel_format;
+                }
+            }
+            if(first_output)experiment_.log_first_output(session_,image,entry);
+#else
+            pixel_matches=out.pixel_format==info_.pixel_format;
+#endif
+            if(!pixel_matches||out.width!=parsed_.width||out.height!=parsed_.height) {out.result=MAV_UNSUPPORTED;}
+            else {out.image=image;out.color=image_color(image);
+#ifdef MAV_VT_EXPERIMENTS
+                // image_color's production FourCC list contains linear bi-planar
+                // formats only. An allowed experiment preserves signaled range.
+                if(experiment_.pixel_format||experiment_.native_pixel){out.color.valid|=MAV_COLOR_RANGE;out.color.full_range=color_.full_range;}
+#endif
+                attach_missing_color(image,color_);}
         } else if(!status&&work->display&&!out.dropped) {
             // Valid hidden frames are successful no-display. A displayed frame
             // without an image is visible as a drop, never a fake output.
@@ -42,6 +73,19 @@ public:
     ~VideoToolboxBackend()override{invalidate();}
     mav_result configure(const Format& f,const mav_config& c,const mav_color& color)override {
         invalidate();info_=BackendInfo{};color_=color;parsed_=f;
+#ifdef MAV_VT_EXPERIMENTS
+        if(!experiment_.load()){experiment_.log_failure(MAV_INVALID_ARGUMENT);return MAV_INVALID_ARGUMENT;}
+        first_output_=false;
+        experiment_.allowed_format_count=c.pixel_format_count;
+        for(uint32_t i=0;i<c.pixel_format_count;++i)experiment_.allowed_formats[i]=c.pixel_formats[i];
+        mav_config settings=c;
+        if(experiment_.realtime!=-1)settings.realtime=experiment_.realtime;
+        if(experiment_.thread_count!=-1)settings.thread_count=static_cast<uint32_t>(experiment_.thread_count);
+        if(experiment_.power_efficiency!=-1)settings.power_efficiency=experiment_.power_efficiency;
+        if(settings.realtime&&settings.power_efficiency==1){experiment_.error="RealTime and MaximizePowerEfficiency cannot both be enabled";experiment_.log_failure(MAV_UNSUPPORTED);return MAV_UNSUPPORTED;}
+#else
+        const mav_config& settings=c;
+#endif
         mav_capability cap{};cap.struct_size=sizeof(cap);cap.version=MAV_ABI_VERSION;
         auto available=backend_capability(c.codec,cap);
         if(available!=MAV_OK)return available;
@@ -50,13 +94,28 @@ public:
         auto dimensions=CMVideoFormatDescriptionGetDimensions(format_);
         if(dimensions.width!=static_cast<int32_t>(f.width)||dimensions.height!=static_cast<int32_t>(f.height)){invalidate();return MAV_MALFORMED_INPUT;}
         uint32_t pixel=f.bit_depth==10?(color.full_range?kCVPixelFormatType_420YpCbCr10BiPlanarFullRange:kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange):(color.full_range?kCVPixelFormatType_420YpCbCr8BiPlanarFullRange:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange);
+#ifdef MAV_VT_EXPERIMENTS
+        if(!experiment_.select_pixel(pixel)){experiment_.log_failure(MAV_UNSUPPORTED);invalidate();return MAV_UNSUPPORTED;}
+#endif
+#ifdef MAV_VT_EXPERIMENTS
+        if(!experiment_.native_pixel)
+#endif
         if(c.pixel_format_count){bool found=false;for(uint32_t i=0;i<c.pixel_format_count;++i)found|=c.pixel_formats[i]==pixel;if(!found){invalidate();return MAV_UNSUPPORTED;}}
         CFHolder<CFMutableDictionaryRef> spec(dictionary()),attrs(dictionary()),surface(dictionary());
         if(@available(macOS 10.9,iOS 17.0,tvOS 17.0,*)) {
             CFDictionarySetValue(spec,c.hardware_policy==MAV_HARDWARE_REQUIRED?kVTVideoDecoderSpecification_RequireHardwareAcceleratedVideoDecoder:kVTVideoDecoderSpecification_EnableHardwareAcceleratedVideoDecoder,kCFBooleanTrue);
         } else {invalidate();return MAV_API_UNAVAILABLE;}
+#ifdef MAV_VT_EXPERIMENTS
+        if(!experiment_.native_pixel)
+#endif
         number(attrs,kCVPixelBufferPixelFormatTypeKey,static_cast<int>(pixel));
+#ifdef MAV_VT_EXPERIMENTS
+        if(experiment_.iosurface)
+#endif
         CFDictionarySetValue(attrs,kCVPixelBufferIOSurfacePropertiesKey,surface);
+#ifdef MAV_VT_EXPERIMENTS
+        if(experiment_.metal)
+#endif
         CFDictionarySetValue(attrs,kCVPixelBufferMetalCompatibilityKey,kCFBooleanTrue);
         VTDecompressionOutputCallbackRecord cb{callback,this};
         status=VTDecompressionSessionCreate(kCFAllocatorDefault,format_,spec,attrs,&cb,&session_);info_.last_status=status;
@@ -66,14 +125,20 @@ public:
         if(!status&&hardware.value&&CFGetTypeID(hardware)==CFBooleanGetTypeID())info_.hardware=CFBooleanGetValue(static_cast<CFBooleanRef>(hardware.value));
         if(c.hardware_policy==MAV_HARDWARE_REQUIRED&&(!info_.hardware||status)){info_.last_status=status;invalidate();return MAV_UNSUPPORTED;}
         info_.pixel_format=pixel;
+#ifdef MAV_VT_EXPERIMENTS
+        if(experiment_.native_pixel)info_.pixel_format=0;
+#endif
         CFHolder<CFDictionaryRef> properties;status=VTSessionCopySupportedPropertyDictionary(session_,properties.out());
         if(status){info_.realtime_status=status;info_.power_status=status;info_.thread_status=status;}
         else {
-            info_.realtime_status=property(properties,kVTDecompressionPropertyKey_RealTime,c.realtime?kCFBooleanTrue:kCFBooleanFalse,info_.realtime_effective);
-            if(c.power_efficiency!=-1)info_.power_status=property(properties,kVTDecompressionPropertyKey_MaximizePowerEfficiency,c.power_efficiency?kCFBooleanTrue:kCFBooleanFalse,info_.power_effective);
+            info_.realtime_status=property(properties,kVTDecompressionPropertyKey_RealTime,settings.realtime?kCFBooleanTrue:kCFBooleanFalse,info_.realtime_effective);
+            if(settings.power_efficiency!=-1)info_.power_status=property(properties,kVTDecompressionPropertyKey_MaximizePowerEfficiency,settings.power_efficiency?kCFBooleanTrue:kCFBooleanFalse,info_.power_effective);
             else {CFHolder<CFTypeRef> v;auto s=VTSessionCopyProperty(session_,kVTDecompressionPropertyKey_MaximizePowerEfficiency,kCFAllocatorDefault,v.out());info_.power_status=s;if(!s&&v.value&&CFGetTypeID(v)==CFBooleanGetTypeID())info_.power_effective=CFBooleanGetValue(static_cast<CFBooleanRef>(v.value));}
-            if(c.thread_count){int n=c.thread_count;CFHolder<CFNumberRef> value(CFNumberCreate(kCFAllocatorDefault,kCFNumberIntType,&n));info_.thread_status=property(properties,kVTDecompressionPropertyKey_ThreadCount,value,info_.thread_effective);}
+            if(settings.thread_count){int n=settings.thread_count;CFHolder<CFNumberRef> value(CFNumberCreate(kCFAllocatorDefault,kCFNumberIntType,&n));info_.thread_status=property(properties,kVTDecompressionPropertyKey_ThreadCount,value,info_.thread_effective);}
         }
+#ifdef MAV_VT_EXPERIMENTS
+        experiment_.log_session(session_,c,settings,info_,properties,status);
+#endif
         return MAV_OK;
     }
     void submit(std::shared_ptr<Work> w)override {
@@ -82,9 +147,20 @@ public:
             if(status){BackendOutput o;o.result=vt_result(status);o.status=status;w->complete(o);return;}
             {std::lock_guard<std::mutex> l(mutex_);pending_.emplace(w.get(),w);}
             VTDecodeInfoFlags flags=0;
+#ifdef MAV_VT_EXPERIMENTS
+            VTDecodeFrameFlags decode_flags=experiment_.asynchronous?kVTDecodeFrame_EnableAsynchronousDecompression:0;
+#else
+            const VTDecodeFrameFlags decode_flags=kVTDecodeFrame_EnableAsynchronousDecompression;
+#endif
             w->submit_ns.store(mav_monotonic_time_ns());
-            status=VTDecompressionSessionDecodeFrame(session_,sample,kVTDecodeFrame_EnableAsynchronousDecompression,w.get(),&flags);
+#ifdef MAV_VT_EXPERIMENTS
+            experiment_.begin(w.get(),w->submit_ns.load());
+#endif
+            status=VTDecompressionSessionDecodeFrame(session_,sample,decode_flags,w.get(),&flags);
             w->return_ns.store(mav_monotonic_time_ns());
+#ifdef MAV_VT_EXPERIMENTS
+            experiment_.returned(w.get(),w->return_ns.load(),status);
+#endif
             // SDK guarantees no callback for a synchronous error. Map removal
             // is idempotent and ownership also survives an inline success.
             if(status)finish(w.get(),status,flags,nullptr,0);
@@ -107,7 +183,12 @@ public:
         if(session_){drain();VTDecompressionSessionInvalidate(session_);CFRelease(session_);session_=nullptr;}
         if(format_){CFRelease(format_);format_=nullptr;}
     }
-    BackendInfo info()const override{return info_;}
+    BackendInfo info()const override{
+#ifdef MAV_VT_EXPERIMENTS
+        std::lock_guard<std::mutex> l(mutex_);
+#endif
+        return info_;
+    }
 };
 std::unique_ptr<Backend> make_backend(){return std::make_unique<VideoToolboxBackend>();}
 mav_result backend_capability(mav_codec codec,mav_capability& c) {

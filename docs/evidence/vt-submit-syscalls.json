@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "kind": "per-frame-vt-submit-syscall-diagnostic",
+  "case": "hevc-system",
+  "scope": "Only the replay process submitting thread, inside exactly joined steady VTDecodeCall intervals. No unrelated process data or raw stack/address dump is included.",
+  "sources": {
+    "filtered_target_syscalls": {
+      "path": "results/vt-profile/hevc-system-submit-syscalls.json",
+      "size_bytes": 1743627,
+      "sha256": "d99929d057a86251d19458da7b81e92d28ee16b807ea2cd8396f217f440bacab"
+    },
+    "local_aggregate": {
+      "path": "results/vt-profile/hevc-system-submit-syscall-summary.json",
+      "size_bytes": 7736,
+      "sha256": "5b79e7c4f0d3d13c80c4179b4cc5e97d997bc895545d81bd16ec0fb65e8cb7d8"
+    },
+    "joined_frames": {
+      "path": "results/vt-profile/all-joined-frames.json",
+      "size_bytes": 1603771,
+      "sha256": "5b2d0d2b0edd43b26a98ef5030d1d691b31f578a7b3316319151c68874ee7880"
+    },
+    "profile_aggregate": {
+      "path": "docs/evidence/vt-profile-analysis.json",
+      "size_bytes": 27489,
+      "sha256": "3aa419b710cf47773ba91214d0cf6be92b71741b867409917ed652a0a044e377"
+    },
+    "profile_source_hashes": {
+      "result": {
+        "name": "hevc-system.json",
+        "sha256": "bac9c7e7d3790848da2697424340e043130c2924fb5cc0e10054a9c8f2a9a421"
+      },
+      "csv": {
+        "name": "hevc-system.csv",
+        "sha256": "b9d9ffd20ca9f843efa3735c19e4bbdda78f306b9bf8711cf01c8731a6a65604"
+      },
+      "toc": {
+        "name": "hevc-system-toc.xml",
+        "sha256": "8d72637b0929542231864ead4e4917cb2657a6bae64f0e78d980fd9b7ab949d4"
+      },
+      "regions": {
+        "name": "hevc-system-region-of-interest.xml",
+        "sha256": "fe0024c464bc9194720491b3958336c8e1d9f2e32a484d11cd47b222ca84724e"
+      },
+      "thread_states": {
+        "name": "hevc-system-thread-state.xml",
+        "sha256": "887cb207b83d44ac7997e029c75d4dfa15b3f3761d553291e8243447f8132b71"
+      }
+    },
+    "raw_syscall_export": {
+      "path": "results/vt-profile/hevc-system-syscall.xml",
+      "size_bytes": 220099874,
+      "sha256": "8e312adbc379cfa39308f82013f556910e24365d34152d7619942c930e7a42b2",
+      "hash_note": "Full raw export hashed after all timing runs completed."
+    }
+  },
+  "replay": {
+    "status": "PASS",
+    "codec": "hevc",
+    "width": 3840,
+    "height": 2160,
+    "bit_depth": 8,
+    "mode": "paced",
+    "offered": 600,
+    "submitted": 600,
+    "completed": 600,
+    "displayed_outputs": 600,
+    "warmup_frames": 120,
+    "fixture_sha256": "adcf92ca66452bb9fb27af351218e8c60c78ff6cb51062989085f57aecc6d318"
+  },
+  "capture": {
+    "duration": "25.806953",
+    "recording-mode": "Windowed (25 seconds)",
+    "end-reason": "Time limit reached",
+    "template-name": "System Trace",
+    "process_exit_status": null,
+    "process_identity": "Exact submit timestamp matches between signpost payloads and CSV"
+  },
+  "methodology": [
+    "Streamed the syscall XML with ElementTree.iterparse, resolving typed global XML id/ref values and clearing each row after filtering; did not construct a full document tree.",
+    "Selected the submitting TID determined by exact CLOCK_UPTIME_RAW submit timestamp joins between replay CSV and VTDecodeCall signposts. Filtered out all other threads and processes before saving the local subset.",
+    "Used the 480 frames marked steady by scripts/analyze-vt-profile.py after the 120 offered warmup frames; each call interval is in the trace time domain.",
+    "Intersected each selected syscall start/end with each steady VTDecodeCall interval on the same thread. All selected syscall intervals were wholly contained, so their wall durations require no clipping or attribution to inter-frame sleep.",
+    "Classified synchronous XPC only when the exported stack explicitly contained xpc_connection_send_message_with_reply_sync. Deeper unsymbolized frames were not inferred.",
+    "Per-frame percentiles include zero overlap on frames without that syscall. Each share divides summed syscall wall overlap by summed trace-native submit-call wall time, not by submit-to-callback time."
+  ],
+  "accounting": {
+    "exact_csv_signpost_joins": 600,
+    "offered_frames": 600,
+    "steady_frames": 480,
+    "steady_call_intervals": 480,
+    "submit_threads": 1,
+    "selected_syscall_rows": 2463,
+    "clipped_syscall_rows": 0,
+    "steady_submit_call_wall_ns": 398148721,
+    "frame_ids_with_condition_wait": 480
+  },
+  "syscall_wall_overlap": [
+    {
+      "call": "BSC_psynch_cvwait",
+      "count": 480,
+      "overlap_ns": 228647496,
+      "per_frame_overlap_p50_ns": 495208.5,
+      "per_frame_overlap_p95_ns": 608574.9999999999,
+      "fraction_of_submit_call_wall": 0.5742766055501155
+    },
+    {
+      "call": "MSC_mach_msg2_trap",
+      "count": 1152,
+      "overlap_ns": 120591919,
+      "per_frame_overlap_p50_ns": 256229.0,
+      "per_frame_overlap_p95_ns": 358967.3,
+      "fraction_of_submit_call_wall": 0.3028815933330601
+    },
+    {
+      "call": "MSC_mach_vm_deallocate_trap",
+      "count": 88,
+      "overlap_ns": 2071254,
+      "per_frame_overlap_p50_ns": 0.0,
+      "per_frame_overlap_p95_ns": 25539.59999999985,
+      "fraction_of_submit_call_wall": 0.005202211863943172
+    },
+    {
+      "call": "MSC_mach_vm_allocate_trap",
+      "count": 88,
+      "overlap_ns": 1126950,
+      "per_frame_overlap_p50_ns": 0.0,
+      "per_frame_overlap_p95_ns": 13752.099999999999,
+      "fraction_of_submit_call_wall": 0.002830474997306346
+    },
+    {
+      "call": "BSC_gettimeofday",
+      "count": 480,
+      "overlap_ns": 1040362,
+      "per_frame_overlap_p50_ns": 2167.0,
+      "per_frame_overlap_p95_ns": 2959.0,
+      "fraction_of_submit_call_wall": 0.0026129984730002436
+    },
+    {
+      "call": "BSC_kevent_id",
+      "count": 86,
+      "overlap_ns": 813338,
+      "per_frame_overlap_p50_ns": 0.0,
+      "per_frame_overlap_p95_ns": 11710.099999999999,
+      "fraction_of_submit_call_wall": 0.002042799479443763
+    },
+    {
+      "call": "MSC_mach_port_deallocate_trap",
+      "count": 88,
+      "overlap_ns": 519158,
+      "per_frame_overlap_p50_ns": 0.0,
+      "per_frame_overlap_p95_ns": 6256.2499999999945,
+      "fraction_of_submit_call_wall": 0.0013039298448481013
+    },
+    {
+      "call": "MSC_semaphore_signal_trap",
+      "count": 1,
+      "overlap_ns": 2209,
+      "per_frame_overlap_p50_ns": 0.0,
+      "per_frame_overlap_p95_ns": 0.0,
+      "fraction_of_submit_call_wall": 5.54817806384464e-06
+    }
+  ],
+  "synchronous_xpc": {
+    "matching_syscall_rows": 960,
+    "frames_with_matching_syscall": 480,
+    "overlap_ns": 116544844,
+    "fraction_of_submit_call_wall": 0.29271686144635384,
+    "fraction_of_mach_msg2_wall": 0.9664399154308175,
+    "per_frame_overlap_p50_ns": 251687.0,
+    "per_frame_overlap_p95_ns": 336835.3999999999,
+    "observed_call_chain": [
+      "xpc_connection_send_message_with_reply_sync",
+      "dispatch_mach_send_with_result_and_wait_for_reply",
+      "_dispatch_mach_send_and_wait_for_reply",
+      "mach_msg2_trap"
+    ]
+  },
+  "interpretation": [
+    "The largest selected syscall interval is a condition-variable wait: exactly one psynch_cvwait per steady call, via _pthread_cond_wait.",
+    "The next largest syscall family is Mach IPC, dominated by explicitly synchronous XPC send/reply paths. Both execute within the public VT submit call, before its output callback and before Qt wrapping.",
+    "This identifies API-visible waiting and IPC overhead; it does not establish what the condition variable or remote service is waiting for, nor isolate hardware decode execution."
+  ],
+  "limitations": [
+    "This is a single instrumented HEVC SDR8 4K60 diagnostic, not an uninstrumented performance comparison or proof of the same breakdown for AV1/HDR/other hardware.",
+    "Use vt-profile-analysis.json thread-state intersections for Running/Blocked/Runnable accounting. Raw syscall cputime/waittime annotations were observed not to partition syscall wall duration consistently and are deliberately omitted here.",
+    "Signpost emission adds instrumentation overhead. Trace-native interval endpoints bracket the API but differ slightly from raw timestamp endpoints; the joined profile evidence quantifies those deltas.",
+    "Middle framework and application frames in the all-process syscall export lack symbol/binary metadata. This report names only visible symbols and does not infer missing callers.",
+    "Synchronous XPC spans are a subset of mach_msg2 spans, not an additional disjoint cost. Per-phase percentiles are not additive.",
+    "The raw all-process export stays local; this portable artifact contains only target-specific aggregate evidence."
+  ]
+}

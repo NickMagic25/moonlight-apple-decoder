@@ -1,0 +1,963 @@
+{
+  "schema_version": 1,
+  "kind": "per-frame-vt-system-trace-diagnostic",
+  "runs": [
+    {
+      "case": "av1-paced",
+      "sources": {
+        "result": {
+          "name": "av1-paced.json",
+          "sha256": "5c8a38d6ffa3a3e06573655c31641dd645100cc2f67f3b5f5ef659869892060d"
+        },
+        "csv": {
+          "name": "av1-paced.csv",
+          "sha256": "e5371b9fd9d58595ce2ddb46c27af199a9dfecc6865b90ca92eab695f90cb096"
+        },
+        "toc": {
+          "name": "av1-paced-toc.xml",
+          "sha256": "4fa8ea9319de97d6164d8fe3da78469ba54f3826bbdb1f471de99920a212b08f"
+        },
+        "regions": {
+          "name": "av1-paced-region-of-interest.xml",
+          "sha256": "44be763716eee5802b30c73eef1464970fb3caac704e23c68e262c64965f6c3b"
+        },
+        "thread_states": {
+          "name": "av1-paced-thread-state.xml",
+          "sha256": "cbdc9294f37fcae1e0cbd917a2f564ea2070fb05a3c1c0807361d02a6bb1d2ad"
+        }
+      },
+      "capture": {
+        "duration": "10.910079",
+        "recording-mode": "Windowed (20 seconds)",
+        "end-reason": "Target app exited",
+        "template-name": "System Trace",
+        "process_exit_status": "0",
+        "process_identity": "Exact submit timestamp matches between signpost payloads and CSV"
+      },
+      "replay": {
+        "status": "PASS",
+        "codec": "av1",
+        "width": 3840,
+        "height": 2160,
+        "bit_depth": 8,
+        "mode": "paced",
+        "offered": 600,
+        "submitted": 600,
+        "completed": 600,
+        "displayed_outputs": 600,
+        "warmup_frames": 120,
+        "fixture_sha256": "677010412d5d4e45bd60b405c36aef8156b1e60b0c8092aedd889a4e7e794ae8"
+      },
+      "accounting_errors": [],
+      "join_errors": [],
+      "exact_joins": 600,
+      "csv_rows": 600,
+      "region_counts": {
+        "VTDecodeCall": 600,
+        "VTFrame": 600
+      },
+      "extra_regions": {
+        "VTDecodeCall": 0,
+        "VTFrame": 0
+      },
+      "unmatched_regions": 0,
+      "unjoined_csv_rows": 0,
+      "target_threads_with_state_records": 8,
+      "submit_threads": 1,
+      "submit_threads_without_state_records": 1,
+      "callback_before_return_frames": 0,
+      "csv_missing_return_frames": 0,
+      "all_frames": {
+        "frames": 600,
+        "metrics": {
+          "raw_call_ns": {
+            "count": 600,
+            "mean": 832006.1733333333,
+            "median": 797395.5,
+            "p95": 1145815.2,
+            "p99": 4577702.739999999,
+            "min": 124750,
+            "max": 7745791
+          },
+          "raw_vt_ns": {
+            "count": 600,
+            "mean": 3071902.9066666667,
+            "median": 2767271.0,
+            "p95": 3252108.3499999996,
+            "p99": 17645800.509999998,
+            "min": 1633333,
+            "max": 23307792
+          },
+          "trace_call_ns": {
+            "count": 600,
+            "mean": 830380.8383333334,
+            "median": 796271.0,
+            "p95": 1144971.5,
+            "p99": 4577602.09,
+            "min": 124750,
+            "max": 7745500
+          },
+          "trace_frame_ns": {
+            "count": 600,
+            "mean": 3072058.4066666667,
+            "median": 2767709.0,
+            "p95": 3252597.9499999997,
+            "p99": 17646382.25,
+            "min": 1633458,
+            "max": 23300917
+          },
+          "call_duration_delta_ns": {
+            "count": 600,
+            "mean": -1625.335,
+            "median": -771.0,
+            "p95": -333.0,
+            "p99": 0.009999999999990905,
+            "min": -65417,
+            "max": 3916
+          },
+          "frame_duration_delta_ns": {
+            "count": 600,
+            "mean": 155.5,
+            "median": 250.0,
+            "p95": 625.0,
+            "p99": 917.3999999999996,
+            "min": -6875,
+            "max": 8542
+          }
+        },
+        "submit_thread_states_ns": {
+          "Blocked": {
+            "count": 600,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "min": 0,
+            "max": 0,
+            "sum": 0,
+            "nonzero_frames": 0
+          },
+          "Runnable": {
+            "count": 600,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "min": 0,
+            "max": 0,
+            "sum": 0,
+            "nonzero_frames": 0
+          },
+          "Running": {
+            "count": 600,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "min": 0,
+            "max": 0,
+            "sum": 0,
+            "nonzero_frames": 0
+          },
+          "ambiguous": {
+            "count": 600,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "min": 0,
+            "max": 0,
+            "sum": 0,
+            "nonzero_frames": 0
+          },
+          "uncovered": {
+            "count": 600,
+            "mean": 830380.8383333334,
+            "median": 796271.0,
+            "p95": 1144971.5,
+            "p99": 4577602.09,
+            "min": 124750,
+            "max": 7745500,
+            "sum": 498228503,
+            "nonzero_frames": 600
+          }
+        },
+        "fully_covered_frames": 0,
+        "fully_known_frames": 0
+      },
+      "steady": {
+        "frames": 480,
+        "metrics": {
+          "raw_call_ns": {
+            "count": 480,
+            "mean": 822189.9354166667,
+            "median": 818834.0,
+            "p95": 1130264.6,
+            "p99": 1267929.179999999,
+            "min": 125708,
+            "max": 6875958
+          },
+          "raw_vt_ns": {
+            "count": 480,
+            "mean": 3024426.4625,
+            "median": 2798729.5,
+            "p95": 3222128.849999999,
+            "p99": 17463508.72,
+            "min": 1658125,
+            "max": 17993458
+          },
+          "trace_call_ns": {
+            "count": 480,
+            "mean": 820549.8354166667,
+            "median": 816854.5,
+            "p95": 1128795.8499999999,
+            "p99": 1267223.859999999,
+            "min": 125500,
+            "max": 6874666
+          },
+          "trace_frame_ns": {
+            "count": 480,
+            "mean": 3024644.6104166666,
+            "median": 2798916.5,
+            "p95": 3222738.1499999994,
+            "p99": 17464121.959999997,
+            "min": 1658125,
+            "max": 17993958
+          },
+          "call_duration_delta_ns": {
+            "count": 480,
+            "mean": -1640.1,
+            "median": -751.0,
+            "p95": -334.0,
+            "p99": -116.39000000000084,
+            "min": -65417,
+            "max": 3916
+          },
+          "frame_duration_delta_ns": {
+            "count": 480,
+            "mean": 218.14791666666667,
+            "median": 291.0,
+            "p95": 625.05,
+            "p99": 957.21,
+            "min": -6292,
+            "max": 8542
+          }
+        },
+        "submit_thread_states_ns": {
+          "Blocked": {
+            "count": 480,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "min": 0,
+            "max": 0,
+            "sum": 0,
+            "nonzero_frames": 0
+          },
+          "Runnable": {
+            "count": 480,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "min": 0,
+            "max": 0,
+            "sum": 0,
+            "nonzero_frames": 0
+          },
+          "Running": {
+            "count": 480,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "min": 0,
+            "max": 0,
+            "sum": 0,
+            "nonzero_frames": 0
+          },
+          "ambiguous": {
+            "count": 480,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "min": 0,
+            "max": 0,
+            "sum": 0,
+            "nonzero_frames": 0
+          },
+          "uncovered": {
+            "count": 480,
+            "mean": 820549.8354166667,
+            "median": 816854.5,
+            "p95": 1128795.8499999999,
+            "p99": 1267223.859999999,
+            "min": 125500,
+            "max": 6874666,
+            "sum": 393863921,
+            "nonzero_frames": 480
+          }
+        },
+        "fully_covered_frames": 0,
+        "fully_known_frames": 0
+      },
+      "join_qualified": true,
+      "scheduling_qualified": false
+    },
+    {
+      "case": "hevc-paced",
+      "sources": {
+        "result": {
+          "name": "hevc-paced.json",
+          "sha256": "9bb4e8d3f1630a0082a82981745725b1b84391c539e229ca27fb92acc424139f"
+        },
+        "csv": {
+          "name": "hevc-paced.csv",
+          "sha256": "278b705de790dbc21bcf6ad666f19c6839ba8bb35a94b35f0b24e0e4c040cdd8"
+        },
+        "toc": {
+          "name": "hevc-paced-toc.xml",
+          "sha256": "c0b1d932347d1cc0eea3a75710ea18b34b1168632883a4b0168e99a5e871a4eb"
+        },
+        "regions": {
+          "name": "hevc-paced-region-of-interest.xml",
+          "sha256": "452e189cf9b263a02a2d85ec533acf412178a25aba84f7049dfb2c63e55b17f0"
+        },
+        "thread_states": {
+          "name": "hevc-paced-thread-state.xml",
+          "sha256": "27946bad2c19f83749bda263731a161d79d589773dfda1410186067647416651"
+        }
+      },
+      "capture": {
+        "duration": "10.886146",
+        "recording-mode": "Windowed (20 seconds)",
+        "end-reason": "Target app exited",
+        "template-name": "System Trace",
+        "process_exit_status": "0",
+        "process_identity": "Exact submit timestamp matches between signpost payloads and CSV"
+      },
+      "replay": {
+        "status": "PASS",
+        "codec": "hevc",
+        "width": 3840,
+        "height": 2160,
+        "bit_depth": 8,
+        "mode": "paced",
+        "offered": 600,
+        "submitted": 600,
+        "completed": 600,
+        "displayed_outputs": 600,
+        "warmup_frames": 120,
+        "fixture_sha256": "adcf92ca66452bb9fb27af351218e8c60c78ff6cb51062989085f57aecc6d318"
+      },
+      "accounting_errors": [],
+      "join_errors": [],
+      "exact_joins": 600,
+      "csv_rows": 600,
+      "region_counts": {
+        "VTDecodeCall": 600,
+        "VTFrame": 600
+      },
+      "extra_regions": {
+        "VTDecodeCall": 0,
+        "VTFrame": 0
+      },
+      "unmatched_regions": 0,
+      "unjoined_csv_rows": 0,
+      "target_threads_with_state_records": 5,
+      "submit_threads": 1,
+      "submit_threads_without_state_records": 1,
+      "callback_before_return_frames": 0,
+      "csv_missing_return_frames": 0,
+      "all_frames": {
+        "frames": 600,
+        "metrics": {
+          "raw_call_ns": {
+            "count": 600,
+            "mean": 689834.51,
+            "median": 683646.0,
+            "p95": 1078962.1999999997,
+            "p99": 1596793.4199999995,
+            "min": 153875,
+            "max": 8551208
+          },
+          "raw_vt_ns": {
+            "count": 600,
+            "mean": 2648569.11,
+            "median": 2586437.0,
+            "p95": 3157541.699999999,
+            "p99": 8641539.079999989,
+            "min": 1664334,
+            "max": 11831042
+          },
+          "trace_call_ns": {
+            "count": 600,
+            "mean": 688199.7816666666,
+            "median": 680396.0,
+            "p95": 1078116.6999999997,
+            "p99": 1596665.2499999993,
+            "min": 152791,
+            "max": 8551125
+          },
+          "trace_frame_ns": {
+            "count": 600,
+            "mean": 2648501.3666666667,
+            "median": 2586687.5,
+            "p95": 3157646.449999999,
+            "p99": 8641748.749999989,
+            "min": 1663750,
+            "max": 11825083
+          },
+          "call_duration_delta_ns": {
+            "count": 600,
+            "mean": -1634.7283333333332,
+            "median": -750.0,
+            "p95": -333.0,
+            "p99": -82.59000000000037,
+            "min": -42834,
+            "max": 2791
+          },
+          "frame_duration_delta_ns": {
+            "count": 600,
+            "mean": -67.74333333333334,
+            "median": 167.0,
+            "p95": 542.0,
+            "p99": 791.8399999999992,
+            "min": -5959,
+            "max": 2500
+          }
+        },
+        "submit_thread_states_ns": {
+          "Blocked": {
+            "count": 600,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "min": 0,
+            "max": 0,
+            "sum": 0,
+            "nonzero_frames": 0
+          },
+          "Runnable": {
+            "count": 600,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "min": 0,
+            "max": 0,
+            "sum": 0,
+            "nonzero_frames": 0
+          },
+          "Running": {
+            "count": 600,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "min": 0,
+            "max": 0,
+            "sum": 0,
+            "nonzero_frames": 0
+          },
+          "ambiguous": {
+            "count": 600,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "min": 0,
+            "max": 0,
+            "sum": 0,
+            "nonzero_frames": 0
+          },
+          "uncovered": {
+            "count": 600,
+            "mean": 688199.7816666666,
+            "median": 680396.0,
+            "p95": 1078116.6999999997,
+            "p99": 1596665.2499999993,
+            "min": 152791,
+            "max": 8551125,
+            "sum": 412919869,
+            "nonzero_frames": 600
+          }
+        },
+        "fully_covered_frames": 0,
+        "fully_known_frames": 0
+      },
+      "steady": {
+        "frames": 480,
+        "metrics": {
+          "raw_call_ns": {
+            "count": 480,
+            "mean": 656399.2125,
+            "median": 672729.0,
+            "p95": 1023766.6499999999,
+            "p99": 1284274.9299999997,
+            "min": 263833,
+            "max": 1742292
+          },
+          "raw_vt_ns": {
+            "count": 480,
+            "mean": 2599924.314583333,
+            "median": 2562771.0,
+            "p95": 3036888.1,
+            "p99": 5911970.069999999,
+            "min": 1919292,
+            "max": 10589292
+          },
+          "trace_call_ns": {
+            "count": 480,
+            "mean": 654746.625,
+            "median": 670979.0,
+            "p95": 1022902.0999999999,
+            "p99": 1283781.8599999999,
+            "min": 263542,
+            "max": 1741250
+          },
+          "trace_frame_ns": {
+            "count": 480,
+            "mean": 2599795.19375,
+            "median": 2560520.5,
+            "p95": 3037145.5,
+            "p99": 5912312.679999999,
+            "min": 1919375,
+            "max": 10590083
+          },
+          "call_duration_delta_ns": {
+            "count": 480,
+            "mean": -1652.5875,
+            "median": -792.0,
+            "p95": -414.0000000000018,
+            "p99": -222.75000000000256,
+            "min": -39709,
+            "max": 2791
+          },
+          "frame_duration_delta_ns": {
+            "count": 480,
+            "mean": -129.12083333333334,
+            "median": 84.0,
+            "p95": 541.0,
+            "p99": 808.6399999999983,
+            "min": -4375,
+            "max": 2500
+          }
+        },
+        "submit_thread_states_ns": {
+          "Blocked": {
+            "count": 480,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "min": 0,
+            "max": 0,
+            "sum": 0,
+            "nonzero_frames": 0
+          },
+          "Runnable": {
+            "count": 480,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "min": 0,
+            "max": 0,
+            "sum": 0,
+            "nonzero_frames": 0
+          },
+          "Running": {
+            "count": 480,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "min": 0,
+            "max": 0,
+            "sum": 0,
+            "nonzero_frames": 0
+          },
+          "ambiguous": {
+            "count": 480,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "min": 0,
+            "max": 0,
+            "sum": 0,
+            "nonzero_frames": 0
+          },
+          "uncovered": {
+            "count": 480,
+            "mean": 654746.625,
+            "median": 670979.0,
+            "p95": 1022902.0999999999,
+            "p99": 1283781.8599999999,
+            "min": 263542,
+            "max": 1741250,
+            "sum": 314278380,
+            "nonzero_frames": 480
+          }
+        },
+        "fully_covered_frames": 0,
+        "fully_known_frames": 0
+      },
+      "join_qualified": true,
+      "scheduling_qualified": false
+    },
+    {
+      "case": "hevc-system",
+      "sources": {
+        "result": {
+          "name": "hevc-system.json",
+          "sha256": "bac9c7e7d3790848da2697424340e043130c2924fb5cc0e10054a9c8f2a9a421"
+        },
+        "csv": {
+          "name": "hevc-system.csv",
+          "sha256": "b9d9ffd20ca9f843efa3735c19e4bbdda78f306b9bf8711cf01c8731a6a65604"
+        },
+        "toc": {
+          "name": "hevc-system-toc.xml",
+          "sha256": "8d72637b0929542231864ead4e4917cb2657a6bae64f0e78d980fd9b7ab949d4"
+        },
+        "regions": {
+          "name": "hevc-system-region-of-interest.xml",
+          "sha256": "fe0024c464bc9194720491b3958336c8e1d9f2e32a484d11cd47b222ca84724e"
+        },
+        "thread_states": {
+          "name": "hevc-system-thread-state.xml",
+          "sha256": "887cb207b83d44ac7997e029c75d4dfa15b3f3761d553291e8243447f8132b71"
+        }
+      },
+      "capture": {
+        "duration": "25.806953",
+        "recording-mode": "Windowed (25 seconds)",
+        "end-reason": "Time limit reached",
+        "template-name": "System Trace",
+        "process_exit_status": null,
+        "process_identity": "Exact submit timestamp matches between signpost payloads and CSV"
+      },
+      "replay": {
+        "status": "PASS",
+        "codec": "hevc",
+        "width": 3840,
+        "height": 2160,
+        "bit_depth": 8,
+        "mode": "paced",
+        "offered": 600,
+        "submitted": 600,
+        "completed": 600,
+        "displayed_outputs": 600,
+        "warmup_frames": 120,
+        "fixture_sha256": "adcf92ca66452bb9fb27af351218e8c60c78ff6cb51062989085f57aecc6d318"
+      },
+      "accounting_errors": [],
+      "join_errors": [],
+      "exact_joins": 600,
+      "csv_rows": 600,
+      "region_counts": {
+        "VTDecodeCall": 600,
+        "VTFrame": 600
+      },
+      "extra_regions": {
+        "VTDecodeCall": 0,
+        "VTFrame": 0
+      },
+      "unmatched_regions": 0,
+      "unjoined_csv_rows": 0,
+      "target_threads_with_state_records": 9,
+      "submit_threads": 1,
+      "submit_threads_without_state_records": 0,
+      "callback_before_return_frames": 0,
+      "csv_missing_return_frames": 0,
+      "all_frames": {
+        "frames": 600,
+        "metrics": {
+          "raw_call_ns": {
+            "count": 600,
+            "mean": 837332.6983333334,
+            "median": 813520.5,
+            "p95": 1211760.3999999992,
+            "p99": 2089341.5799999998,
+            "min": 156666,
+            "max": 7886208
+          },
+          "raw_vt_ns": {
+            "count": 600,
+            "mean": 2887721.605,
+            "median": 2806916.5,
+            "p95": 3332468.0999999987,
+            "p99": 10162661.84,
+            "min": 1644083,
+            "max": 13584083
+          },
+          "trace_call_ns": {
+            "count": 600,
+            "mean": 835739.3216666667,
+            "median": 811770.5,
+            "p95": 1211271.1499999994,
+            "p99": 2089125.9199999997,
+            "min": 156667,
+            "max": 7887167
+          },
+          "trace_frame_ns": {
+            "count": 600,
+            "mean": 2887832.39,
+            "median": 2807250.0,
+            "p95": 3333214.899999999,
+            "p99": 10162815.239999998,
+            "min": 1643750,
+            "max": 13584500
+          },
+          "call_duration_delta_ns": {
+            "count": 600,
+            "mean": -1593.3766666666668,
+            "median": -708.0,
+            "p95": -375.0,
+            "p99": 0.0,
+            "min": -47958,
+            "max": 959
+          },
+          "frame_duration_delta_ns": {
+            "count": 600,
+            "mean": 110.785,
+            "median": 250.0,
+            "p95": 583.0,
+            "p99": 875.4099999999996,
+            "min": -5792,
+            "max": 6417
+          }
+        },
+        "submit_thread_states_ns": {
+          "Blocked": {
+            "count": 600,
+            "mean": 638150.9933333333,
+            "median": 637646.0,
+            "p95": 839644.6999999998,
+            "p99": 1225539.919999994,
+            "min": 110333,
+            "max": 7841458,
+            "sum": 382890596,
+            "nonzero_frames": 600
+          },
+          "Interrupted": {
+            "count": 600,
+            "mean": 922.5783333333334,
+            "median": 0.0,
+            "p95": 4304.499999999989,
+            "p99": 10630.419999999995,
+            "min": 0,
+            "max": 20459,
+            "sum": 553547,
+            "nonzero_frames": 137
+          },
+          "Preempted": {
+            "count": 600,
+            "mean": 4558.125,
+            "median": 0.0,
+            "p95": 0.0,
+            "p99": 77181.74999999991,
+            "min": 0,
+            "max": 869625,
+            "sum": 2734875,
+            "nonzero_frames": 16
+          },
+          "Runnable": {
+            "count": 600,
+            "mean": 24693.766666666666,
+            "median": 24083.0,
+            "p95": 39725.64999999999,
+            "p99": 79713.24999999984,
+            "min": 4501,
+            "max": 297667,
+            "sum": 14816260,
+            "nonzero_frames": 600
+          },
+          "Running": {
+            "count": 600,
+            "mean": 167413.85833333334,
+            "median": 138229.5,
+            "p95": 341422.3,
+            "p99": 768998.0099999999,
+            "min": 27835,
+            "max": 1138624,
+            "sum": 100448315,
+            "nonzero_frames": 600
+          },
+          "ambiguous": {
+            "count": 600,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "min": 0,
+            "max": 0,
+            "sum": 0,
+            "nonzero_frames": 0
+          },
+          "uncovered": {
+            "count": 600,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "min": 0,
+            "max": 0,
+            "sum": 0,
+            "nonzero_frames": 0
+          }
+        },
+        "fully_covered_frames": 600,
+        "fully_known_frames": 600
+      },
+      "steady": {
+        "frames": 480,
+        "metrics": {
+          "raw_call_ns": {
+            "count": 480,
+            "mean": 831104.2479166667,
+            "median": 831708.0,
+            "p95": 1175585.4,
+            "p99": 1535184.4599999997,
+            "min": 231334,
+            "max": 2119000
+          },
+          "raw_vt_ns": {
+            "count": 480,
+            "mean": 2879839.33125,
+            "median": 2831417.0,
+            "p95": 3233657.6999999997,
+            "p99": 6235411.859999999,
+            "min": 1875834,
+            "max": 10980250
+          },
+          "trace_call_ns": {
+            "count": 480,
+            "mean": 829476.5020833333,
+            "median": 826021.0,
+            "p95": 1174833.3499999999,
+            "p99": 1530934.4299999997,
+            "min": 230334,
+            "max": 2118125
+          },
+          "trace_frame_ns": {
+            "count": 480,
+            "mean": 2879947.7604166665,
+            "median": 2831687.5,
+            "p95": 3233835.0999999996,
+            "p99": 6235733.569999999,
+            "min": 1875500,
+            "max": 10981000
+          },
+          "call_duration_delta_ns": {
+            "count": 480,
+            "mean": -1627.7458333333334,
+            "median": -708.0,
+            "p95": -417.0,
+            "p99": -324.6000000000008,
+            "min": -47958,
+            "max": -167
+          },
+          "frame_duration_delta_ns": {
+            "count": 480,
+            "mean": 108.42916666666666,
+            "median": 250.0,
+            "p95": 543.9999999999982,
+            "p99": 883.6099999999992,
+            "min": -5250,
+            "max": 6417
+          }
+        },
+        "submit_thread_states_ns": {
+          "Blocked": {
+            "count": 480,
+            "mean": 624286.0479166667,
+            "median": 649958.5,
+            "p95": 813672.5999999999,
+            "p99": 946252.9299999998,
+            "min": 163334,
+            "max": 1219167,
+            "sum": 299657303,
+            "nonzero_frames": 480
+          },
+          "Interrupted": {
+            "count": 480,
+            "mean": 971.45,
+            "median": 0.0,
+            "p95": 4304.499999999989,
+            "p99": 11411.859999999977,
+            "min": 0,
+            "max": 20459,
+            "sum": 466296,
+            "nonzero_frames": 117
+          },
+          "Preempted": {
+            "count": 480,
+            "mean": 4027.43125,
+            "median": 0.0,
+            "p95": 0.0,
+            "p99": 79156.7499999998,
+            "min": 0,
+            "max": 869625,
+            "sum": 1933167,
+            "nonzero_frames": 12
+          },
+          "Runnable": {
+            "count": 480,
+            "mean": 25785.50625,
+            "median": 24667.0,
+            "p95": 40696.79999999994,
+            "p99": 97122.06999999995,
+            "min": 4501,
+            "max": 297667,
+            "sum": 12377043,
+            "nonzero_frames": 480
+          },
+          "Running": {
+            "count": 480,
+            "mean": 174406.06666666668,
+            "median": 142188.0,
+            "p95": 341855.5999999996,
+            "p99": 666857.4299999974,
+            "min": 49624,
+            "max": 995457,
+            "sum": 83714912,
+            "nonzero_frames": 480
+          },
+          "ambiguous": {
+            "count": 480,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "min": 0,
+            "max": 0,
+            "sum": 0,
+            "nonzero_frames": 0
+          },
+          "uncovered": {
+            "count": 480,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "min": 0,
+            "max": 0,
+            "sum": 0,
+            "nonzero_frames": 0
+          }
+        },
+        "fully_covered_frames": 480,
+        "fully_known_frames": 480
+      },
+      "join_qualified": true,
+      "scheduling_qualified": true
+    }
+  ],
+  "interpretation": "All durations are nanoseconds. Submit-thread states overlap trace-native VTDecodeCall intervals, not inferred clock offsets. Raw payload timestamps must join CSV exactly. Unknown/Idle/Interrupted/Preempted stay separate; uncovered and ambiguous intervals are explicit. No hardware-only timing or uninstrumented performance claim. Signpost and raw timer durations differ by instrumentation boundaries."
+}
