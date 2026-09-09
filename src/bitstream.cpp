@@ -236,11 +236,19 @@ struct Nal { size_t start,size; unsigned type; };
 std::vector<Nal> nals(const uint8_t* p,size_t n) {
     std::vector<Nal> out;
     auto next=[&](size_t pos,size_t& start,size_t& payload)->bool {
-        unsigned zeros=0;
-        for (size_t i=pos;i<n;++i) {
-            if (!p[i]) { ++zeros; continue; }
-            if (p[i]==1 && zeros>=2) { start=i-zeros; payload=i+1; return true; }
-            zeros=0;
+        const size_t begin=pos;
+        while (pos<n) {
+            // Search bounded candidates in bulk; only a 1 preceded by two
+            // zeros can finish a start code. Retain the entire zero run so
+            // Annex-B leading/trailing zero handling remains unchanged.
+            auto candidate=static_cast<const uint8_t*>(std::memchr(p+pos,1,n-pos));
+            if (!candidate) return false;
+            size_t i=size_t(candidate-p);
+            if (i-begin>=2 && !p[i-1] && !p[i-2]) {
+                start=i-2; while (start>begin && !p[start-1]) --start;
+                payload=i+1; return true;
+            }
+            pos=i+1;
         }
         return false;
     };
@@ -510,9 +518,13 @@ ParseResult Bitstream::State::hevc(const uint8_t* p,size_t n,Prepared& out) {
     auto units=nals(p,n); bool picture=false; unsigned selected_pps=64; Sample sample;
     Color unit_metadata;
     // Parameter sets can arrive in any order before slices in the same AU.
-    bool saw_vcl=false;
+    bool saw_vcl=false; size_t normalized_size=0;
     for (const auto& u:units) {
         const uint8_t* bytes=p+u.start;
+        if (u.type<32 || u.type>34) {
+            if (u.size>MaxBytes-4 || normalized_size>MaxBytes-4-u.size) malformed("HEVC normalized sample exceeds size limit");
+            normalized_size+=4+u.size;
+        }
         if (u.type<=31) saw_vcl=true;
         if (saw_vcl && u.type>=32 && u.type<=34) malformed("HEVC parameter sets must precede the picture they configure");
         if (u.type==32) {
@@ -521,6 +533,7 @@ ParseResult Bitstream::State::hevc(const uint8_t* p,size_t n,Prepared& out) {
         else if (u.type==34) { Pps pp=hevc_pps(bytes,u.size); pps[pp.id]=std::move(pp); }
         else if (u.type==39 || u.type==40) hevc_sei(bytes,u.size,unit_metadata);
     }
+    out.bytes.reserve(normalized_size);
     for (const auto& u:units) {
         const uint8_t* bytes=p+u.start;
         if (u.type<=31) {
@@ -560,9 +573,9 @@ ParseResult Bitstream::State::hevc(const uint8_t* p,size_t n,Prepared& out) {
             }
         }
         if (u.type<32 || u.type>34) {
-            if (u.size>MaxBytes-4 || out.bytes.size()>MaxBytes-4-u.size) malformed("HEVC normalized sample exceeds size limit");
-            size_t offset=out.bytes.size(); out.bytes.resize(offset+4+u.size);
-            put32(out.bytes.data()+offset,uint32_t(u.size)); std::memcpy(out.bytes.data()+offset+4,bytes,u.size);
+            uint8_t length[4]; put32(length,uint32_t(u.size));
+            out.bytes.insert(out.bytes.end(),length,length+4);
+            out.bytes.insert(out.bytes.end(),bytes,bytes+u.size);
         }
     }
     if (!picture) {
