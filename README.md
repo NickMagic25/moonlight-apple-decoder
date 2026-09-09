@@ -74,6 +74,8 @@ comparison against an independent software reference before timing; the optional
 FFmpeg helper is a testing dependency only. Each comparison writes
 human-readable `report.md`, machine-readable
 `results.json`, and JUnit results alongside the raw measurements.
+The [96-case Mbps validation](docs/bitrate-matrix-validation.md) preserves both
+reports, measured bitrate coverage, and any delivery failures.
 The [full paired toolchain comparison](docs/toolchain-paired-comparison.md)
 records all requested modes, the queue-32 startup control, and balanced
 confirmation of the initial latency flags.

@@ -9,6 +9,10 @@ JSON, and JUnit XML. Explicit-bitrate noise fixtures also require an independent
 software reference for full-frame correctness checks. The same command runs
 locally and on a physical CI runner.
 
+The [96-case Mbps validation](bitrate-matrix-validation.md) includes the
+generated Markdown and JSON reports, measured bitrate coverage, full-frame
+correctness evidence, and preserved delivery failures.
+
 This is a headless decoder test. It measures hardware decoding and delivery to
 the replay client's callback. Display refresh, render/presentation latency,
 network transport, audio, input latency, and a live Sunshine session require
