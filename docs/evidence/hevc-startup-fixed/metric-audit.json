@@ -1,0 +1,3814 @@
+{
+  "status": "PASS",
+  "method": "Independent integer duration sums and counts; exact rational linearly interpolated quantiles; no benchmark analysis imports. Whole-trial means include all eligible outputs. Steady quantiles exclude offered IDs below 120 and first successful output per generation. Pair same-numbered trials and compare median delta with max(0.1 ms, 5% of median baseline metric).",
+  "sources": {
+    "plan.json": "eda2d8524cbb8a3771638ed9707a630f25fde864fbd04dc2b72017f73d2410e6",
+    "results.json": "065fc0d08f991f02df5a0656e90f2b1dd3278183a133e05ccfcfc8f616244d42",
+    "moonlight-decode-times.json": "559a4d4af35f2d3e86705fea2383e1a46a1627a529ff0a0135b9fc3e41fd6d67",
+    "report.md": "1c4be86f763c15fd0f2a0d416e17d30108f595e85a77039fa7ef1e53ca87258e",
+    "runs/ultrawide-3440x1440p240-hevc-sdr-50mbps/timed-baseline-1.csv": "ac4fefaa7d1dfb70527bcb61c67646a8545134a8c397b53c58d4e07dd189bb7b",
+    "runs/ultrawide-3440x1440p240-hevc-sdr-50mbps/timed-baseline-2.csv": "008120247f03d4d1f4794b6543565d1982ed7cf971d4ac54536f1975aa65bba2",
+    "runs/ultrawide-3440x1440p240-hevc-sdr-50mbps/timed-baseline-3.csv": "b97fdce8cc44ef88b3b1c3874723ef7df7aac0dba3559cac3cd404302c65fdd0",
+    "runs/ultrawide-3440x1440p240-hevc-sdr-50mbps/timed-candidate-1.csv": "39ce419f9e8b76d9ba8a7dbc98e4ddc53fd3c5570c4d4b7e8b914b71c6e1a765",
+    "runs/ultrawide-3440x1440p240-hevc-sdr-50mbps/timed-candidate-2.csv": "b5425d2464559f1c433daff3ab23137a031e0f337809e838ad34a44aa2b35f0d",
+    "runs/ultrawide-3440x1440p240-hevc-sdr-50mbps/timed-candidate-3.csv": "73f0e75c430897e428beaf440d9f747e32b71cae9eb84107da0d7359751efed0",
+    "runs/ultrawide-3440x1440p240-hevc-sdr-100mbps/timed-baseline-1.csv": "aece4c6986005d727eba59a0875275c6195194f159e7a5984e4d9bc163247c9a",
+    "runs/ultrawide-3440x1440p240-hevc-sdr-100mbps/timed-baseline-2.csv": "51989dbbe024cee91905885ace8213b0b78653908d2e8e29f4a4aa70e37349fd",
+    "runs/ultrawide-3440x1440p240-hevc-sdr-100mbps/timed-baseline-3.csv": "e9999f1fea45a4457429fa4ac9199d0dafc2f857bb961dbaa51fb42041d870a0",
+    "runs/ultrawide-3440x1440p240-hevc-sdr-100mbps/timed-candidate-1.csv": "72d12fcbe1666f9f82783d5ffd14d2549c7d31a59e662ef553445ad9c28d0fe0",
+    "runs/ultrawide-3440x1440p240-hevc-sdr-100mbps/timed-candidate-2.csv": "29b49526b8373dc585cbcd43301f93094cb12a541002094741ca85b60b8ef33f",
+    "runs/ultrawide-3440x1440p240-hevc-sdr-100mbps/timed-candidate-3.csv": "19ad73d6a9a433650ca1b8e3a9110339da4bb8f5bc02270bd85b19a8a861c854",
+    "runs/ultrawide-3440x1440p240-hevc-sdr-250mbps/timed-baseline-1.csv": "23ebd592f6f933d583efaac05bf1fd0132b3e8230dcd6f34c4bde2593f85c4b6",
+    "runs/ultrawide-3440x1440p240-hevc-sdr-250mbps/timed-baseline-2.csv": "8bb427846293793dadbd018a4389eab5dab17df89d89c93283d52dbb02dc931c",
+    "runs/ultrawide-3440x1440p240-hevc-sdr-250mbps/timed-baseline-3.csv": "26f15cc12b8d5d2b6e087ec897173ed726c4b872a57d48807923eade716ff7fb",
+    "runs/ultrawide-3440x1440p240-hevc-sdr-250mbps/timed-candidate-1.csv": "e9d408d1e863cd445f9dd5eca250074147f33d0f1927dd9ba80192ffa881076b",
+    "runs/ultrawide-3440x1440p240-hevc-sdr-250mbps/timed-candidate-2.csv": "d72dae31ab9b9d8187d486b05c39c0e7dcf35cbe62a693050f931da536699d1f",
+    "runs/ultrawide-3440x1440p240-hevc-sdr-250mbps/timed-candidate-3.csv": "e14fb7c5982ef19445ded34fdad57efe7ac45d3766f3cd7a92296c84f366ddc7",
+    "runs/ultrawide-3440x1440p240-hevc-sdr-350mbps/timed-baseline-1.csv": "b888edc9e66f2ac76e02d8007e30f839bdf2e4b4078ef12efd6a5e6e031d5dd3",
+    "runs/ultrawide-3440x1440p240-hevc-sdr-350mbps/timed-baseline-2.csv": "30c84e278020bed681f0601de8d8053a96d58adf74da6168e1a4f11d9d6cefd2",
+    "runs/ultrawide-3440x1440p240-hevc-sdr-350mbps/timed-baseline-3.csv": "f9370d9eb41812819c167e7a4586f2b893bfcfbb79b8413c155e8eabb3c69837",
+    "runs/ultrawide-3440x1440p240-hevc-sdr-350mbps/timed-candidate-1.csv": "3128a87ccd5c7c5e76e683b5577c4d806f6b5ed4a35ef89c0211993862ef8a91",
+    "runs/ultrawide-3440x1440p240-hevc-sdr-350mbps/timed-candidate-2.csv": "9cb2b7570719be654924381305ba188ac2b807e72edb09bdc307e5f56fb0a478",
+    "runs/ultrawide-3440x1440p240-hevc-sdr-350mbps/timed-candidate-3.csv": "b93f9334902eed385e1f797b1dc0bf6a719dd5aa59e935d78da29b40d8622eea",
+    "runs/ultrawide-3440x1440p240-hevc-hdr10-50mbps/timed-baseline-1.csv": "f10ba671e5193230a5dcea97984574c7d51230cfcd706c559cc3eb65939434e8",
+    "runs/ultrawide-3440x1440p240-hevc-hdr10-50mbps/timed-baseline-2.csv": "cf00b53a53ac850c786e7eb2eaba6ce538c9577e97bd3b4cd8677c0eb6d43e11",
+    "runs/ultrawide-3440x1440p240-hevc-hdr10-50mbps/timed-baseline-3.csv": "ee008a50351dcef8cfec1a2b389bdda3523408288440b926b32bea480442ab16",
+    "runs/ultrawide-3440x1440p240-hevc-hdr10-50mbps/timed-candidate-1.csv": "861a1bc85d3bda8ae72eb6814993e2261d3199113e61af5d8c46e1a05ee8138e",
+    "runs/ultrawide-3440x1440p240-hevc-hdr10-50mbps/timed-candidate-2.csv": "9ca21ce7de3ff3ffc02da3aa647a45e0ea25911912dc523086e8b387d355309c",
+    "runs/ultrawide-3440x1440p240-hevc-hdr10-50mbps/timed-candidate-3.csv": "2f5e9a3c2024ee83ecd57e6a9040da816ee8c72f9446e7d80f3ddf80b860ba1f",
+    "runs/ultrawide-3440x1440p240-hevc-hdr10-100mbps/timed-baseline-1.csv": "eeed9fd6d743e062469294e6015910ee597a292213fbfdff547aeda24f7fe596",
+    "runs/ultrawide-3440x1440p240-hevc-hdr10-100mbps/timed-baseline-2.csv": "24318a879fdf24c058e0a22edb2b38afb4162949c0171fda047ae8587344997e",
+    "runs/ultrawide-3440x1440p240-hevc-hdr10-100mbps/timed-baseline-3.csv": "badd75c2fce06fb73bd61f6ed1c1e12e27b634d8ea9dff4672fd4264e2d13f8d",
+    "runs/ultrawide-3440x1440p240-hevc-hdr10-100mbps/timed-candidate-1.csv": "f0bee38ed9a6396b2b96923700098199d2603ca68ccb28cf33cc248b0f21d994",
+    "runs/ultrawide-3440x1440p240-hevc-hdr10-100mbps/timed-candidate-2.csv": "8a25865220d4eab49e79bd6f47061462501d1afee0b3213431adb47b70c2e208",
+    "runs/ultrawide-3440x1440p240-hevc-hdr10-100mbps/timed-candidate-3.csv": "430c060975391a87b7e0a9e33c6aac6bcac9a7bdf22ebdfa085ff6df1707d904",
+    "runs/ultrawide-3440x1440p240-hevc-hdr10-250mbps/timed-baseline-1.csv": "ffa0a5d0716e9bf18d78ca2a66c87119d640ae84b641bf11a5165641012d1ba0",
+    "runs/ultrawide-3440x1440p240-hevc-hdr10-250mbps/timed-baseline-2.csv": "c5ec0f360b2e64c761ddbb477d387dcc7e0fa3a3b15b28aca98006070f76bdee",
+    "runs/ultrawide-3440x1440p240-hevc-hdr10-250mbps/timed-baseline-3.csv": "2ad309fa64b0d5e3ae9b9fe439072b22b58965bf53e274754b3f63d59675201e",
+    "runs/ultrawide-3440x1440p240-hevc-hdr10-250mbps/timed-candidate-1.csv": "a79fbbfa55ef7786879c39b8f72c811185ad3978277a307f9d2196d6acc43bf8",
+    "runs/ultrawide-3440x1440p240-hevc-hdr10-250mbps/timed-candidate-2.csv": "166713fa528437958e776ba45cf7c422da6665f5b969b3c83809cc85a71b7340",
+    "runs/ultrawide-3440x1440p240-hevc-hdr10-250mbps/timed-candidate-3.csv": "327713c0ebfa3e34ca79d1c885df3e64cbe354f8ea76b2b6f34c44589f51272e",
+    "runs/ultrawide-3440x1440p240-hevc-hdr10-350mbps/timed-baseline-1.csv": "5eaba1019bdb8ccf0b4c539f19fa0b7559d2f0185cb82deee68c578477df75da",
+    "runs/ultrawide-3440x1440p240-hevc-hdr10-350mbps/timed-baseline-2.csv": "7449ee520ee9a925dff69b022294173d8d5a6f2af4f7486f680a98f1c377e494",
+    "runs/ultrawide-3440x1440p240-hevc-hdr10-350mbps/timed-baseline-3.csv": "2b536f1357d36c7a6c749d9906f3e136235a7ac7ede890753e86cfb43ca4f84c",
+    "runs/ultrawide-3440x1440p240-hevc-hdr10-350mbps/timed-candidate-1.csv": "96f2370ac5112b2b1a46fdb5b005c8c01155306df223c417e8375a0c631c4aed",
+    "runs/ultrawide-3440x1440p240-hevc-hdr10-350mbps/timed-candidate-2.csv": "9215b28ec2086d7bcd665b729245c23d080c0e2f40520597d2ac0bb903afd084",
+    "runs/ultrawide-3440x1440p240-hevc-hdr10-350mbps/timed-candidate-3.csv": "987b18532422435c2b2f1cd17bd4dce6910854101da718bafdb898c32b8c74f5",
+    "runs/4k-3840x2160p60-hevc-sdr-50mbps/timed-baseline-1.csv": "a91b3450bbfa6aba733263cc50ae4b99abba4ad4628caf4d6b6e4cf79441158e",
+    "runs/4k-3840x2160p60-hevc-sdr-50mbps/timed-baseline-2.csv": "2431348006a7fed2725ff0027f2a051f6054e0f9e22e1d5736efc304d3b23d16",
+    "runs/4k-3840x2160p60-hevc-sdr-50mbps/timed-baseline-3.csv": "7c6c069e0f5895b73d33f9298d19856fe679869f281d85d5028b33278eda4110",
+    "runs/4k-3840x2160p60-hevc-sdr-50mbps/timed-candidate-1.csv": "92d83ecde7b6421a1cad0083495f320f4ff5acb04906f4a2c1be4f7f3bf2214a",
+    "runs/4k-3840x2160p60-hevc-sdr-50mbps/timed-candidate-2.csv": "f201c7c74a7439aa36acfb05a0bdb0917d8ce67ce6d652962519a239ed19eec0",
+    "runs/4k-3840x2160p60-hevc-sdr-50mbps/timed-candidate-3.csv": "a7b53a32be9a5c48a27fedfd6068ac65c4cbdf0d0651672d3e3301ccc76c831a",
+    "runs/4k-3840x2160p60-hevc-sdr-100mbps/timed-baseline-1.csv": "6c2ba604a6da247c07d30905c2cf96e1d86e230bf79e043d502597d4e246b245",
+    "runs/4k-3840x2160p60-hevc-sdr-100mbps/timed-baseline-2.csv": "faac5f419559911038dd7be948b156dd793ffd4745b066c05794d7d151715a79",
+    "runs/4k-3840x2160p60-hevc-sdr-100mbps/timed-baseline-3.csv": "89b209b94a0821f30348bd5bb8c84ab8c62bd1eaa826cb2483e723535238605b",
+    "runs/4k-3840x2160p60-hevc-sdr-100mbps/timed-candidate-1.csv": "17265cb1a525a21791c8c90cec1b460ec66d03154b88dfa21c4fea576bfdb492",
+    "runs/4k-3840x2160p60-hevc-sdr-100mbps/timed-candidate-2.csv": "2bc44aa03a938e4cdd29d8ff90fd499a7d79217bc422bc1504cc0a82775414a7",
+    "runs/4k-3840x2160p60-hevc-sdr-100mbps/timed-candidate-3.csv": "3141466a0b9f4280698a50660d67a0074e35ed680c23624e594e8d717f50e769",
+    "runs/4k-3840x2160p60-hevc-sdr-250mbps/timed-baseline-1.csv": "4e1297f40a6414ccd4e29edd2577fdf4c977299051103528905eb1552ac9a2e9",
+    "runs/4k-3840x2160p60-hevc-sdr-250mbps/timed-baseline-2.csv": "38b3b8add56a0710d7e1f7f657b047b7151552f395184fab1560647b3e80faaf",
+    "runs/4k-3840x2160p60-hevc-sdr-250mbps/timed-baseline-3.csv": "8dcc92fe8150d5563bad1655d160e41f870558cbdc7c9eb4c1e995e2233023d5",
+    "runs/4k-3840x2160p60-hevc-sdr-250mbps/timed-candidate-1.csv": "84284051e2f9572d68a76e18da2cae56b4fed7794ba329e697e04327c6b2b5df",
+    "runs/4k-3840x2160p60-hevc-sdr-250mbps/timed-candidate-2.csv": "4d5c93e62210dd9126d834134ea58d2a6d2c4b3a57df2eacbad419913ac3328f",
+    "runs/4k-3840x2160p60-hevc-sdr-250mbps/timed-candidate-3.csv": "5d4f3418fb85b568e6f541ff347e5db9481e6b91b20248c194f711b7bbcd9232",
+    "runs/4k-3840x2160p60-hevc-sdr-350mbps/timed-baseline-1.csv": "2ee9a1a15dd10da882c98649d418e036f832a07403be28333b77411cb9c4ae82",
+    "runs/4k-3840x2160p60-hevc-sdr-350mbps/timed-baseline-2.csv": "c3acdd7de421d43f8317b6d98c1c5f988d96ce5cab88e477480443ec2011774a",
+    "runs/4k-3840x2160p60-hevc-sdr-350mbps/timed-baseline-3.csv": "aaf6f5f8a19bdf618d1adc9b1c7211ef190dc3d9da2c05c6d28b37fa7068686a",
+    "runs/4k-3840x2160p60-hevc-sdr-350mbps/timed-candidate-1.csv": "032ab7c665b683ad7aa5023db2a5069924e860cc4362dce7b820a2227bf0302c",
+    "runs/4k-3840x2160p60-hevc-sdr-350mbps/timed-candidate-2.csv": "f78a64320fd24d42d98ce563d353959ea8b329beb704acfa12d59d6bb64cfd96",
+    "runs/4k-3840x2160p60-hevc-sdr-350mbps/timed-candidate-3.csv": "5f4385892fc41007f52df2b1a19dfe8efd47173928ba89445498086d91f122f6",
+    "runs/4k-3840x2160p60-hevc-hdr10-50mbps/timed-baseline-1.csv": "796e26244fea4ad09e86bd8ed9f893d94a9c6ecfa051efc616276ca916bd5395",
+    "runs/4k-3840x2160p60-hevc-hdr10-50mbps/timed-baseline-2.csv": "cab8b24b2c092111ffee9f9ccd29f0cd4a62faa1c1b900b456ba96bbfa32f472",
+    "runs/4k-3840x2160p60-hevc-hdr10-50mbps/timed-baseline-3.csv": "dd8abcdb21b5403441fb8aed783f48e21bd407c7472d6a121e60291d8acc6420",
+    "runs/4k-3840x2160p60-hevc-hdr10-50mbps/timed-candidate-1.csv": "aeb0c52ba3214a53d7db7251f9ff356eec4a9af636107830e06dca3f0f0671fc",
+    "runs/4k-3840x2160p60-hevc-hdr10-50mbps/timed-candidate-2.csv": "689b7e364bb47fcb4fe034968f9e9a6e807e45574b16ba0bc10e32dc18654361",
+    "runs/4k-3840x2160p60-hevc-hdr10-50mbps/timed-candidate-3.csv": "68957c0170e7fde1abef8058fba34352747a4e48c4d6b2b42b4df52072f0347f",
+    "runs/4k-3840x2160p60-hevc-hdr10-100mbps/timed-baseline-1.csv": "b04adcb0c53fd3c971573e2ddf249e7310bd953e3cb2fba4e57c663125d5d011",
+    "runs/4k-3840x2160p60-hevc-hdr10-100mbps/timed-baseline-2.csv": "610dec09d5eb2e17ad505b6338ba163b1ac393b1ef31149d319a74595e1c5af4",
+    "runs/4k-3840x2160p60-hevc-hdr10-100mbps/timed-baseline-3.csv": "e44649c88b66e4eabc8175b5d1687c939dc7347b40603b8394db8bbbf9c6deb5",
+    "runs/4k-3840x2160p60-hevc-hdr10-100mbps/timed-candidate-1.csv": "9114f3ff5f87791f4d241acf302e4eee8f64a3c74d8f424308c9b118f002696a",
+    "runs/4k-3840x2160p60-hevc-hdr10-100mbps/timed-candidate-2.csv": "4461fd86c936db3a7a587be63bf7640c9fa2399334a10c8d1753555162e622a1",
+    "runs/4k-3840x2160p60-hevc-hdr10-100mbps/timed-candidate-3.csv": "7322674417edf5cab05ad9a37784c47529b678e33c35c533dff8244277cffef7",
+    "runs/4k-3840x2160p60-hevc-hdr10-250mbps/timed-baseline-1.csv": "cc6a9adeb9f351412ae6a9bc2e736b77171bb21dba188c65b9b8c1252af76746",
+    "runs/4k-3840x2160p60-hevc-hdr10-250mbps/timed-baseline-2.csv": "52cc9c1d212a64ff67041043dce8e9ca5305515530d97cc26f6ee57303905b42",
+    "runs/4k-3840x2160p60-hevc-hdr10-250mbps/timed-baseline-3.csv": "c4597ba6fc4d08081661843b0bd32232489a18573e15ef01ee4c0377f9beee10",
+    "runs/4k-3840x2160p60-hevc-hdr10-250mbps/timed-candidate-1.csv": "f62d4f3de42650b54d56c566e5790c1aa971e1ae4d3f696146bc527cb5017d09",
+    "runs/4k-3840x2160p60-hevc-hdr10-250mbps/timed-candidate-2.csv": "ea098ec9833f8d078529d717dfa5525267630d5913b9d520c46bac9f86a925e0",
+    "runs/4k-3840x2160p60-hevc-hdr10-250mbps/timed-candidate-3.csv": "088206fd34ab93988f50d6b821b7b21e1f7068def6c94f9060b02e25936ad774",
+    "runs/4k-3840x2160p60-hevc-hdr10-350mbps/timed-baseline-1.csv": "02623cf14d5873d3d700ed543581fb0e833f6595fe8d8f1c24f5cdb8a0f2d02b",
+    "runs/4k-3840x2160p60-hevc-hdr10-350mbps/timed-baseline-2.csv": "09e07d63b2d26e10be56fbfe2a98af3200605dd655097d82b3d51c55082b69d9",
+    "runs/4k-3840x2160p60-hevc-hdr10-350mbps/timed-baseline-3.csv": "ad33a5fd45390281c410a3e88a27fa84b53c3f65d65e5cc5834696b3fec316f9",
+    "runs/4k-3840x2160p60-hevc-hdr10-350mbps/timed-candidate-1.csv": "bc8402b57854bc3f28f6a2419b4d38fb509d21985df7683f4e9376406cdb716a",
+    "runs/4k-3840x2160p60-hevc-hdr10-350mbps/timed-candidate-2.csv": "ed4489772e9dd84a4ec93ceced3bc82b3b45cfaf8941deb132520f992d4750e5",
+    "runs/4k-3840x2160p60-hevc-hdr10-350mbps/timed-candidate-3.csv": "9a9a79996e48dd6a75fbb9dface4f5587d8d06808c722ed36bdecd2bea1e1255"
+  },
+  "audit_script_sha256": "783e73e90acc3ecca7249ee7c265811ee8484c95def7472cb959ac1300ba19b2",
+  "case_count": 16,
+  "timed_csv_count": 96,
+  "build_totals": {
+    "baseline": {
+      "native_vt": {
+        "sample_count": 72000,
+        "total_ns": 225581637127,
+        "mean_ms": 3.1330782934305557
+      },
+      "native_submission": {
+        "sample_count": 71903,
+        "total_ns": 54782184311,
+        "mean_ms": 0.7618901062681668
+      },
+      "public_queue_proxy": {
+        "sample_count": 72000,
+        "total_ns": 312713669197,
+        "mean_ms": 4.343245405513889
+      },
+      "missing_return_samples": 97
+    },
+    "candidate": {
+      "native_vt": {
+        "sample_count": 72000,
+        "total_ns": 225928772572,
+        "mean_ms": 3.1378996190555557
+      },
+      "native_submission": {
+        "sample_count": 71901,
+        "total_ns": 54941079572,
+        "mean_ms": 0.7641212162835009
+      },
+      "public_queue_proxy": {
+        "sample_count": 72000,
+        "total_ns": 313688120720,
+        "mean_ms": 4.356779454444445
+      },
+      "missing_return_samples": 99
+    }
+  },
+  "cases": [
+    {
+      "name": "ultrawide-3440x1440p240-hevc-sdr-50mbps",
+      "status": "PASS",
+      "builds": {
+        "baseline": {
+          "native_vt": {
+            "sample_count": 7200,
+            "total_ns": 15155934132,
+            "mean_ms": 2.1049908516666664
+          },
+          "native_submission": {
+            "sample_count": 7184,
+            "total_ns": 4383028658,
+            "mean_ms": 0.6101097797884186
+          },
+          "public_queue_proxy": {
+            "sample_count": 7200,
+            "total_ns": 20210465900,
+            "mean_ms": 2.807009152777778
+          }
+        },
+        "candidate": {
+          "native_vt": {
+            "sample_count": 7200,
+            "total_ns": 15404137133,
+            "mean_ms": 2.1394634906944447
+          },
+          "native_submission": {
+            "sample_count": 7184,
+            "total_ns": 4551311817,
+            "mean_ms": 0.6335344956848553
+          },
+          "public_queue_proxy": {
+            "sample_count": 7200,
+            "total_ns": 20829485855,
+            "mean_ms": 2.8929841465277777
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-50mbps/timed-baseline-1.csv",
+          "missing_return_samples": 4,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 5024413115,
+              "mean_ms": 2.0935054645833335
+            },
+            "native_submission": {
+              "sample_count": 2396,
+              "total_ns": 1451351113,
+              "mean_ms": 0.6057391957429048
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 6599443296,
+              "mean_ms": 2.74976804
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 1.9551875,
+            "vt_p95_ms": 2.79135865,
+            "vt_p99_ms": 8.2943355,
+            "public_median_ms": 2.209945,
+            "public_p95_ms": 3.2621032999999997,
+            "public_p99_ms": 9.63170353
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-50mbps/timed-baseline-2.csv",
+          "missing_return_samples": 6,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 5070896512,
+              "mean_ms": 2.112873546666667
+            },
+            "native_submission": {
+              "sample_count": 2394,
+              "total_ns": 1468648932,
+              "mean_ms": 0.613470731829574
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 6782215358,
+              "mean_ms": 2.8259230658333334
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 1.948,
+            "vt_p95_ms": 2.7422875,
+            "vt_p99_ms": 8.4806675,
+            "public_median_ms": 2.2049715,
+            "public_p95_ms": 3.14241785,
+            "public_p99_ms": 9.7043659
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-50mbps/timed-baseline-3.csv",
+          "missing_return_samples": 6,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 5060624505,
+              "mean_ms": 2.10859354375
+            },
+            "native_submission": {
+              "sample_count": 2394,
+              "total_ns": 1463028613,
+              "mean_ms": 0.6111230630743526
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 6828807246,
+              "mean_ms": 2.8453363525
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 1.9406455,
+            "vt_p95_ms": 2.7752125,
+            "vt_p99_ms": 8.51684825,
+            "public_median_ms": 2.2030735,
+            "public_p95_ms": 3.15294785,
+            "public_p99_ms": 9.70070222
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-50mbps/timed-candidate-1.csv",
+          "missing_return_samples": 3,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 5133086401,
+              "mean_ms": 2.1387860004166668
+            },
+            "native_submission": {
+              "sample_count": 2397,
+              "total_ns": 1529913138,
+              "mean_ms": 0.638261634543179
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 6910812566,
+              "mean_ms": 2.8795052358333333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 1.9746455,
+            "vt_p95_ms": 2.75514195,
+            "vt_p99_ms": 8.50997143,
+            "public_median_ms": 2.2283325,
+            "public_p95_ms": 3.1914072,
+            "public_p99_ms": 10.08568108
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-50mbps/timed-candidate-2.csv",
+          "missing_return_samples": 7,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 5123833804,
+              "mean_ms": 2.1349307516666665
+            },
+            "native_submission": {
+              "sample_count": 2393,
+              "total_ns": 1494864231,
+              "mean_ms": 0.6246820856665274
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 6854530828,
+              "mean_ms": 2.8560545116666667
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 1.97475,
+            "vt_p95_ms": 2.83260385,
+            "vt_p99_ms": 8.38874175,
+            "public_median_ms": 2.2239645,
+            "public_p95_ms": 3.2463584,
+            "public_p99_ms": 9.65838233
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-50mbps/timed-candidate-3.csv",
+          "missing_return_samples": 6,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 5147216928,
+              "mean_ms": 2.14467372
+            },
+            "native_submission": {
+              "sample_count": 2394,
+              "total_ns": 1526534448,
+              "mean_ms": 0.6376501453634085
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 7064142461,
+              "mean_ms": 2.943392692083333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 1.964125,
+            "vt_p95_ms": 2.8323917,
+            "vt_p99_ms": 8.288911820000001,
+            "public_median_ms": 2.219892,
+            "public_p95_ms": 3.29432385,
+            "public_p99_ms": 10.09604191
+          }
+        }
+      ],
+      "threshold_breaches": []
+    },
+    {
+      "name": "ultrawide-3440x1440p240-hevc-sdr-100mbps",
+      "status": "PASS",
+      "builds": {
+        "baseline": {
+          "native_vt": {
+            "sample_count": 7200,
+            "total_ns": 16434643570,
+            "mean_ms": 2.2825893847222223
+          },
+          "native_submission": {
+            "sample_count": 7187,
+            "total_ns": 4547335948,
+            "mean_ms": 0.6327168426325309
+          },
+          "public_queue_proxy": {
+            "sample_count": 7200,
+            "total_ns": 23608765493,
+            "mean_ms": 3.278995207361111
+          }
+        },
+        "candidate": {
+          "native_vt": {
+            "sample_count": 7200,
+            "total_ns": 16468691152,
+            "mean_ms": 2.2873182155555556
+          },
+          "native_submission": {
+            "sample_count": 7188,
+            "total_ns": 4577118773,
+            "mean_ms": 0.636772227740679
+          },
+          "public_queue_proxy": {
+            "sample_count": 7200,
+            "total_ns": 23778643522,
+            "mean_ms": 3.3025893780555555
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-100mbps/timed-baseline-1.csv",
+          "missing_return_samples": 2,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 5458207619,
+              "mean_ms": 2.2742531745833334
+            },
+            "native_submission": {
+              "sample_count": 2398,
+              "total_ns": 1502086525,
+              "mean_ms": 0.6263913782318599
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 7892054241,
+              "mean_ms": 3.2883559337499997
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 1.985104,
+            "vt_p95_ms": 3.19593575,
+            "vt_p99_ms": 11.66463693,
+            "public_median_ms": 2.245143,
+            "public_p95_ms": 4.1638114,
+            "public_p99_ms": 17.24663025
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-100mbps/timed-baseline-2.csv",
+          "missing_return_samples": 4,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 5509809180,
+              "mean_ms": 2.2957538250000002
+            },
+            "native_submission": {
+              "sample_count": 2396,
+              "total_ns": 1544476345,
+              "mean_ms": 0.6446061540066778
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 7905088008,
+              "mean_ms": 3.29378667
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 1.9985415,
+            "vt_p95_ms": 3.21153955,
+            "vt_p99_ms": 11.63784489,
+            "public_median_ms": 2.254968,
+            "public_p95_ms": 3.9715412999999997,
+            "public_p99_ms": 17.108600850000002
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-100mbps/timed-baseline-3.csv",
+          "missing_return_samples": 7,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 5466626771,
+              "mean_ms": 2.2777611545833336
+            },
+            "native_submission": {
+              "sample_count": 2393,
+              "total_ns": 1500773078,
+              "mean_ms": 0.627151307145842
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 7811623244,
+              "mean_ms": 3.2548430183333337
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 1.999396,
+            "vt_p95_ms": 3.1801482,
+            "vt_p99_ms": 11.69634868,
+            "public_median_ms": 2.251463,
+            "public_p95_ms": 3.9174247,
+            "public_p99_ms": 16.6970373
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-100mbps/timed-candidate-1.csv",
+          "missing_return_samples": 6,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 5463562089,
+              "mean_ms": 2.27648420375
+            },
+            "native_submission": {
+              "sample_count": 2394,
+              "total_ns": 1507808014,
+              "mean_ms": 0.6298279089390142
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 7848385659,
+              "mean_ms": 3.27016069125
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 1.993521,
+            "vt_p95_ms": 3.1281646000000003,
+            "vt_p99_ms": 11.68788361,
+            "public_median_ms": 2.251081,
+            "public_p95_ms": 3.7710812999999996,
+            "public_p99_ms": 17.26129212
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-100mbps/timed-candidate-2.csv",
+          "missing_return_samples": 3,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 5486839520,
+              "mean_ms": 2.286183133333333
+            },
+            "native_submission": {
+              "sample_count": 2397,
+              "total_ns": 1532146835,
+              "mean_ms": 0.6391935064664164
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 7892007079,
+              "mean_ms": 3.2883362829166667
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.0025,
+            "vt_p95_ms": 3.1808,
+            "vt_p99_ms": 11.64781939,
+            "public_median_ms": 2.2546985,
+            "public_p95_ms": 3.8286395499999997,
+            "public_p99_ms": 17.55525078
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-100mbps/timed-candidate-3.csv",
+          "missing_return_samples": 3,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 5518289543,
+              "mean_ms": 2.2992873095833333
+            },
+            "native_submission": {
+              "sample_count": 2397,
+              "total_ns": 1537163924,
+              "mean_ms": 0.6412865765540259
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 8038250784,
+              "mean_ms": 3.3492711600000002
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.00175,
+            "vt_p95_ms": 3.1762191,
+            "vt_p99_ms": 11.75894368,
+            "public_median_ms": 2.2614015,
+            "public_p95_ms": 4.1508862,
+            "public_p99_ms": 17.282643710000002
+          }
+        }
+      ],
+      "threshold_breaches": []
+    },
+    {
+      "name": "ultrawide-3440x1440p240-hevc-sdr-250mbps",
+      "status": "PASS",
+      "builds": {
+        "baseline": {
+          "native_vt": {
+            "sample_count": 7200,
+            "total_ns": 19827638106,
+            "mean_ms": 2.7538386258333336
+          },
+          "native_submission": {
+            "sample_count": 7188,
+            "total_ns": 5095630712,
+            "mean_ms": 0.7089080011129661
+          },
+          "public_queue_proxy": {
+            "sample_count": 7200,
+            "total_ns": 31013210535,
+            "mean_ms": 4.307390352083334
+          }
+        },
+        "candidate": {
+          "native_vt": {
+            "sample_count": 7200,
+            "total_ns": 19943934718,
+            "mean_ms": 2.7699909330555554
+          },
+          "native_submission": {
+            "sample_count": 7188,
+            "total_ns": 5163504715,
+            "mean_ms": 0.7183506837785197
+          },
+          "public_queue_proxy": {
+            "sample_count": 7200,
+            "total_ns": 31133484618,
+            "mean_ms": 4.324095085833333
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-250mbps/timed-baseline-1.csv",
+          "missing_return_samples": 4,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 6597172358,
+              "mean_ms": 2.7488218158333333
+            },
+            "native_submission": {
+              "sample_count": 2396,
+              "total_ns": 1690265351,
+              "mean_ms": 0.7054529845575961
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 10340151785,
+              "mean_ms": 4.308396577083333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.479979,
+            "vt_p95_ms": 3.5015357000000003,
+            "vt_p99_ms": 15.30995614,
+            "public_median_ms": 2.7637465,
+            "public_p95_ms": 10.76048825,
+            "public_p99_ms": 27.97760502
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-250mbps/timed-baseline-2.csv",
+          "missing_return_samples": 5,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 6636493764,
+              "mean_ms": 2.765205735
+            },
+            "native_submission": {
+              "sample_count": 2395,
+              "total_ns": 1717717723,
+              "mean_ms": 0.7172099052192067
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 10340023067,
+              "mean_ms": 4.308342944583333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.511646,
+            "vt_p95_ms": 3.63178365,
+            "vt_p99_ms": 15.229269,
+            "public_median_ms": 2.7714695,
+            "public_p95_ms": 10.16658265,
+            "public_p99_ms": 27.78830545
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-250mbps/timed-baseline-3.csv",
+          "missing_return_samples": 3,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 6593971984,
+              "mean_ms": 2.7474883266666668
+            },
+            "native_submission": {
+              "sample_count": 2397,
+              "total_ns": 1687647638,
+              "mean_ms": 0.7040665990821862
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 10333035683,
+              "mean_ms": 4.305431534583333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.4803125,
+            "vt_p95_ms": 3.8034830499999996,
+            "vt_p99_ms": 15.38345582,
+            "public_median_ms": 2.7383165,
+            "public_p95_ms": 10.3877913,
+            "public_p99_ms": 27.596188079999997
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-250mbps/timed-candidate-1.csv",
+          "missing_return_samples": 6,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 6634171893,
+              "mean_ms": 2.7642382887499997
+            },
+            "native_submission": {
+              "sample_count": 2394,
+              "total_ns": 1712947134,
+              "mean_ms": 0.7155167644110275
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 10239474692,
+              "mean_ms": 4.266447788333333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.503562,
+            "vt_p95_ms": 3.6670131,
+            "vt_p99_ms": 15.22868125,
+            "public_median_ms": 2.7939785,
+            "public_p95_ms": 9.24994475,
+            "public_p99_ms": 27.52715435
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-250mbps/timed-candidate-2.csv",
+          "missing_return_samples": 1,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 6672894185,
+              "mean_ms": 2.7803725770833334
+            },
+            "native_submission": {
+              "sample_count": 2399,
+              "total_ns": 1723169007,
+              "mean_ms": 0.7182863722384326
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 10534707371,
+              "mean_ms": 4.389461404583333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.513771,
+            "vt_p95_ms": 3.5522521,
+            "vt_p99_ms": 15.55957882,
+            "public_median_ms": 2.766171,
+            "public_p95_ms": 12.8529976,
+            "public_p99_ms": 28.324252949999998
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-250mbps/timed-candidate-3.csv",
+          "missing_return_samples": 5,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 6636868640,
+              "mean_ms": 2.7653619333333332
+            },
+            "native_submission": {
+              "sample_count": 2395,
+              "total_ns": 1727388574,
+              "mean_ms": 0.7212478388308977
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 10359302555,
+              "mean_ms": 4.316376064583333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.490354,
+            "vt_p95_ms": 3.60632115,
+            "vt_p99_ms": 15.40025629,
+            "public_median_ms": 2.7409045,
+            "public_p95_ms": 10.525785,
+            "public_p99_ms": 28.11891427
+          }
+        }
+      ],
+      "threshold_breaches": []
+    },
+    {
+      "name": "ultrawide-3440x1440p240-hevc-sdr-350mbps",
+      "status": "PASS",
+      "builds": {
+        "baseline": {
+          "native_vt": {
+            "sample_count": 7200,
+            "total_ns": 22596323565,
+            "mean_ms": 3.1383782729166665
+          },
+          "native_submission": {
+            "sample_count": 7193,
+            "total_ns": 4858230199,
+            "mean_ms": 0.6754108437369665
+          },
+          "public_queue_proxy": {
+            "sample_count": 7200,
+            "total_ns": 36627782764,
+            "mean_ms": 5.087192050555555
+          }
+        },
+        "candidate": {
+          "native_vt": {
+            "sample_count": 7200,
+            "total_ns": 22787942839,
+            "mean_ms": 3.164992060972222
+          },
+          "native_submission": {
+            "sample_count": 7196,
+            "total_ns": 4923733208,
+            "mean_ms": 0.6842319633129517
+          },
+          "public_queue_proxy": {
+            "sample_count": 7200,
+            "total_ns": 36454259077,
+            "mean_ms": 5.063091538472222
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-350mbps/timed-baseline-1.csv",
+          "missing_return_samples": 4,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 7643877449,
+              "mean_ms": 3.1849489370833335
+            },
+            "native_submission": {
+              "sample_count": 2396,
+              "total_ns": 1694099617,
+              "mean_ms": 0.7070532625208681
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 12292184802,
+              "mean_ms": 5.1217436675000005
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.902083,
+            "vt_p95_ms": 4.0559292000000005,
+            "vt_p99_ms": 16.9793695,
+            "public_median_ms": 3.1888415,
+            "public_p95_ms": 15.34323985,
+            "public_p99_ms": 32.97280883
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-350mbps/timed-baseline-2.csv",
+          "missing_return_samples": 3,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 7243066258,
+              "mean_ms": 3.017944274166666
+            },
+            "native_submission": {
+              "sample_count": 2397,
+              "total_ns": 1426837183,
+              "mean_ms": 0.5952595673758865
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 11993879820,
+              "mean_ms": 4.997449925
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.6856465,
+            "vt_p95_ms": 4.08619375,
+            "vt_p99_ms": 17.14262432,
+            "public_median_ms": 3.049175,
+            "public_p95_ms": 14.847241949999999,
+            "public_p99_ms": 32.54962873
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-350mbps/timed-baseline-3.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 7709379858,
+              "mean_ms": 3.2122416074999998
+            },
+            "native_submission": {
+              "sample_count": 2400,
+              "total_ns": 1737293399,
+              "mean_ms": 0.7238722495833334
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 12341718142,
+              "mean_ms": 5.142382559166667
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.9285,
+            "vt_p95_ms": 4.5138827,
+            "vt_p99_ms": 17.178374,
+            "public_median_ms": 3.206387,
+            "public_p95_ms": 15.0449635,
+            "public_p99_ms": 32.678415539999996
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-350mbps/timed-candidate-1.csv",
+          "missing_return_samples": 2,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 7616878023,
+              "mean_ms": 3.17369917625
+            },
+            "native_submission": {
+              "sample_count": 2398,
+              "total_ns": 1647395969,
+              "mean_ms": 0.686987476647206
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 12185156582,
+              "mean_ms": 5.077148575833333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.9095625,
+            "vt_p95_ms": 4.0250354,
+            "vt_p99_ms": 17.36987668,
+            "public_median_ms": 3.1865345,
+            "public_p95_ms": 14.97509975,
+            "public_p99_ms": 32.768493559999996
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-350mbps/timed-candidate-2.csv",
+          "missing_return_samples": 1,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 7672599294,
+              "mean_ms": 3.1969163725
+            },
+            "native_submission": {
+              "sample_count": 2399,
+              "total_ns": 1693186543,
+              "mean_ms": 0.705788471446436
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 12222522670,
+              "mean_ms": 5.092717779166667
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.939396,
+            "vt_p95_ms": 4.39619345,
+            "vt_p99_ms": 16.95308575,
+            "public_median_ms": 3.2096385,
+            "public_p95_ms": 15.19322215,
+            "public_p99_ms": 32.99108562
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-350mbps/timed-candidate-3.csv",
+          "missing_return_samples": 1,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 7498465522,
+              "mean_ms": 3.124360634166667
+            },
+            "native_submission": {
+              "sample_count": 2399,
+              "total_ns": 1583150696,
+              "mean_ms": 0.659921090454356
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 12046579825,
+              "mean_ms": 5.019408260416667
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.8138335,
+            "vt_p95_ms": 4.15542855,
+            "vt_p99_ms": 17.06576818,
+            "public_median_ms": 3.1292905,
+            "public_p95_ms": 15.04274075,
+            "public_p99_ms": 32.94525668
+          }
+        }
+      ],
+      "threshold_breaches": []
+    },
+    {
+      "name": "ultrawide-3440x1440p240-hevc-hdr10-50mbps",
+      "status": "PASS",
+      "builds": {
+        "baseline": {
+          "native_vt": {
+            "sample_count": 7200,
+            "total_ns": 15616090201,
+            "mean_ms": 2.1689014168055554
+          },
+          "native_submission": {
+            "sample_count": 7185,
+            "total_ns": 4733104029,
+            "mean_ms": 0.6587479511482255
+          },
+          "public_queue_proxy": {
+            "sample_count": 7200,
+            "total_ns": 20454357788,
+            "mean_ms": 2.840883026111111
+          }
+        },
+        "candidate": {
+          "native_vt": {
+            "sample_count": 7200,
+            "total_ns": 15505339921,
+            "mean_ms": 2.1535194334722223
+          },
+          "native_submission": {
+            "sample_count": 7186,
+            "total_ns": 4685774298,
+            "mean_ms": 0.6520698995268578
+          },
+          "public_queue_proxy": {
+            "sample_count": 7200,
+            "total_ns": 20326187855,
+            "mean_ms": 2.8230816465277777
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-50mbps/timed-baseline-1.csv",
+          "missing_return_samples": 5,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 5220106900,
+              "mean_ms": 2.1750445416666664
+            },
+            "native_submission": {
+              "sample_count": 2395,
+              "total_ns": 1591967751,
+              "mean_ms": 0.664704697703549
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 6817505927,
+              "mean_ms": 2.8406274695833336
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.033146,
+            "vt_p95_ms": 3.04846875,
+            "vt_p99_ms": 6.29795879,
+            "public_median_ms": 2.2694645,
+            "public_p95_ms": 3.4867047,
+            "public_p99_ms": 7.06414312
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-50mbps/timed-baseline-2.csv",
+          "missing_return_samples": 5,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 5202784521,
+              "mean_ms": 2.16782688375
+            },
+            "native_submission": {
+              "sample_count": 2395,
+              "total_ns": 1566617882,
+              "mean_ms": 0.6541202012526096
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 6829841882,
+              "mean_ms": 2.8457674508333333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.0383955,
+            "vt_p95_ms": 3.0657809,
+            "vt_p99_ms": 6.28478989,
+            "public_median_ms": 2.268952,
+            "public_p95_ms": 3.41943705,
+            "public_p99_ms": 7.09572527
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-50mbps/timed-baseline-3.csv",
+          "missing_return_samples": 5,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 5193198780,
+              "mean_ms": 2.163832825
+            },
+            "native_submission": {
+              "sample_count": 2395,
+              "total_ns": 1574518396,
+              "mean_ms": 0.6574189544885177
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 6807009979,
+              "mean_ms": 2.8362541579166667
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.0238955,
+            "vt_p95_ms": 3.04787535,
+            "vt_p99_ms": 6.2576425,
+            "public_median_ms": 2.26822,
+            "public_p95_ms": 3.39971735,
+            "public_p99_ms": 7.507643
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-50mbps/timed-candidate-1.csv",
+          "missing_return_samples": 6,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 5252265793,
+              "mean_ms": 2.1884440804166667
+            },
+            "native_submission": {
+              "sample_count": 2394,
+              "total_ns": 1626804806,
+              "mean_ms": 0.6795341712614871
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 6843974702,
+              "mean_ms": 2.8516561258333333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.044875,
+            "vt_p95_ms": 3.0380506499999997,
+            "vt_p99_ms": 6.50796989,
+            "public_median_ms": 2.2808345,
+            "public_p95_ms": 3.4709795,
+            "public_p99_ms": 7.23245412
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-50mbps/timed-candidate-2.csv",
+          "missing_return_samples": 6,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 5230861792,
+              "mean_ms": 2.1795257466666667
+            },
+            "native_submission": {
+              "sample_count": 2394,
+              "total_ns": 1587038863,
+              "mean_ms": 0.6629235016708438
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 6820537898,
+              "mean_ms": 2.8418907908333333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.0395415,
+            "vt_p95_ms": 3.0968202000000002,
+            "vt_p99_ms": 6.36778125,
+            "public_median_ms": 2.2746785,
+            "public_p95_ms": 3.4969660499999997,
+            "public_p99_ms": 7.4033896299999995
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-50mbps/timed-candidate-3.csv",
+          "missing_return_samples": 2,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 5022212336,
+              "mean_ms": 2.0925884733333335
+            },
+            "native_submission": {
+              "sample_count": 2398,
+              "total_ns": 1471930629,
+              "mean_ms": 0.6138159420350292
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 6661675255,
+              "mean_ms": 2.7756980229166666
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.0075,
+            "vt_p95_ms": 3.0091441,
+            "vt_p99_ms": 6.4808825,
+            "public_median_ms": 2.2439425,
+            "public_p95_ms": 3.4120476,
+            "public_p99_ms": 7.29033613
+          }
+        }
+      ],
+      "threshold_breaches": []
+    },
+    {
+      "name": "ultrawide-3440x1440p240-hevc-hdr10-100mbps",
+      "status": "PASS",
+      "builds": {
+        "baseline": {
+          "native_vt": {
+            "sample_count": 7200,
+            "total_ns": 16764813111,
+            "mean_ms": 2.328446265416667
+          },
+          "native_submission": {
+            "sample_count": 7190,
+            "total_ns": 4918062446,
+            "mean_ms": 0.6840142484005562
+          },
+          "public_queue_proxy": {
+            "sample_count": 7200,
+            "total_ns": 23125939249,
+            "mean_ms": 3.2119360068055554
+          }
+        },
+        "candidate": {
+          "native_vt": {
+            "sample_count": 7200,
+            "total_ns": 16654023307,
+            "mean_ms": 2.313058792638889
+          },
+          "native_submission": {
+            "sample_count": 7189,
+            "total_ns": 4821611283,
+            "mean_ms": 0.670692903463625
+          },
+          "public_queue_proxy": {
+            "sample_count": 7200,
+            "total_ns": 23199701956,
+            "mean_ms": 3.222180827222222
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-100mbps/timed-baseline-1.csv",
+          "missing_return_samples": 6,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 5568685687,
+              "mean_ms": 2.320285702916667
+            },
+            "native_submission": {
+              "sample_count": 2394,
+              "total_ns": 1623104379,
+              "mean_ms": 0.6779884624060151
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 7725598451,
+              "mean_ms": 3.218999354583333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.064479,
+            "vt_p95_ms": 3.2768691000000003,
+            "vt_p99_ms": 10.74040182,
+            "public_median_ms": 2.3021285,
+            "public_p95_ms": 3.8064188,
+            "public_p99_ms": 14.26233884
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-100mbps/timed-baseline-2.csv",
+          "missing_return_samples": 1,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 5597094910,
+              "mean_ms": 2.332122879166667
+            },
+            "native_submission": {
+              "sample_count": 2399,
+              "total_ns": 1630669846,
+              "mean_ms": 0.6797289895789912
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 7709773955,
+              "mean_ms": 3.212405814583333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.067146,
+            "vt_p95_ms": 3.2762125,
+            "vt_p99_ms": 10.90515575,
+            "public_median_ms": 2.309844,
+            "public_p95_ms": 3.8091491,
+            "public_p99_ms": 14.31700903
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-100mbps/timed-baseline-3.csv",
+          "missing_return_samples": 3,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 5599032514,
+              "mean_ms": 2.332930214166667
+            },
+            "native_submission": {
+              "sample_count": 2397,
+              "total_ns": 1664288221,
+              "mean_ms": 0.6943213270755111
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 7690566843,
+              "mean_ms": 3.20440285125
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.068958,
+            "vt_p95_ms": 3.25356395,
+            "vt_p99_ms": 10.63215818,
+            "public_median_ms": 2.3104165,
+            "public_p95_ms": 3.75609315,
+            "public_p99_ms": 14.358330140000001
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-100mbps/timed-candidate-1.csv",
+          "missing_return_samples": 3,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 5556396952,
+              "mean_ms": 2.3151653966666665
+            },
+            "native_submission": {
+              "sample_count": 2397,
+              "total_ns": 1598741941,
+              "mean_ms": 0.6669761956612432
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 7682273962,
+              "mean_ms": 3.200947484166667
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.0641045,
+            "vt_p95_ms": 3.25649615,
+            "vt_p99_ms": 10.579825,
+            "public_median_ms": 2.311156,
+            "public_p95_ms": 3.9519306000000003,
+            "public_p99_ms": 14.05387283
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-100mbps/timed-candidate-2.csv",
+          "missing_return_samples": 6,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 5572921598,
+              "mean_ms": 2.3220506658333333
+            },
+            "native_submission": {
+              "sample_count": 2394,
+              "total_ns": 1614659726,
+              "mean_ms": 0.6744610384294069
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 7701062024,
+              "mean_ms": 3.208775843333333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.0487295,
+            "vt_p95_ms": 3.3069583,
+            "vt_p99_ms": 10.74191232,
+            "public_median_ms": 2.297397,
+            "public_p95_ms": 3.7826334,
+            "public_p99_ms": 14.402246949999999
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-100mbps/timed-candidate-3.csv",
+          "missing_return_samples": 2,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 5524704757,
+              "mean_ms": 2.301960315416667
+            },
+            "native_submission": {
+              "sample_count": 2398,
+              "total_ns": 1608209616,
+              "mean_ms": 0.6706462118432027
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 7816365970,
+              "mean_ms": 3.2568191541666667
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.0524165,
+            "vt_p95_ms": 3.20709375,
+            "vt_p99_ms": 10.58854614,
+            "public_median_ms": 2.302802,
+            "public_p95_ms": 3.7155561,
+            "public_p99_ms": 14.338935300000001
+          }
+        }
+      ],
+      "threshold_breaches": []
+    },
+    {
+      "name": "ultrawide-3440x1440p240-hevc-hdr10-250mbps",
+      "status": "PASS",
+      "builds": {
+        "baseline": {
+          "native_vt": {
+            "sample_count": 7200,
+            "total_ns": 20256723487,
+            "mean_ms": 2.813433817638889
+          },
+          "native_submission": {
+            "sample_count": 7191,
+            "total_ns": 5251130061,
+            "mean_ms": 0.730236415102211
+          },
+          "public_queue_proxy": {
+            "sample_count": 7200,
+            "total_ns": 30014109452,
+            "mean_ms": 4.168626312777778
+          }
+        },
+        "candidate": {
+          "native_vt": {
+            "sample_count": 7200,
+            "total_ns": 20391895532,
+            "mean_ms": 2.8322077127777776
+          },
+          "native_submission": {
+            "sample_count": 7189,
+            "total_ns": 5341221645,
+            "mean_ms": 0.7429714348309918
+          },
+          "public_queue_proxy": {
+            "sample_count": 7200,
+            "total_ns": 29684664161,
+            "mean_ms": 4.122870022361111
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-250mbps/timed-baseline-1.csv",
+          "missing_return_samples": 1,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 6749548945,
+              "mean_ms": 2.8123120604166667
+            },
+            "native_submission": {
+              "sample_count": 2399,
+              "total_ns": 1756758650,
+              "mean_ms": 0.7322878907878283
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 9929216723,
+              "mean_ms": 4.137173634583333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.597375,
+            "vt_p95_ms": 3.65708925,
+            "vt_p99_ms": 13.60347175,
+            "public_median_ms": 2.8559145,
+            "public_p95_ms": 8.09511045,
+            "public_p99_ms": 23.312843559999997
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-250mbps/timed-baseline-2.csv",
+          "missing_return_samples": 3,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 6738385484,
+              "mean_ms": 2.8076606183333332
+            },
+            "native_submission": {
+              "sample_count": 2397,
+              "total_ns": 1732672803,
+              "mean_ms": 0.7228505644555695
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 10023368003,
+              "mean_ms": 4.176403334583333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.5791875,
+            "vt_p95_ms": 3.90134555,
+            "vt_p99_ms": 13.82780611,
+            "public_median_ms": 2.8368925,
+            "public_p95_ms": 8.08944425,
+            "public_p99_ms": 23.85089259
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-250mbps/timed-baseline-3.csv",
+          "missing_return_samples": 5,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 6768789058,
+              "mean_ms": 2.8203287741666663
+            },
+            "native_submission": {
+              "sample_count": 2395,
+              "total_ns": 1761698608,
+              "mean_ms": 0.7355735315240084
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 10061524726,
+              "mean_ms": 4.1923019691666665
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.5828335,
+            "vt_p95_ms": 3.86821935,
+            "vt_p99_ms": 13.772835539999999,
+            "public_median_ms": 2.8383665,
+            "public_p95_ms": 7.335851900000001,
+            "public_p99_ms": 23.163543649999998
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-250mbps/timed-candidate-1.csv",
+          "missing_return_samples": 4,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 6820683918,
+              "mean_ms": 2.8419516325
+            },
+            "native_submission": {
+              "sample_count": 2396,
+              "total_ns": 1792223247,
+              "mean_ms": 0.7480063635225375
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 9937464363,
+              "mean_ms": 4.14061015125
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.6094165,
+            "vt_p95_ms": 3.6647194,
+            "vt_p99_ms": 13.62193307,
+            "public_median_ms": 2.87171,
+            "public_p95_ms": 7.05046985,
+            "public_p99_ms": 23.411334309999997
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-250mbps/timed-candidate-2.csv",
+          "missing_return_samples": 2,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 6790343873,
+              "mean_ms": 2.8293099470833334
+            },
+            "native_submission": {
+              "sample_count": 2398,
+              "total_ns": 1763958481,
+              "mean_ms": 0.7355956968306923
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 9910579938,
+              "mean_ms": 4.1294083075
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.5975,
+            "vt_p95_ms": 4.0694917,
+            "vt_p99_ms": 13.6391975,
+            "public_median_ms": 2.855241,
+            "public_p95_ms": 7.6725805,
+            "public_p99_ms": 23.08865345
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-250mbps/timed-candidate-3.csv",
+          "missing_return_samples": 5,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 6780867741,
+              "mean_ms": 2.82536155875
+            },
+            "native_submission": {
+              "sample_count": 2395,
+              "total_ns": 1785039917,
+              "mean_ms": 0.7453193807933194
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 9836619860,
+              "mean_ms": 4.098591608333334
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.5783545,
+            "vt_p95_ms": 3.6220082999999996,
+            "vt_p99_ms": 13.41134443,
+            "public_median_ms": 2.823512,
+            "public_p95_ms": 7.702703400000001,
+            "public_p99_ms": 23.04802738
+          }
+        }
+      ],
+      "threshold_breaches": []
+    },
+    {
+      "name": "ultrawide-3440x1440p240-hevc-hdr10-350mbps",
+      "status": "PASS",
+      "builds": {
+        "baseline": {
+          "native_vt": {
+            "sample_count": 7200,
+            "total_ns": 23151522584,
+            "mean_ms": 3.2154892477777777
+          },
+          "native_submission": {
+            "sample_count": 7191,
+            "total_ns": 5115537456,
+            "mean_ms": 0.7113805390070922
+          },
+          "public_queue_proxy": {
+            "sample_count": 7200,
+            "total_ns": 36323805360,
+            "mean_ms": 5.044972966666667
+          }
+        },
+        "candidate": {
+          "native_vt": {
+            "sample_count": 7200,
+            "total_ns": 23092595944,
+            "mean_ms": 3.207304992222222
+          },
+          "native_submission": {
+            "sample_count": 7192,
+            "total_ns": 5034322778,
+            "mean_ms": 0.6999892627919911
+          },
+          "public_queue_proxy": {
+            "sample_count": 7200,
+            "total_ns": 36986714135,
+            "mean_ms": 5.137043629861111
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-350mbps/timed-baseline-1.csv",
+          "missing_return_samples": 4,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 7812753949,
+              "mean_ms": 3.255314145416667
+            },
+            "native_submission": {
+              "sample_count": 2396,
+              "total_ns": 1761937844,
+              "mean_ms": 0.7353663789649416
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 12358116736,
+              "mean_ms": 5.149215306666667
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.987979,
+            "vt_p95_ms": 4.5115785,
+            "vt_p99_ms": 15.959966679999999,
+            "public_median_ms": 3.2702735,
+            "public_p95_ms": 15.16538265,
+            "public_p99_ms": 31.707789440000003
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-350mbps/timed-baseline-2.csv",
+          "missing_return_samples": 2,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 7644504053,
+              "mean_ms": 3.185210022083333
+            },
+            "native_submission": {
+              "sample_count": 2398,
+              "total_ns": 1664714755,
+              "mean_ms": 0.6942096559633028
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 12002076465,
+              "mean_ms": 5.000865193749999
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.936396,
+            "vt_p95_ms": 3.9579353999999998,
+            "vt_p99_ms": 16.08361368,
+            "public_median_ms": 3.230119,
+            "public_p95_ms": 14.97398785,
+            "public_p99_ms": 31.063596829999998
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-350mbps/timed-baseline-3.csv",
+          "missing_return_samples": 3,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 7694264582,
+              "mean_ms": 3.205943575833333
+            },
+            "native_submission": {
+              "sample_count": 2397,
+              "total_ns": 1688884857,
+              "mean_ms": 0.7045827521902377
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 11963612159,
+              "mean_ms": 4.984838399583333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.946771,
+            "vt_p95_ms": 4.49150865,
+            "vt_p99_ms": 16.03423507,
+            "public_median_ms": 3.2234335,
+            "public_p95_ms": 14.9402329,
+            "public_p99_ms": 30.8049646
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-350mbps/timed-candidate-1.csv",
+          "missing_return_samples": 4,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 7754867238,
+              "mean_ms": 3.2311946825
+            },
+            "native_submission": {
+              "sample_count": 2396,
+              "total_ns": 1720643914,
+              "mean_ms": 0.7181318505843072
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 12522161597,
+              "mean_ms": 5.217567332083333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.9709785,
+            "vt_p95_ms": 4.16167945,
+            "vt_p99_ms": 16.10778,
+            "public_median_ms": 3.23964,
+            "public_p95_ms": 14.8620921,
+            "public_p99_ms": 31.080164059999998
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-350mbps/timed-candidate-2.csv",
+          "missing_return_samples": 2,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 7580361185,
+              "mean_ms": 3.1584838270833333
+            },
+            "native_submission": {
+              "sample_count": 2398,
+              "total_ns": 1582295302,
+              "mean_ms": 0.6598395754795664
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 12303507679,
+              "mean_ms": 5.126461532916667
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.92925,
+            "vt_p95_ms": 4.1632896,
+            "vt_p99_ms": 16.10537982,
+            "public_median_ms": 3.224793,
+            "public_p95_ms": 14.8600506,
+            "public_p99_ms": 30.90298558
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-350mbps/timed-candidate-3.csv",
+          "missing_return_samples": 2,
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 7757367521,
+              "mean_ms": 3.2322364670833337
+            },
+            "native_submission": {
+              "sample_count": 2398,
+              "total_ns": 1731383562,
+              "mean_ms": 0.7220114937447873
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 12161044859,
+              "mean_ms": 5.067102024583333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.959,
+            "vt_p95_ms": 4.3199604,
+            "vt_p99_ms": 16.11591793,
+            "public_median_ms": 3.239825,
+            "public_p95_ms": 14.707293949999999,
+            "public_p99_ms": 30.80250637
+          }
+        }
+      ],
+      "threshold_breaches": []
+    },
+    {
+      "name": "4k-3840x2160p60-hevc-sdr-50mbps",
+      "status": "INCONCLUSIVE",
+      "builds": {
+        "baseline": {
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 6562061056,
+            "mean_ms": 3.6455894755555556
+          },
+          "native_submission": {
+            "sample_count": 1800,
+            "total_ns": 1675496909,
+            "mean_ms": 0.9308316161111111
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 8129245766,
+            "mean_ms": 4.516247647777778
+          }
+        },
+        "candidate": {
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 6588062093,
+            "mean_ms": 3.6600344961111113
+          },
+          "native_submission": {
+            "sample_count": 1799,
+            "total_ns": 1697969445,
+            "mean_ms": 0.9438407142857144
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 8182279997,
+            "mean_ms": 4.5457111094444445
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-50mbps/timed-baseline-1.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2183523789,
+              "mean_ms": 3.639206315
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 556279220,
+              "mean_ms": 0.9271320333333333
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 2709452418,
+              "mean_ms": 4.51575403
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.8966045,
+            "vt_p95_ms": 7.25976905,
+            "vt_p99_ms": 18.199478929999998,
+            "public_median_ms": 3.268222,
+            "public_p95_ms": 7.9017634,
+            "public_p99_ms": 19.34090814
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-50mbps/timed-baseline-2.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2172231949,
+              "mean_ms": 3.6203865816666667
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 553502171,
+              "mean_ms": 0.9225036183333333
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 2686810774,
+              "mean_ms": 4.478017956666667
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.877208,
+            "vt_p95_ms": 7.496512200000001,
+            "vt_p99_ms": 18.05574064,
+            "public_median_ms": 3.21455,
+            "public_p95_ms": 8.12771055,
+            "public_p99_ms": 19.098130559999998
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-50mbps/timed-baseline-3.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2206305318,
+              "mean_ms": 3.67717553
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 565715518,
+              "mean_ms": 0.9428591966666666
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 2732982574,
+              "mean_ms": 4.554970956666667
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.8927495,
+            "vt_p95_ms": 7.5795226,
+            "vt_p99_ms": 18.0788625,
+            "public_median_ms": 3.2640415,
+            "public_p95_ms": 9.97239025,
+            "public_p99_ms": 19.13451284
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-50mbps/timed-candidate-1.csv",
+          "missing_return_samples": 1,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2199919721,
+              "mean_ms": 3.6665328683333334
+            },
+            "native_submission": {
+              "sample_count": 599,
+              "total_ns": 564978232,
+              "mean_ms": 0.9432023906510851
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 2726024601,
+              "mean_ms": 4.543374335
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.901292,
+            "vt_p95_ms": 7.748016349999999,
+            "vt_p99_ms": 18.00635307,
+            "public_median_ms": 3.275095,
+            "public_p95_ms": 9.6269331,
+            "public_p99_ms": 19.17521098
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-50mbps/timed-candidate-2.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2181740122,
+              "mean_ms": 3.6362335366666665
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 554385917,
+              "mean_ms": 0.9239765283333333
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 2711376052,
+              "mean_ms": 4.518960086666667
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.8697295,
+            "vt_p95_ms": 7.406766950000001,
+            "vt_p99_ms": 17.96447689,
+            "public_median_ms": 3.2379675,
+            "public_p95_ms": 7.6822559,
+            "public_p99_ms": 19.03038391
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-50mbps/timed-candidate-3.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2206402250,
+              "mean_ms": 3.6773370833333336
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 578605296,
+              "mean_ms": 0.9643421600000001
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 2744879344,
+              "mean_ms": 4.5747989066666666
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.890312,
+            "vt_p95_ms": 7.77254135,
+            "vt_p99_ms": 18.03684561,
+            "public_median_ms": 3.270697,
+            "public_p95_ms": 8.54888645,
+            "public_p99_ms": 19.41968991
+          }
+        }
+      ],
+      "threshold_breaches": []
+    },
+    {
+      "name": "4k-3840x2160p60-hevc-sdr-100mbps",
+      "status": "PASS",
+      "builds": {
+        "baseline": {
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 7200380030,
+            "mean_ms": 4.000211127777778
+          },
+          "native_submission": {
+            "sample_count": 1800,
+            "total_ns": 1761366557,
+            "mean_ms": 0.9785369761111111
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 8899534747,
+            "mean_ms": 4.944185970555556
+          }
+        },
+        "candidate": {
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 7159340535,
+            "mean_ms": 3.9774114083333334
+          },
+          "native_submission": {
+            "sample_count": 1798,
+            "total_ns": 1745099950,
+            "mean_ms": 0.9705783926585094
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 8831694079,
+            "mean_ms": 4.9064967105555555
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-100mbps/timed-baseline-1.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2398569577,
+              "mean_ms": 3.9976159616666664
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 602701654,
+              "mean_ms": 1.0045027566666667
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 3005747635,
+              "mean_ms": 5.009579391666667
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.9663955,
+            "vt_p95_ms": 11.5448125,
+            "vt_p99_ms": 21.37852946,
+            "public_median_ms": 3.358838,
+            "public_p95_ms": 12.35870755,
+            "public_p99_ms": 22.90040182
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-100mbps/timed-baseline-2.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2404840747,
+              "mean_ms": 4.008067911666666
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 578469667,
+              "mean_ms": 0.9641161116666667
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 2949322016,
+              "mean_ms": 4.915536693333333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 3.002292,
+            "vt_p95_ms": 10.947723550000001,
+            "vt_p99_ms": 21.39642418,
+            "public_median_ms": 3.365562,
+            "public_p95_ms": 11.73031555,
+            "public_p99_ms": 22.84916373
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-100mbps/timed-baseline-3.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2396969706,
+              "mean_ms": 3.9949495099999996
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 580195236,
+              "mean_ms": 0.96699206
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 2944465096,
+              "mean_ms": 4.907441826666667
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.9813335,
+            "vt_p95_ms": 11.104885099999999,
+            "vt_p99_ms": 21.45074625,
+            "public_median_ms": 3.3347365,
+            "public_p95_ms": 12.013513849999999,
+            "public_p99_ms": 22.80612833
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-100mbps/timed-candidate-1.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2389060284,
+              "mean_ms": 3.98176714
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 576526165,
+              "mean_ms": 0.9608769416666667
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 2942074420,
+              "mean_ms": 4.903457366666666
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.9742495,
+            "vt_p95_ms": 11.214285449999998,
+            "vt_p99_ms": 21.04679368,
+            "public_median_ms": 3.3288645,
+            "public_p95_ms": 12.1226108,
+            "public_p99_ms": 22.49726176
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-100mbps/timed-candidate-2.csv",
+          "missing_return_samples": 1,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2380084284,
+              "mean_ms": 3.9668071400000002
+            },
+            "native_submission": {
+              "sample_count": 599,
+              "total_ns": 579872695,
+              "mean_ms": 0.9680679382303841
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 2949682418,
+              "mean_ms": 4.916137363333333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.9274375,
+            "vt_p95_ms": 11.5967208,
+            "vt_p99_ms": 21.29415443,
+            "public_median_ms": 3.297588,
+            "public_p95_ms": 12.3804394,
+            "public_p99_ms": 22.90046263
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-100mbps/timed-candidate-3.csv",
+          "missing_return_samples": 1,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2390195967,
+              "mean_ms": 3.983659945
+            },
+            "native_submission": {
+              "sample_count": 599,
+              "total_ns": 588701090,
+              "mean_ms": 0.9828064941569282
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 2939937241,
+              "mean_ms": 4.899895401666666
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.973292,
+            "vt_p95_ms": 10.582541699999998,
+            "vt_p99_ms": 21.698,
+            "public_median_ms": 3.3558245,
+            "public_p95_ms": 11.37576705,
+            "public_p99_ms": 23.226952899999997
+          }
+        }
+      ],
+      "threshold_breaches": []
+    },
+    {
+      "name": "4k-3840x2160p60-hevc-sdr-250mbps",
+      "status": "PASS",
+      "builds": {
+        "baseline": {
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 10593594250,
+            "mean_ms": 5.885330138888889
+          },
+          "native_submission": {
+            "sample_count": 1798,
+            "total_ns": 2097203801,
+            "mean_ms": 1.1664092330367073
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 12680551643,
+            "mean_ms": 7.044750912777777
+          }
+        },
+        "candidate": {
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 10658504014,
+            "mean_ms": 5.921391118888889
+          },
+          "native_submission": {
+            "sample_count": 1799,
+            "total_ns": 2118488401,
+            "mean_ms": 1.1775922184546972
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 12714251838,
+            "mean_ms": 7.063473243333333
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-250mbps/timed-baseline-1.csv",
+          "missing_return_samples": 2,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 3546644623,
+              "mean_ms": 5.911074371666667
+            },
+            "native_submission": {
+              "sample_count": 598,
+              "total_ns": 704969914,
+              "mean_ms": 1.1788794548494983
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4235233203,
+              "mean_ms": 7.058722005
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 4.774083,
+            "vt_p95_ms": 19.925483649999997,
+            "vt_p99_ms": 27.59358975,
+            "public_median_ms": 5.173572,
+            "public_p95_ms": 21.2555723,
+            "public_p99_ms": 29.44797422
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-250mbps/timed-baseline-2.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 3507546173,
+              "mean_ms": 5.845910288333333
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 681412863,
+              "mean_ms": 1.135688105
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4207836296,
+              "mean_ms": 7.013060493333334
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 4.695625,
+            "vt_p95_ms": 18.94787355,
+            "vt_p99_ms": 27.92568232,
+            "public_median_ms": 5.084757,
+            "public_p95_ms": 20.216908800000002,
+            "public_p99_ms": 30.16183476
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-250mbps/timed-baseline-3.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 3539403454,
+              "mean_ms": 5.899005756666667
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 710821024,
+              "mean_ms": 1.1847017066666667
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4237482144,
+              "mean_ms": 7.062470240000001
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 4.693125,
+            "vt_p95_ms": 19.59539935,
+            "vt_p99_ms": 27.51574814,
+            "public_median_ms": 5.058439,
+            "public_p95_ms": 21.04444,
+            "public_p99_ms": 29.567442760000002
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-250mbps/timed-candidate-1.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 3573964624,
+              "mean_ms": 5.956607706666667
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 722860617,
+              "mean_ms": 1.2047676950000001
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4270709517,
+              "mean_ms": 7.117849195000001
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 4.878833,
+            "vt_p95_ms": 19.68556395,
+            "vt_p99_ms": 27.661450679999998,
+            "public_median_ms": 5.272607,
+            "public_p95_ms": 21.005930399999997,
+            "public_p99_ms": 29.695468769999998
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-250mbps/timed-candidate-2.csv",
+          "missing_return_samples": 1,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 3541346019,
+              "mean_ms": 5.902243365
+            },
+            "native_submission": {
+              "sample_count": 599,
+              "total_ns": 700660662,
+              "mean_ms": 1.1697172988313855
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4212541269,
+              "mean_ms": 7.020902115
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 4.769229,
+            "vt_p95_ms": 19.358333350000002,
+            "vt_p99_ms": 27.57728736,
+            "public_median_ms": 5.1122905,
+            "public_p95_ms": 20.60682245,
+            "public_p99_ms": 29.244807899999998
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-250mbps/timed-candidate-3.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 3543193371,
+              "mean_ms": 5.9053222850000004
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 694967122,
+              "mean_ms": 1.1582785366666666
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4231001052,
+              "mean_ms": 7.0516684199999995
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 4.766854,
+            "vt_p95_ms": 19.6980375,
+            "vt_p99_ms": 28.03529439,
+            "public_median_ms": 5.103172,
+            "public_p95_ms": 20.98409795,
+            "public_p99_ms": 29.75680137
+          }
+        }
+      ],
+      "threshold_breaches": []
+    },
+    {
+      "name": "4k-3840x2160p60-hevc-sdr-350mbps",
+      "status": "PASS",
+      "builds": {
+        "baseline": {
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 12738025276,
+            "mean_ms": 7.0766807088888894
+          },
+          "native_submission": {
+            "sample_count": 1800,
+            "total_ns": 2162721576,
+            "mean_ms": 1.2015119866666666
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 14950074982,
+            "mean_ms": 8.305597212222223
+          }
+        },
+        "candidate": {
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 12661753790,
+            "mean_ms": 7.034307661111111
+          },
+          "native_submission": {
+            "sample_count": 1800,
+            "total_ns": 2118565629,
+            "mean_ms": 1.176980905
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 14973130981,
+            "mean_ms": 8.318406100555556
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-350mbps/timed-baseline-1.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 4273202881,
+              "mean_ms": 7.122004801666667
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 736659833,
+              "mean_ms": 1.2277663883333334
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 5027618463,
+              "mean_ms": 8.379364105
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 5.8813125,
+            "vt_p95_ms": 21.74932855,
+            "vt_p99_ms": 29.90708943,
+            "public_median_ms": 6.347871,
+            "public_p95_ms": 23.41820405,
+            "public_p99_ms": 31.75167866
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-350mbps/timed-baseline-2.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 4254487752,
+              "mean_ms": 7.09081292
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 732491965,
+              "mean_ms": 1.2208199416666667
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4993451143,
+              "mean_ms": 8.322418571666667
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 5.9443745,
+            "vt_p95_ms": 21.3536226,
+            "vt_p99_ms": 29.64625389,
+            "public_median_ms": 6.390348,
+            "public_p95_ms": 22.50225205,
+            "public_p99_ms": 31.44329901
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-350mbps/timed-baseline-3.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 4210334643,
+              "mean_ms": 7.017224405
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 693569778,
+              "mean_ms": 1.1559496299999998
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4929005376,
+              "mean_ms": 8.21500896
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 5.774416,
+            "vt_p95_ms": 21.79890805,
+            "vt_p99_ms": 29.78105325,
+            "public_median_ms": 6.239638,
+            "public_p95_ms": 23.27697355,
+            "public_p99_ms": 31.42944503
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-350mbps/timed-candidate-1.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 4132880319,
+              "mean_ms": 6.888133865
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 644433752,
+              "mean_ms": 1.0740562533333333
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4875117627,
+              "mean_ms": 8.125196045
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 5.7199165,
+            "vt_p95_ms": 21.502202699999998,
+            "vt_p99_ms": 29.03994932,
+            "public_median_ms": 6.2300775,
+            "public_p95_ms": 22.524470899999997,
+            "public_p99_ms": 30.86507805
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-350mbps/timed-candidate-2.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 4239606088,
+              "mean_ms": 7.066010146666667
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 723976202,
+              "mean_ms": 1.2066270033333335
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 5025464795,
+              "mean_ms": 8.375774658333333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 5.794958,
+            "vt_p95_ms": 22.280821149999998,
+            "vt_p99_ms": 29.8333495,
+            "public_median_ms": 6.298368,
+            "public_p95_ms": 23.6140822,
+            "public_p99_ms": 31.94631748
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-350mbps/timed-candidate-3.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 4289267383,
+              "mean_ms": 7.148778971666666
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 750155675,
+              "mean_ms": 1.2502594583333333
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 5072548559,
+              "mean_ms": 8.454247598333332
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 6.08925,
+            "vt_p95_ms": 22.287073550000002,
+            "vt_p99_ms": 30.00142936,
+            "public_median_ms": 6.5295565,
+            "public_p95_ms": 23.91828115,
+            "public_p99_ms": 32.20286369
+          }
+        }
+      ],
+      "threshold_breaches": []
+    },
+    {
+      "name": "4k-3840x2160p60-hevc-hdr10-50mbps",
+      "status": "INCONCLUSIVE",
+      "builds": {
+        "baseline": {
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 7602680460,
+            "mean_ms": 4.223711366666667
+          },
+          "native_submission": {
+            "sample_count": 1799,
+            "total_ns": 1839225083,
+            "mean_ms": 1.0223596903835463
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 9534858410,
+            "mean_ms": 5.2971435611111115
+          }
+        },
+        "candidate": {
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 7611264742,
+            "mean_ms": 4.228480412222223
+          },
+          "native_submission": {
+            "sample_count": 1798,
+            "total_ns": 1830666048,
+            "mean_ms": 1.0181679911012236
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 9487503001,
+            "mean_ms": 5.2708350005555555
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-50mbps/timed-baseline-1.csv",
+          "missing_return_samples": 1,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2546164992,
+              "mean_ms": 4.24360832
+            },
+            "native_submission": {
+              "sample_count": 599,
+              "total_ns": 618594113,
+              "mean_ms": 1.0327113739565943
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 3214976039,
+              "mean_ms": 5.358293398333333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.994604,
+            "vt_p95_ms": 13.535008,
+            "vt_p99_ms": 26.06930332,
+            "public_median_ms": 3.3773465,
+            "public_p95_ms": 14.39798465,
+            "public_p99_ms": 28.458352899999998
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-50mbps/timed-baseline-2.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2536814963,
+              "mean_ms": 4.228024938333333
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 621799469,
+              "mean_ms": 1.0363324483333334
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 3160201078,
+              "mean_ms": 5.2670017966666665
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.9940835,
+            "vt_p95_ms": 14.08068335,
+            "vt_p99_ms": 25.82956439,
+            "public_median_ms": 3.3270925,
+            "public_p95_ms": 14.78948115,
+            "public_p99_ms": 27.50126678
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-50mbps/timed-baseline-3.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2519700505,
+              "mean_ms": 4.199500841666667
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 598831501,
+              "mean_ms": 0.9980525016666667
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 3159681293,
+              "mean_ms": 5.266135488333333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 3.0165625,
+            "vt_p95_ms": 13.36672645,
+            "vt_p99_ms": 26.108780109999998,
+            "public_median_ms": 3.3500265,
+            "public_p95_ms": 14.232031150000001,
+            "public_p99_ms": 27.79669495
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-50mbps/timed-candidate-1.csv",
+          "missing_return_samples": 1,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2535423707,
+              "mean_ms": 4.225706178333334
+            },
+            "native_submission": {
+              "sample_count": 599,
+              "total_ns": 610669081,
+              "mean_ms": 1.019480936560935
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 3157171146,
+              "mean_ms": 5.2619519100000005
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.995104,
+            "vt_p95_ms": 13.781898550000001,
+            "vt_p99_ms": 26.059398820000002,
+            "public_median_ms": 3.321058,
+            "public_p95_ms": 14.41817685,
+            "public_p99_ms": 27.63408547
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-50mbps/timed-candidate-2.csv",
+          "missing_return_samples": 1,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2525657736,
+              "mean_ms": 4.209429559999999
+            },
+            "native_submission": {
+              "sample_count": 599,
+              "total_ns": 598869026,
+              "mean_ms": 0.9997813455759599
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 3159959421,
+              "mean_ms": 5.2665990350000005
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 2.9734795,
+            "vt_p95_ms": 14.205155900000001,
+            "vt_p99_ms": 26.27531543,
+            "public_median_ms": 3.347126,
+            "public_p95_ms": 14.9886204,
+            "public_p99_ms": 27.769665829999997
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-50mbps/timed-candidate-3.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2550183299,
+              "mean_ms": 4.250305498333333
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 621127941,
+              "mean_ms": 1.035213235
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 3170372434,
+              "mean_ms": 5.2839540566666665
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 3.0224585,
+            "vt_p95_ms": 13.582656550000001,
+            "vt_p99_ms": 25.94358939,
+            "public_median_ms": 3.3435265,
+            "public_p95_ms": 14.11171955,
+            "public_p99_ms": 27.551578629999998
+          }
+        }
+      ],
+      "threshold_breaches": []
+    },
+    {
+      "name": "4k-3840x2160p60-hevc-hdr10-100mbps",
+      "status": "PASS",
+      "builds": {
+        "baseline": {
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 7339287333,
+            "mean_ms": 4.077381851666667
+          },
+          "native_submission": {
+            "sample_count": 1798,
+            "total_ns": 1863108323,
+            "mean_ms": 1.0362115255839823
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 8990973071,
+            "mean_ms": 4.994985039444445
+          }
+        },
+        "candidate": {
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 7298346795,
+            "mean_ms": 4.054637108333333
+          },
+          "native_submission": {
+            "sample_count": 1798,
+            "total_ns": 1882935137,
+            "mean_ms": 1.0472386746384872
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 9013004014,
+            "mean_ms": 5.007224452222222
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-100mbps/timed-baseline-1.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2449631130,
+              "mean_ms": 4.08271855
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 619200790,
+              "mean_ms": 1.0320013166666666
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 3005851825,
+              "mean_ms": 5.009753041666667
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 3.0500835,
+            "vt_p95_ms": 10.714706849999999,
+            "vt_p99_ms": 20.89454307,
+            "public_median_ms": 3.441289,
+            "public_p95_ms": 11.65624805,
+            "public_p99_ms": 22.44834779
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-100mbps/timed-baseline-2.csv",
+          "missing_return_samples": 2,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2438915331,
+              "mean_ms": 4.064858885
+            },
+            "native_submission": {
+              "sample_count": 598,
+              "total_ns": 616055414,
+              "mean_ms": 1.030193
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 2982473725,
+              "mean_ms": 4.970789541666667
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 3.025833,
+            "vt_p95_ms": 11.015298199999998,
+            "vt_p99_ms": 21.30920107,
+            "public_median_ms": 3.398139,
+            "public_p95_ms": 11.8800828,
+            "public_p99_ms": 22.79206312
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-100mbps/timed-baseline-3.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2450740872,
+              "mean_ms": 4.08456812
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 627852119,
+              "mean_ms": 1.0464201983333334
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 3002647521,
+              "mean_ms": 5.004412535
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 3.0824795,
+            "vt_p95_ms": 10.77854405,
+            "vt_p99_ms": 21.08343254,
+            "public_median_ms": 3.435606,
+            "public_p95_ms": 11.770496300000001,
+            "public_p99_ms": 22.45406678
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-100mbps/timed-candidate-1.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2427517179,
+              "mean_ms": 4.045861965
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 624664469,
+              "mean_ms": 1.0411074483333334
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 3001613445,
+              "mean_ms": 5.002689075
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 3.071,
+            "vt_p95_ms": 10.7321601,
+            "vt_p99_ms": 21.00372432,
+            "public_median_ms": 3.4581005,
+            "public_p95_ms": 11.6227007,
+            "public_p99_ms": 22.63786665
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-100mbps/timed-candidate-2.csv",
+          "missing_return_samples": 1,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2440052247,
+              "mean_ms": 4.066753745
+            },
+            "native_submission": {
+              "sample_count": 599,
+              "total_ns": 626846244,
+              "mean_ms": 1.0464878864774625
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 3026055014,
+              "mean_ms": 5.0434250233333335
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 3.0715,
+            "vt_p95_ms": 11.128670199999998,
+            "vt_p99_ms": 21.22049125,
+            "public_median_ms": 3.452422,
+            "public_p95_ms": 11.95611885,
+            "public_p99_ms": 22.866842719999998
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-100mbps/timed-candidate-3.csv",
+          "missing_return_samples": 1,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2430777369,
+              "mean_ms": 4.051295615
+            },
+            "native_submission": {
+              "sample_count": 599,
+              "total_ns": 631424424,
+              "mean_ms": 1.0541309248747914
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 2985335555,
+              "mean_ms": 4.975559258333334
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 3.0542915,
+            "vt_p95_ms": 11.28847565,
+            "vt_p99_ms": 20.49708743,
+            "public_median_ms": 3.411974,
+            "public_p95_ms": 12.13545775,
+            "public_p99_ms": 21.898311800000002
+          }
+        }
+      ],
+      "threshold_breaches": []
+    },
+    {
+      "name": "4k-3840x2160p60-hevc-hdr10-250mbps",
+      "status": "PASS",
+      "builds": {
+        "baseline": {
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 10699094836,
+            "mean_ms": 5.943941575555556
+          },
+          "native_submission": {
+            "sample_count": 1799,
+            "total_ns": 2134726822,
+            "mean_ms": 1.186618578098944
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 12836095034,
+            "mean_ms": 7.131163907777778
+          }
+        },
+        "candidate": {
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 10753206054,
+            "mean_ms": 5.974003363333333
+          },
+          "native_submission": {
+            "sample_count": 1797,
+            "total_ns": 2151273370,
+            "mean_ms": 1.1971471174179187
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 12835052135,
+            "mean_ms": 7.130584519444445
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-250mbps/timed-baseline-1.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 3607321913,
+              "mean_ms": 6.012203188333333
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 744001739,
+              "mean_ms": 1.2400028983333333
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4298783057,
+              "mean_ms": 7.164638428333333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 4.895708,
+            "vt_p95_ms": 18.335804149999998,
+            "vt_p99_ms": 27.477471,
+            "public_median_ms": 5.2899775,
+            "public_p95_ms": 19.800632699999998,
+            "public_p99_ms": 29.3276688
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-250mbps/timed-baseline-2.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 3575963342,
+              "mean_ms": 5.959938903333334
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 713522667,
+              "mean_ms": 1.189204445
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4271188262,
+              "mean_ms": 7.118647103333333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 4.8275,
+            "vt_p95_ms": 18.98879105,
+            "vt_p99_ms": 27.04012425,
+            "public_median_ms": 5.2247715,
+            "public_p95_ms": 20.1650289,
+            "public_p99_ms": 28.76122132
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-250mbps/timed-baseline-3.csv",
+          "missing_return_samples": 1,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 3515809581,
+              "mean_ms": 5.8596826349999995
+            },
+            "native_submission": {
+              "sample_count": 599,
+              "total_ns": 677202416,
+              "mean_ms": 1.1305549515859767
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4266123715,
+              "mean_ms": 7.110206191666666
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 4.8030835,
+            "vt_p95_ms": 18.738958,
+            "vt_p99_ms": 27.10955061,
+            "public_median_ms": 5.2261885,
+            "public_p95_ms": 21.815008,
+            "public_p99_ms": 29.06002213
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-250mbps/timed-candidate-1.csv",
+          "missing_return_samples": 2,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 3603922324,
+              "mean_ms": 6.006537206666667
+            },
+            "native_submission": {
+              "sample_count": 598,
+              "total_ns": 718662339,
+              "mean_ms": 1.2017764866220737
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4287114082,
+              "mean_ms": 7.145190136666667
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 4.9632505,
+            "vt_p95_ms": 18.4926152,
+            "vt_p99_ms": 27.32176939,
+            "public_median_ms": 5.3294135,
+            "public_p95_ms": 19.48641945,
+            "public_p99_ms": 29.14713687
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-250mbps/timed-candidate-2.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 3611358996,
+              "mean_ms": 6.01893166
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 740915049,
+              "mean_ms": 1.234858415
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4293318427,
+              "mean_ms": 7.155530711666667
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 4.932062,
+            "vt_p95_ms": 18.8421021,
+            "vt_p99_ms": 26.915388710000002,
+            "public_median_ms": 5.40171,
+            "public_p95_ms": 21.9971025,
+            "public_p99_ms": 28.68789821
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-250mbps/timed-candidate-3.csv",
+          "missing_return_samples": 1,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 3537924734,
+              "mean_ms": 5.896541223333333
+            },
+            "native_submission": {
+              "sample_count": 599,
+              "total_ns": 691695982,
+              "mean_ms": 1.154751222036728
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4254619626,
+              "mean_ms": 7.09103271
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 4.7143125,
+            "vt_p95_ms": 18.56141875,
+            "vt_p99_ms": 27.137462929999998,
+            "public_median_ms": 5.0574355,
+            "public_p95_ms": 19.682676949999998,
+            "public_p99_ms": 28.884366649999997
+          }
+        }
+      ],
+      "threshold_breaches": []
+    },
+    {
+      "name": "4k-3840x2160p60-hevc-hdr10-350mbps",
+      "status": "PASS",
+      "builds": {
+        "baseline": {
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 13042825130,
+            "mean_ms": 7.246013961111111
+          },
+          "native_submission": {
+            "sample_count": 1800,
+            "total_ns": 2346275731,
+            "mean_ms": 1.303486517222222
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 15313899003,
+            "mean_ms": 8.507721668333334
+          }
+        },
+        "candidate": {
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 12949734003,
+            "mean_ms": 7.194296668333333
+          },
+          "native_submission": {
+            "sample_count": 1800,
+            "total_ns": 2297483075,
+            "mean_ms": 1.276379486111111
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 15258063496,
+            "mean_ms": 8.476701942222222
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-350mbps/timed-baseline-1.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 4367599792,
+              "mean_ms": 7.279332986666667
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 792430117,
+              "mean_ms": 1.3207168616666667
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 5120960261,
+              "mean_ms": 8.534933768333332
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 6.368,
+            "vt_p95_ms": 20.341354149999997,
+            "vt_p99_ms": 28.93948368,
+            "public_median_ms": 6.8249485,
+            "public_p95_ms": 21.68853665,
+            "public_p99_ms": 30.864708670000002
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-350mbps/timed-baseline-2.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 4308775044,
+              "mean_ms": 7.18129174
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 759852911,
+              "mean_ms": 1.2664215183333334
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 5058051449,
+              "mean_ms": 8.430085748333333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 6.4056455,
+            "vt_p95_ms": 21.0427417,
+            "vt_p99_ms": 28.812157,
+            "public_median_ms": 6.8439595,
+            "public_p95_ms": 22.8938466,
+            "public_p99_ms": 30.79275295
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-350mbps/timed-baseline-3.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 4366450294,
+              "mean_ms": 7.277417156666666
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 793992703,
+              "mean_ms": 1.3233211716666666
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 5134887293,
+              "mean_ms": 8.558145488333333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 6.443562,
+            "vt_p95_ms": 20.2724934,
+            "vt_p99_ms": 28.83911375,
+            "public_median_ms": 6.899026,
+            "public_p95_ms": 21.867771949999998,
+            "public_p99_ms": 30.70218152
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-350mbps/timed-candidate-1.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 4242353349,
+              "mean_ms": 7.070588915
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 709326960,
+              "mean_ms": 1.1822116
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 5007819713,
+              "mean_ms": 8.346366188333333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 5.992292,
+            "vt_p95_ms": 20.509721149999997,
+            "vt_p99_ms": 28.81120757,
+            "public_median_ms": 6.4637965,
+            "public_p95_ms": 21.559277350000002,
+            "public_p99_ms": 30.882969489999997
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-350mbps/timed-candidate-2.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 4358168132,
+              "mean_ms": 7.263613553333333
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 787820499,
+              "mean_ms": 1.3130341650000001
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 5133328640,
+              "mean_ms": 8.555547733333333
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 6.4238125,
+            "vt_p95_ms": 20.37236045,
+            "vt_p99_ms": 28.763956320000002,
+            "public_median_ms": 6.950014,
+            "public_p95_ms": 22.060849,
+            "public_p99_ms": 30.78838919
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-350mbps/timed-candidate-3.csv",
+          "missing_return_samples": 0,
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 4349212522,
+              "mean_ms": 7.248687536666667
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 800335616,
+              "mean_ms": 1.3338926933333333
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 5116915143,
+              "mean_ms": 8.528191905
+            }
+          },
+          "metrics": {
+            "vt_median_ms": 6.237312,
+            "vt_p95_ms": 20.02509825,
+            "vt_p99_ms": 28.90737054,
+            "public_median_ms": 6.746374,
+            "public_p95_ms": 21.5941865,
+            "public_p99_ms": 30.386394210000002
+          }
+        }
+      ],
+      "threshold_breaches": []
+    }
+  ],
+  "threshold_breaches": []
+}

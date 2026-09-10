@@ -1,0 +1,20 @@
+{
+  "baseline_decoder_revision": "5e482b0392df5d56008be51ca0f6ea6431f4f03a",
+  "harness_base_revision": "b2d39154db1ad5005a18f9ce69fcbf5a533bcfcd",
+  "description": "Offline replay harness overlay for matching startup policies; baseline production sources and C++17 CMake setting preserved.",
+  "files": {
+    "tools/replay.mm": {
+      "original_baseline_sha256": "50c702408092850235cc02f975f369ccf0ec62238b5d148dd2f4214371cd4037",
+      "comparison_sha256": "ae58ac962002cc0fffad54be1b3092a65cd606173342fe8377119d2b36fa3c42"
+    },
+    "tools/fixture_support.hpp": {
+      "original_baseline_sha256": "73311e2a63992c17d8e50f289cd5c36dc07f8e51db5731dcccdcd3b80b6d5b85",
+      "comparison_sha256": "73311e2a63992c17d8e50f289cd5c36dc07f8e51db5731dcccdcd3b80b6d5b85"
+    },
+    "tools/replay_startup.h": {
+      "original_baseline_sha256": null,
+      "comparison_sha256": "8872d20aff155ed14a49f70074d614ca04083ca5c0d7ec832f85cfd19a2ea915"
+    }
+  },
+  "harness_revision": "a181a0090f746445c3daa62e5ea0bc3ead318119"
+}

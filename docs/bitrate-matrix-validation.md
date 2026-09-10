@@ -13,6 +13,13 @@ zero pixel difference. The full run is **not an all-pass performance result**:
 50 workloads passed every gate, 24 were inconclusive, 21 had baseline failures,
 and one was flagged by an isolated candidate startup failure.
 
+The subsequent [HEVC startup scheduling fix](hevc-startup-validation.md) adds
+a bounded initial admission allowance and a separate first-output gate.
+Its paired rerun delivered all 144,000 offered frames across 96 trials with
+no latency threshold breaches: 14 workloads passed, and two retained their
+existing bitrate-coverage misses. The original strict results below remain
+unchanged.
+
 ## Focused HEVC rerun — September 9, 2026
 
 The requested repeat covers **3440×1440 at 240 fps and 3840×2160 at 60 fps**,

@@ -1,0 +1,4830 @@
+{
+  "source": "controls.json",
+  "source_sha256": "7182c76d409a09e69003235f3c16af89c01d92be8783719d19e73454ebe6f47c",
+  "framework_sha256": "3e7316a44c8671510ea1eebce88b64342bc3766389100f1c9bc6403efecc3c01",
+  "thresholds": {
+    "decoded_fps_ratio": 0.99,
+    "latency_relative_pct": 5.0,
+    "latency_absolute_ms": 0.1,
+    "bitrate_tolerance_pct": 20.0,
+    "first_output_max_ms": 250.0
+  },
+  "runs": [
+    {
+      "case": "ultrawide-3440x1440p240-hevc-sdr-100mbps",
+      "setting": "candidate",
+      "phase": "timed",
+      "repetition": 1,
+      "command": [
+        "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/build-startup-release/mav-replay",
+        "--fixture",
+        "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/results/bitrate-matrix-paired-full/fixtures/bbc88d6da5ee3954b91064ec8f74592c3cbf9f531ba590180b0b1aaa13138081/manifest.json",
+        "--output",
+        "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/results/hevc-startup-controls/sdr-100mbps-0ms-1",
+        "--mode",
+        "paced",
+        "--fps",
+        "240",
+        "--loops",
+        "2",
+        "--loop-mode",
+        "continuous",
+        "--warmup",
+        "120",
+        "--inflight",
+        "2",
+        "--queue-depth",
+        "16",
+        "--startup-grace-ms",
+        "0",
+        "--power",
+        "-1",
+        "--seed",
+        "7",
+        "--jitter-us",
+        "0",
+        "--consumer-delay-ms",
+        "0"
+      ],
+      "state": "FINISHED",
+      "exit_code": 1,
+      "expected_offered": 480,
+      "started_at": "2026-09-10T00:35:11.354012+00:00",
+      "result_file": "sdr-100mbps-0ms-1.json",
+      "result_file_sha256": "a4bc91e70e50be7afa85f87991cafa5c57be0fe99fd601bc6b24011e1c61fe34",
+      "csv_file": "sdr-100mbps-0ms-1.csv",
+      "csv_file_sha256": "818ac19081136101e12a06a60d78df5fe91f4a3f137b6f7faefdc26454edc40c",
+      "log_file": "sdr-100mbps-0ms-1.log",
+      "log_file_sha256": "cbdb79f367e295f22cc2ac086a8c37af9b31cda77faaba4df8197e373ea3a140",
+      "native": {
+        "actual_offered_fps": 239.71611116131885,
+        "admission_fps": 210.25100583107343,
+        "backpressure": 30,
+        "bit_depth": 8,
+        "callback_to_client_handoff_ns": {
+          "count": 360,
+          "max": 39125,
+          "mean": 9077.672222222222,
+          "median": 5750,
+          "min": 2500,
+          "p95": 24143.750000000004,
+          "p99": 31311.47000000003
+        },
+        "chroma": "420",
+        "clock": "mav_monotonic_time_ns CLOCK_UPTIME_RAW",
+        "codec": "hevc",
+        "cold_generation_vt_submit_to_callback_ns": {
+          "count": 1,
+          "max": 2450375,
+          "mean": 2450375,
+          "median": 2450375,
+          "min": 2450375,
+          "p95": 2450375,
+          "p99": 2450375
+        },
+        "cold_vt_submit_to_callback_ns": 2450375,
+        "complete_au_to_output_ns": {
+          "count": 360,
+          "max": 17272121,
+          "mean": 2176327.5555555555,
+          "median": 1450360.5,
+          "min": 1077501,
+          "p95": 6455877.55,
+          "p99": 14982116.530000027
+        },
+        "completed": 421,
+        "compressed_copy_bytes": 17244329,
+        "compressed_copy_count": 421,
+        "consumer_delay_semantics": "bounded 32-buffer validation worker delayed per output",
+        "consumer_retention_delay_ms": 0,
+        "correctness_sink": false,
+        "decoded_fps": 209.751597266154,
+        "displayed_outputs": 420,
+        "expected_display_mismatches": 1,
+        "experiment_busy_wait_wall_ns": 0,
+        "experiment_cpu_percent_one_core": 5.6281447463356695,
+        "experiment_cpu_window_seconds": 2.022371583,
+        "experiment_pacing_semantics": "Original absolute arrival deadlines; sleep until bounded final window then poll the monotonic clock; includes busy-wait CPU cost",
+        "experiment_process_cpu_seconds": 0.113822,
+        "experiment_spin_us": 0,
+        "failed_or_cancelled_or_dropped": 1,
+        "fixture_sha256": "4c8c710e3712958c749fc3295390f1d8ba8409012b3b213a247f67e710846682",
+        "hardware_validated": 1,
+        "height": 1440,
+        "inflight": 2,
+        "initial_setup_ns": 68708750,
+        "internal_samples": 421,
+        "iosurface_metal_verified": false,
+        "loop_mode": "continuous",
+        "loops": 2,
+        "manifest_fallback_color_valid": 3,
+        "mode": "paced",
+        "model": "Mac15,3",
+        "no_display": 0,
+        "offered": 480,
+        "os": "Version 26.6.2 (Build 25G83)",
+        "peak_outstanding": 2,
+        "pixel_format": 875704438,
+        "power_effective": -1,
+        "power_requested": -1,
+        "power_state": null,
+        "power_status": -12900,
+        "preparation_ns": {
+          "count": 360,
+          "max": 1006250,
+          "mean": 24211.555555555555,
+          "median": 10208,
+          "min": 1500,
+          "p95": 65470.50000000006,
+          "p99": 319218.53000000014
+        },
+        "presentation_ns": null,
+        "queue_depth": 16,
+        "queue_wait_ns": {
+          "count": 360,
+          "max": 8957914,
+          "mean": 352488.56388888886,
+          "median": 62440.5,
+          "min": 4697,
+          "p95": 503232.8500000124,
+          "p99": 7343541.600000003
+        },
+        "realtime_effective": 1,
+        "realtime_status": 0,
+        "rejected": 0,
+        "render_ns": null,
+        "requested_fps": 240,
+        "resets": 4,
+        "retained_after_destroy_verified": false,
+        "retained_peak": 0,
+        "run_seconds": 2.002368542,
+        "scheduled_start_ns": 838555305407666,
+        "scheduler_drop_counts": {
+          "arrival_deadline": 4,
+          "awaiting_random_access": 55,
+          "capacity_deadline": 0,
+          "injected_drop": 0
+        },
+        "scheduler_drops": 59,
+        "scheduler_events": [
+          {
+            "deadline_ns": 838555376240988,
+            "frame_id": 1,
+            "observed_ns": 838555376947375,
+            "offered_index": 1,
+            "reason": "arrival_deadline",
+            "scheduled_arrival_ns": 838555309574332
+          },
+          {
+            "deadline_ns": 838555380407654,
+            "frame_id": 2,
+            "observed_ns": 838555390059625,
+            "offered_index": 2,
+            "reason": "arrival_deadline",
+            "scheduled_arrival_ns": 838555313740998
+          },
+          {
+            "deadline_ns": 838555384574320,
+            "frame_id": 3,
+            "observed_ns": 838555390060000,
+            "offered_index": 3,
+            "reason": "arrival_deadline",
+            "scheduled_arrival_ns": 838555317907664
+          },
+          {
+            "deadline_ns": 838555388740986,
+            "frame_id": 4,
+            "observed_ns": 838555390060125,
+            "offered_index": 4,
+            "reason": "arrival_deadline",
+            "scheduled_arrival_ns": 838555322074330
+          },
+          {
+            "deadline_ns": 838555392907652,
+            "frame_id": 5,
+            "observed_ns": 838555390060333,
+            "offered_index": 5,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555326240996
+          },
+          {
+            "deadline_ns": 838555397074318,
+            "frame_id": 6,
+            "observed_ns": 838555390060375,
+            "offered_index": 6,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555330407662
+          },
+          {
+            "deadline_ns": 838555401240984,
+            "frame_id": 7,
+            "observed_ns": 838555390060416,
+            "offered_index": 7,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555334574328
+          },
+          {
+            "deadline_ns": 838555405407650,
+            "frame_id": 8,
+            "observed_ns": 838555390060583,
+            "offered_index": 8,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555338740994
+          },
+          {
+            "deadline_ns": 838555409574316,
+            "frame_id": 9,
+            "observed_ns": 838555390060625,
+            "offered_index": 9,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555342907660
+          },
+          {
+            "deadline_ns": 838555413740982,
+            "frame_id": 10,
+            "observed_ns": 838555390060666,
+            "offered_index": 10,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555347074326
+          },
+          {
+            "deadline_ns": 838555417907648,
+            "frame_id": 11,
+            "observed_ns": 838555390060750,
+            "offered_index": 11,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555351240992
+          },
+          {
+            "deadline_ns": 838555422074314,
+            "frame_id": 12,
+            "observed_ns": 838555390060791,
+            "offered_index": 12,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555355407658
+          },
+          {
+            "deadline_ns": 838555426240980,
+            "frame_id": 13,
+            "observed_ns": 838555390060833,
+            "offered_index": 13,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555359574324
+          },
+          {
+            "deadline_ns": 838555430407646,
+            "frame_id": 14,
+            "observed_ns": 838555390060916,
+            "offered_index": 14,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555363740990
+          },
+          {
+            "deadline_ns": 838555434574312,
+            "frame_id": 15,
+            "observed_ns": 838555390060958,
+            "offered_index": 15,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555367907656
+          },
+          {
+            "deadline_ns": 838555438740978,
+            "frame_id": 16,
+            "observed_ns": 838555390061083,
+            "offered_index": 16,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555372074322
+          },
+          {
+            "deadline_ns": 838555442907644,
+            "frame_id": 17,
+            "observed_ns": 838555390061125,
+            "offered_index": 17,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555376240988
+          },
+          {
+            "deadline_ns": 838555447074310,
+            "frame_id": 18,
+            "observed_ns": 838555390061208,
+            "offered_index": 18,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555380407654
+          },
+          {
+            "deadline_ns": 838555451240976,
+            "frame_id": 19,
+            "observed_ns": 838555390061250,
+            "offered_index": 19,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555384574320
+          },
+          {
+            "deadline_ns": 838555455407642,
+            "frame_id": 20,
+            "observed_ns": 838555390061291,
+            "offered_index": 20,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555388740986
+          },
+          {
+            "deadline_ns": 838555459574308,
+            "frame_id": 21,
+            "observed_ns": 838555393073333,
+            "offered_index": 21,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555392907652
+          },
+          {
+            "deadline_ns": 838555463740974,
+            "frame_id": 22,
+            "observed_ns": 838555397582541,
+            "offered_index": 22,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555397074318
+          },
+          {
+            "deadline_ns": 838555467907640,
+            "frame_id": 23,
+            "observed_ns": 838555401567583,
+            "offered_index": 23,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555401240984
+          },
+          {
+            "deadline_ns": 838555472074306,
+            "frame_id": 24,
+            "observed_ns": 838555405827625,
+            "offered_index": 24,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555405407650
+          },
+          {
+            "deadline_ns": 838555476240972,
+            "frame_id": 25,
+            "observed_ns": 838555409947833,
+            "offered_index": 25,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555409574316
+          },
+          {
+            "deadline_ns": 838555480407638,
+            "frame_id": 26,
+            "observed_ns": 838555414136750,
+            "offered_index": 26,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555413740982
+          },
+          {
+            "deadline_ns": 838555484574304,
+            "frame_id": 27,
+            "observed_ns": 838555418292583,
+            "offered_index": 27,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555417907648
+          },
+          {
+            "deadline_ns": 838555488740970,
+            "frame_id": 28,
+            "observed_ns": 838555422464583,
+            "offered_index": 28,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555422074314
+          },
+          {
+            "deadline_ns": 838555492907636,
+            "frame_id": 29,
+            "observed_ns": 838555426628875,
+            "offered_index": 29,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555426240980
+          },
+          {
+            "deadline_ns": 838555497074302,
+            "frame_id": 30,
+            "observed_ns": 838555430796833,
+            "offered_index": 30,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555430407646
+          },
+          {
+            "deadline_ns": 838555501240968,
+            "frame_id": 31,
+            "observed_ns": 838555434966583,
+            "offered_index": 31,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555434574312
+          },
+          {
+            "deadline_ns": 838555505407634,
+            "frame_id": 32,
+            "observed_ns": 838555439136791,
+            "offered_index": 32,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555438740978
+          },
+          {
+            "deadline_ns": 838555509574300,
+            "frame_id": 33,
+            "observed_ns": 838555442913000,
+            "offered_index": 33,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555442907644
+          },
+          {
+            "deadline_ns": 838555513740966,
+            "frame_id": 34,
+            "observed_ns": 838555447176791,
+            "offered_index": 34,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555447074310
+          },
+          {
+            "deadline_ns": 838555517907632,
+            "frame_id": 35,
+            "observed_ns": 838555451324000,
+            "offered_index": 35,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555451240976
+          },
+          {
+            "deadline_ns": 838555522074298,
+            "frame_id": 36,
+            "observed_ns": 838555455491416,
+            "offered_index": 36,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555455407642
+          },
+          {
+            "deadline_ns": 838555526240964,
+            "frame_id": 37,
+            "observed_ns": 838555459657958,
+            "offered_index": 37,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555459574308
+          },
+          {
+            "deadline_ns": 838555530407630,
+            "frame_id": 38,
+            "observed_ns": 838555463823125,
+            "offered_index": 38,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555463740974
+          },
+          {
+            "deadline_ns": 838555534574296,
+            "frame_id": 39,
+            "observed_ns": 838555467991500,
+            "offered_index": 39,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555467907640
+          },
+          {
+            "deadline_ns": 838555538740962,
+            "frame_id": 40,
+            "observed_ns": 838555472157250,
+            "offered_index": 40,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555472074306
+          },
+          {
+            "deadline_ns": 838555542907628,
+            "frame_id": 41,
+            "observed_ns": 838555476368291,
+            "offered_index": 41,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555476240972
+          },
+          {
+            "deadline_ns": 838555547074294,
+            "frame_id": 42,
+            "observed_ns": 838555480479875,
+            "offered_index": 42,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555480407638
+          },
+          {
+            "deadline_ns": 838555551240960,
+            "frame_id": 43,
+            "observed_ns": 838555484661291,
+            "offered_index": 43,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555484574304
+          },
+          {
+            "deadline_ns": 838555555407626,
+            "frame_id": 44,
+            "observed_ns": 838555488823291,
+            "offered_index": 44,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555488740970
+          },
+          {
+            "deadline_ns": 838555559574292,
+            "frame_id": 45,
+            "observed_ns": 838555492992333,
+            "offered_index": 45,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555492907636
+          },
+          {
+            "deadline_ns": 838555563740958,
+            "frame_id": 46,
+            "observed_ns": 838555497155708,
+            "offered_index": 46,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555497074302
+          },
+          {
+            "deadline_ns": 838555567907624,
+            "frame_id": 47,
+            "observed_ns": 838555501326500,
+            "offered_index": 47,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555501240968
+          },
+          {
+            "deadline_ns": 838555572074290,
+            "frame_id": 48,
+            "observed_ns": 838555505488791,
+            "offered_index": 48,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555505407634
+          },
+          {
+            "deadline_ns": 838555576240956,
+            "frame_id": 49,
+            "observed_ns": 838555509658208,
+            "offered_index": 49,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555509574300
+          },
+          {
+            "deadline_ns": 838555580407622,
+            "frame_id": 50,
+            "observed_ns": 838555513824375,
+            "offered_index": 50,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555513740966
+          },
+          {
+            "deadline_ns": 838555584574288,
+            "frame_id": 51,
+            "observed_ns": 838555517992000,
+            "offered_index": 51,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555517907632
+          },
+          {
+            "deadline_ns": 838555588740954,
+            "frame_id": 52,
+            "observed_ns": 838555522158750,
+            "offered_index": 52,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555522074298
+          },
+          {
+            "deadline_ns": 838555592907620,
+            "frame_id": 53,
+            "observed_ns": 838555526327791,
+            "offered_index": 53,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555526240964
+          },
+          {
+            "deadline_ns": 838555597074286,
+            "frame_id": 54,
+            "observed_ns": 838555530488916,
+            "offered_index": 54,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555530407630
+          },
+          {
+            "deadline_ns": 838555601240952,
+            "frame_id": 55,
+            "observed_ns": 838555534659375,
+            "offered_index": 55,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555534574296
+          },
+          {
+            "deadline_ns": 838555605407618,
+            "frame_id": 56,
+            "observed_ns": 838555538823541,
+            "offered_index": 56,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555538740962
+          },
+          {
+            "deadline_ns": 838555609574284,
+            "frame_id": 57,
+            "observed_ns": 838555542991333,
+            "offered_index": 57,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555542907628
+          },
+          {
+            "deadline_ns": 838555613740950,
+            "frame_id": 58,
+            "observed_ns": 838555547152708,
+            "offered_index": 58,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555547074294
+          },
+          {
+            "deadline_ns": 838555617907616,
+            "frame_id": 59,
+            "observed_ns": 838555551324250,
+            "offered_index": 59,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838555551240960
+          }
+        ],
+        "scheduler_lateness_ns": {
+          "count": 480,
+          "max": 76318627,
+          "mean": 2118227.877083333,
+          "median": 67485,
+          "min": 3110,
+          "p95": 7253269.049999945,
+          "p99": 60527695.21999992
+        },
+        "scheduler_lateness_population": "all offered arrivals, including cold, warmup and losses",
+        "show_existing": 0,
+        "software_reference_max_code_error": null,
+        "software_reference_mean_code_error": null,
+        "software_reference_samples": 0,
+        "software_reference_tolerance": 2,
+        "startup_first_output_ns": 255225959,
+        "startup_grace_ms": 0,
+        "startup_policy": "fixed-initial-deadline-v1",
+        "status": "FAIL",
+        "steady_excludes_first_output_each_generation": true,
+        "submission_call_ns": {
+          "count": 358,
+          "max": 6542416,
+          "mean": 381220.53910614527,
+          "median": 197812.5,
+          "min": 86125,
+          "p95": 879008.0499999995,
+          "p99": 2700905.88000001
+        },
+        "submitted": 421,
+        "thermal_state": 0,
+        "trace_overflow": 0,
+        "variant": "sdr8",
+        "vt_submit_to_callback_ns": {
+          "count": 360,
+          "max": 12933459,
+          "mean": 1787025.4555555556,
+          "median": 1325125,
+          "min": 1011250,
+          "p95": 3127066.35,
+          "p99": 10478515.75000002
+        },
+        "warmup_frames": 120,
+        "width": 3440
+      },
+      "derived": {
+        "moonlight_decode_time": {
+          "native_vt": {
+            "sample_count": 420,
+            "total_ns": 752012917,
+            "mean_ms": 1.7905069452380953
+          },
+          "native_submission": {
+            "sample_count": 417,
+            "total_ns": 171210495,
+            "mean_ms": 0.41057672661870503
+          },
+          "public_queue_proxy": {
+            "sample_count": 420,
+            "total_ns": 1009856566,
+            "mean_ms": 2.4044203952380956
+          }
+        },
+        "public_complete_au_to_output_ns": {
+          "count": 360,
+          "mean": 2185405.2277777777,
+          "median": 1456444.0,
+          "p95": 6459606.4,
+          "p99": 14992857.840000026,
+          "min": 1080542,
+          "max": 17289829
+        },
+        "public_output_boundary": "Native public completion callback entry in harness",
+        "cold_public_complete_au_to_output_ns": {
+          "count": 1,
+          "mean": 5225999.0,
+          "median": 5225999.0,
+          "p95": 5225999.0,
+          "p99": 5225999.0,
+          "min": 5225999,
+          "max": 5225999
+        },
+        "cold_population": "First successful displayed output in each generation; may follow a cancelled initial submission",
+        "initial_submission_frame_id": 0,
+        "initial_submission_status": 4,
+        "initial_submission_terminal_ns": 83661959,
+        "submit_entry_to_vt_submit_ns": {
+          "count": 360,
+          "mean": 36813.53611111111,
+          "median": 15979.0,
+          "p95": 105829.80000000006,
+          "p99": 356664.5300000016,
+          "min": 2834,
+          "max": 1036000
+        },
+        "post_parser_to_vt_submit_ns": {
+          "count": 360,
+          "mean": 12601.980555555556,
+          "median": 5375.0,
+          "p95": 29781.250000000007,
+          "p99": 68501.94000000035,
+          "min": 1208,
+          "max": 560375
+        },
+        "derivation": "Supplemental distributions from raw CSV; warmup and first output per generation excluded from steady distributions. Moonlight arithmetic means include all eligible outputs. Original totals and internal VT callback endpoint remain unchanged."
+      },
+      "first_output_ms": 255.225959,
+      "first_output_origin": "initial scheduled start",
+      "startup": {
+        "policy": "fixed-initial-deadline-v1",
+        "startup_grace_ms": 0,
+        "queue_budget_ms": 66.666656,
+        "scheduled_start_ns": 838555305407666,
+        "first_output_ns": 255225959,
+        "initial_setup_ns": 68708750,
+        "scheduler_drop_counts": {
+          "arrival_deadline": 4,
+          "capacity_deadline": 0,
+          "awaiting_random_access": 55,
+          "injected_drop": 0
+        },
+        "first_output_max_ms": 250.0,
+        "first_output_sla_passed": false
+      },
+      "metrics": {
+        "vt_median_ms": 1.325125,
+        "vt_p95_ms": 3.12706635,
+        "vt_p99_ms": 10.478515750000021,
+        "public_median_ms": 1.456444,
+        "public_p95_ms": 6.4596064,
+        "public_p99_ms": 14.992857840000026
+      },
+      "thermal_nominal": true,
+      "errors": [
+        "native FAIL: accounting/hardware gate failed",
+        "process FINISHED, exit 1",
+        "not every offered frame produced an output",
+        "scheduler_drops=59",
+        "failed_or_cancelled_or_dropped=1",
+        "expected_display_mismatches=1",
+        "resets=4",
+        "CSV contains a non-output terminal completion",
+        "first output exceeds configured startup SLA or no output was delivered",
+        "delivered frame rate below configured ratio"
+      ],
+      "passed": false,
+      "settings": {
+        "width": 3440,
+        "height": 1440,
+        "fps": 240,
+        "codec": "hevc",
+        "dynamic_range": "sdr",
+        "bitrate_mbps": 100.0,
+        "gop": 60,
+        "frames": 240,
+        "fixture": "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/results/bitrate-matrix-paired-full/fixtures/bbc88d6da5ee3954b91064ec8f74592c3cbf9f531ba590180b0b1aaa13138081/manifest.json",
+        "decoder": {
+          "inflight": 2,
+          "queue_depth": 16,
+          "power": -1,
+          "consumer_delay_ms": 0,
+          "jitter_us": 0,
+          "seed": 7,
+          "startup_grace_ms": 0
+        },
+        "name": "ultrawide-3440x1440p240-hevc-sdr-100mbps",
+        "fixture_info": {
+          "manifest_sha256": "b730b4aaaf79e929a83ac15a2444b205343e8fe4c562afe7535c2c5d74b827c8",
+          "payload_sha256": "4c8c710e3712958c749fc3295390f1d8ba8409012b3b213a247f67e710846682",
+          "payload_file": "payload.bin",
+          "frames": 240,
+          "requested_bitrate_mbps": 100,
+          "measured_bitrate_mbps": 95.373816,
+          "generator": {
+            "bitrate_measurement": "encoded payload bytes including codec headers and HDR metadata divided by generated presentation duration; no transport overhead",
+            "content_profile": "seeded-noise-frame-id-v1",
+            "content_seed": 1835103793,
+            "encoder": "Apple VTCompressionSession HEVC (OS-versioned)",
+            "encoder_settings": {
+              "allow_frame_reordering": false,
+              "average_bitrate_bps": 100000000,
+              "data_rate_limits": [
+                15000000,
+                1
+              ],
+              "expected_frame_rate": 240,
+              "hardware_required": true,
+              "max_key_frame_interval": 60,
+              "profile": "Main_AutoLevel",
+              "realtime": true
+            },
+            "inter_count": 236,
+            "low_delay_verified": true,
+            "measured_bitrate_bps": 95373816,
+            "measured_bitrate_mbps": 95.373816,
+            "name": "mav-fixture",
+            "os": "Version 26.6.2 (Build 25G83)",
+            "pattern": "seeded-noise-software-reference-v1",
+            "random_access_count": 4,
+            "rate_control": "average_bitrate",
+            "requested_bitrate_mbps": 100,
+            "settings": {
+              "bitrate_mbps": 100,
+              "chroma": "420",
+              "codec": "hevc",
+              "fps": 240,
+              "frames": 240,
+              "gop": 60,
+              "height": 1440,
+              "variant": "sdr8",
+              "width": 3440
+            },
+            "target_bitrate_bps": 100000000
+          }
+        }
+      }
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-sdr-100mbps",
+      "setting": "candidate",
+      "phase": "timed",
+      "repetition": 1,
+      "command": [
+        "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/build-startup-release/mav-replay",
+        "--fixture",
+        "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/results/bitrate-matrix-paired-full/fixtures/bbc88d6da5ee3954b91064ec8f74592c3cbf9f531ba590180b0b1aaa13138081/manifest.json",
+        "--output",
+        "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/results/hevc-startup-controls/sdr-100mbps-250ms-1",
+        "--mode",
+        "paced",
+        "--fps",
+        "240",
+        "--loops",
+        "2",
+        "--loop-mode",
+        "continuous",
+        "--warmup",
+        "120",
+        "--inflight",
+        "2",
+        "--queue-depth",
+        "16",
+        "--startup-grace-ms",
+        "250",
+        "--power",
+        "-1",
+        "--seed",
+        "7",
+        "--jitter-us",
+        "0",
+        "--consumer-delay-ms",
+        "0"
+      ],
+      "state": "FINISHED",
+      "exit_code": 0,
+      "expected_offered": 480,
+      "started_at": "2026-09-10T00:35:13.406807+00:00",
+      "result_file": "sdr-100mbps-250ms-1.json",
+      "result_file_sha256": "ecbdee5788a5f4d33e81aad6dcfa93edeba29b18592c8c9127ab35e51a7e4843",
+      "csv_file": "sdr-100mbps-250ms-1.csv",
+      "csv_file_sha256": "990c8b69e0b12e38ddacd878bab3f06282de7bb011929997ea0009233f394645",
+      "log_file": "sdr-100mbps-250ms-1.log",
+      "log_file_sha256": "a8fe9c13e1f3d3d73b2231e27384d07e7c461f5d7447c2cf23815ca86077cd72",
+      "native": {
+        "actual_offered_fps": 240.22752044552402,
+        "admission_fps": 240.22752044552402,
+        "backpressure": 73,
+        "bit_depth": 8,
+        "callback_to_client_handoff_ns": {
+          "count": 360,
+          "max": 42459,
+          "mean": 13713.427777777777,
+          "median": 13167,
+          "min": 4500,
+          "p95": 21822.250000000007,
+          "p99": 27580.810000000078
+        },
+        "chroma": "420",
+        "clock": "mav_monotonic_time_ns CLOCK_UPTIME_RAW",
+        "codec": "hevc",
+        "cold_generation_vt_submit_to_callback_ns": {
+          "count": 1,
+          "max": 14476709,
+          "mean": 14476709,
+          "median": 14476709,
+          "min": 14476709,
+          "p95": 14476709,
+          "p99": 14476709
+        },
+        "cold_vt_submit_to_callback_ns": 14476709,
+        "complete_au_to_output_ns": {
+          "count": 360,
+          "max": 17976996,
+          "mean": 2580603.822222222,
+          "median": 2119390,
+          "min": 1146165,
+          "p95": 4574393.650000003,
+          "p99": 15050401.700000051
+        },
+        "completed": 480,
+        "compressed_copy_bytes": 23842782,
+        "compressed_copy_count": 480,
+        "consumer_delay_semantics": "bounded 32-buffer validation worker delayed per output",
+        "consumer_retention_delay_ms": 0,
+        "correctness_sink": false,
+        "decoded_fps": 240.22752044552402,
+        "displayed_outputs": 480,
+        "expected_display_mismatches": 0,
+        "experiment_busy_wait_wall_ns": 0,
+        "experiment_cpu_percent_one_core": 9.6278535391997,
+        "experiment_cpu_window_seconds": 2.018113375,
+        "experiment_pacing_semantics": "Original absolute arrival deadlines; sleep until bounded final window then poll the monotonic clock; includes busy-wait CPU cost",
+        "experiment_process_cpu_seconds": 0.194301,
+        "experiment_spin_us": 0,
+        "failed_or_cancelled_or_dropped": 0,
+        "fixture_sha256": "4c8c710e3712958c749fc3295390f1d8ba8409012b3b213a247f67e710846682",
+        "hardware_validated": 1,
+        "height": 1440,
+        "inflight": 2,
+        "initial_setup_ns": 65677333,
+        "internal_samples": 480,
+        "iosurface_metal_verified": false,
+        "loop_mode": "continuous",
+        "loops": 2,
+        "manifest_fallback_color_valid": 3,
+        "mode": "paced",
+        "model": "Mac15,3",
+        "no_display": 0,
+        "offered": 480,
+        "os": "Version 26.6.2 (Build 25G83)",
+        "peak_outstanding": 2,
+        "pixel_format": 875704438,
+        "power_effective": -1,
+        "power_requested": -1,
+        "power_state": null,
+        "power_status": -12900,
+        "preparation_ns": {
+          "count": 360,
+          "max": 648708,
+          "mean": 32084.033333333333,
+          "median": 16125,
+          "min": 2667,
+          "p95": 82122.90000000017,
+          "p99": 447884.5600000011
+        },
+        "presentation_ns": null,
+        "queue_depth": 16,
+        "queue_wait_ns": {
+          "count": 360,
+          "max": 9668372,
+          "mean": 382933.3361111111,
+          "median": 209422.5,
+          "min": 9952,
+          "p95": 850370.8000000005,
+          "p99": 6746343.010000051
+        },
+        "realtime_effective": 1,
+        "realtime_status": 0,
+        "rejected": 0,
+        "render_ns": null,
+        "requested_fps": 240,
+        "resets": 0,
+        "retained_after_destroy_verified": false,
+        "retained_peak": 0,
+        "run_seconds": 1.998105792,
+        "scheduled_start_ns": 838557367628208,
+        "scheduler_drop_counts": {
+          "arrival_deadline": 0,
+          "awaiting_random_access": 0,
+          "capacity_deadline": 0,
+          "injected_drop": 0
+        },
+        "scheduler_drops": 0,
+        "scheduler_events": [],
+        "scheduler_lateness_ns": {
+          "count": 480,
+          "max": 72078796,
+          "mean": 2893707.68125,
+          "median": 200923.5,
+          "min": 1996,
+          "p95": 13724949.94999985,
+          "p99": 68798483.28999999
+        },
+        "scheduler_lateness_population": "all offered arrivals, including cold, warmup and losses",
+        "show_existing": 0,
+        "software_reference_max_code_error": null,
+        "software_reference_mean_code_error": null,
+        "software_reference_samples": 0,
+        "software_reference_tolerance": 2,
+        "startup_first_output_ns": 80762458,
+        "startup_grace_ms": 250,
+        "startup_policy": "fixed-initial-deadline-v1",
+        "status": "PASS",
+        "steady_excludes_first_output_each_generation": true,
+        "submission_call_ns": {
+          "count": 360,
+          "max": 6096250,
+          "mean": 619153.6055555556,
+          "median": 545125.5,
+          "min": 131584,
+          "p95": 1113487.2000000002,
+          "p99": 2897489.4700000198
+        },
+        "submitted": 480,
+        "thermal_state": 0,
+        "trace_overflow": 0,
+        "variant": "sdr8",
+        "vt_submit_to_callback_ns": {
+          "count": 360,
+          "max": 13525125,
+          "mean": 2147685.283333333,
+          "median": 1866479,
+          "min": 1088625,
+          "p95": 3135366.6500000022,
+          "p99": 10301404.440000037
+        },
+        "warmup_frames": 120,
+        "width": 3440
+      },
+      "derived": {
+        "moonlight_decode_time": {
+          "native_vt": {
+            "sample_count": 480,
+            "total_ns": 1031401666,
+            "mean_ms": 2.1487534708333333
+          },
+          "native_submission": {
+            "sample_count": 480,
+            "total_ns": 274326052,
+            "mean_ms": 0.5715126083333333
+          },
+          "public_queue_proxy": {
+            "sample_count": 480,
+            "total_ns": 2587451639,
+            "mean_ms": 5.390524247916667
+          }
+        },
+        "public_complete_au_to_output_ns": {
+          "count": 360,
+          "mean": 2594317.25,
+          "median": 2134302.5,
+          "p95": 4589262.100000003,
+          "p99": 15070887.51000005,
+          "min": 1150748,
+          "max": 17996371
+        },
+        "public_output_boundary": "Native public completion callback entry in harness",
+        "cold_public_complete_au_to_output_ns": {
+          "count": 1,
+          "mean": 80762458.0,
+          "median": 80762458.0,
+          "p95": 80762458.0,
+          "p99": 80762458.0,
+          "min": 80762458,
+          "max": 80762458
+        },
+        "cold_population": "First successful displayed output in each generation; may follow a cancelled initial submission",
+        "initial_submission_frame_id": 0,
+        "initial_submission_status": 0,
+        "initial_submission_terminal_ns": 80762458,
+        "submit_entry_to_vt_submit_ns": {
+          "count": 360,
+          "mean": 49985.20277777778,
+          "median": 29687.5,
+          "p95": 119912.20000000001,
+          "p99": 502255.7200000007,
+          "min": 5166,
+          "max": 1676584
+        },
+        "post_parser_to_vt_submit_ns": {
+          "count": 360,
+          "mean": 17901.169444444444,
+          "median": 10792.0,
+          "p95": 25983.000000000007,
+          "p99": 61989.78000000029,
+          "min": 2250,
+          "max": 1660792
+        },
+        "derivation": "Supplemental distributions from raw CSV; warmup and first output per generation excluded from steady distributions. Moonlight arithmetic means include all eligible outputs. Original totals and internal VT callback endpoint remain unchanged."
+      },
+      "first_output_ms": 80.762458,
+      "first_output_origin": "initial scheduled start",
+      "startup": {
+        "policy": "fixed-initial-deadline-v1",
+        "startup_grace_ms": 250,
+        "queue_budget_ms": 66.666656,
+        "scheduled_start_ns": 838557367628208,
+        "first_output_ns": 80762458,
+        "initial_setup_ns": 65677333,
+        "scheduler_drop_counts": {
+          "arrival_deadline": 0,
+          "capacity_deadline": 0,
+          "awaiting_random_access": 0,
+          "injected_drop": 0
+        },
+        "first_output_max_ms": 250.0,
+        "first_output_sla_passed": true
+      },
+      "metrics": {
+        "vt_median_ms": 1.866479,
+        "vt_p95_ms": 3.135366650000002,
+        "vt_p99_ms": 10.301404440000036,
+        "public_median_ms": 2.1343025,
+        "public_p95_ms": 4.589262100000004,
+        "public_p99_ms": 15.07088751000005
+      },
+      "thermal_nominal": true,
+      "errors": [],
+      "passed": true,
+      "settings": {
+        "width": 3440,
+        "height": 1440,
+        "fps": 240,
+        "codec": "hevc",
+        "dynamic_range": "sdr",
+        "bitrate_mbps": 100.0,
+        "gop": 60,
+        "frames": 240,
+        "fixture": "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/results/bitrate-matrix-paired-full/fixtures/bbc88d6da5ee3954b91064ec8f74592c3cbf9f531ba590180b0b1aaa13138081/manifest.json",
+        "decoder": {
+          "inflight": 2,
+          "queue_depth": 16,
+          "power": -1,
+          "consumer_delay_ms": 0,
+          "jitter_us": 0,
+          "seed": 7,
+          "startup_grace_ms": 250
+        },
+        "name": "ultrawide-3440x1440p240-hevc-sdr-100mbps",
+        "fixture_info": {
+          "manifest_sha256": "b730b4aaaf79e929a83ac15a2444b205343e8fe4c562afe7535c2c5d74b827c8",
+          "payload_sha256": "4c8c710e3712958c749fc3295390f1d8ba8409012b3b213a247f67e710846682",
+          "payload_file": "payload.bin",
+          "frames": 240,
+          "requested_bitrate_mbps": 100,
+          "measured_bitrate_mbps": 95.373816,
+          "generator": {
+            "bitrate_measurement": "encoded payload bytes including codec headers and HDR metadata divided by generated presentation duration; no transport overhead",
+            "content_profile": "seeded-noise-frame-id-v1",
+            "content_seed": 1835103793,
+            "encoder": "Apple VTCompressionSession HEVC (OS-versioned)",
+            "encoder_settings": {
+              "allow_frame_reordering": false,
+              "average_bitrate_bps": 100000000,
+              "data_rate_limits": [
+                15000000,
+                1
+              ],
+              "expected_frame_rate": 240,
+              "hardware_required": true,
+              "max_key_frame_interval": 60,
+              "profile": "Main_AutoLevel",
+              "realtime": true
+            },
+            "inter_count": 236,
+            "low_delay_verified": true,
+            "measured_bitrate_bps": 95373816,
+            "measured_bitrate_mbps": 95.373816,
+            "name": "mav-fixture",
+            "os": "Version 26.6.2 (Build 25G83)",
+            "pattern": "seeded-noise-software-reference-v1",
+            "random_access_count": 4,
+            "rate_control": "average_bitrate",
+            "requested_bitrate_mbps": 100,
+            "settings": {
+              "bitrate_mbps": 100,
+              "chroma": "420",
+              "codec": "hevc",
+              "fps": 240,
+              "frames": 240,
+              "gop": 60,
+              "height": 1440,
+              "variant": "sdr8",
+              "width": 3440
+            },
+            "target_bitrate_bps": 100000000
+          }
+        }
+      }
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-sdr-100mbps",
+      "setting": "candidate",
+      "phase": "timed",
+      "repetition": 2,
+      "command": [
+        "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/build-startup-release/mav-replay",
+        "--fixture",
+        "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/results/bitrate-matrix-paired-full/fixtures/bbc88d6da5ee3954b91064ec8f74592c3cbf9f531ba590180b0b1aaa13138081/manifest.json",
+        "--output",
+        "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/results/hevc-startup-controls/sdr-100mbps-250ms-2",
+        "--mode",
+        "paced",
+        "--fps",
+        "240",
+        "--loops",
+        "2",
+        "--loop-mode",
+        "continuous",
+        "--warmup",
+        "120",
+        "--inflight",
+        "2",
+        "--queue-depth",
+        "16",
+        "--startup-grace-ms",
+        "250",
+        "--power",
+        "-1",
+        "--seed",
+        "7",
+        "--jitter-us",
+        "0",
+        "--consumer-delay-ms",
+        "0"
+      ],
+      "state": "FINISHED",
+      "exit_code": 0,
+      "expected_offered": 480,
+      "started_at": "2026-09-10T00:35:15.473009+00:00",
+      "result_file": "sdr-100mbps-250ms-2.json",
+      "result_file_sha256": "3c07470d7700e15326d3c0662bc00f0d12d38fc0afe1718c80988e92d3f67744",
+      "csv_file": "sdr-100mbps-250ms-2.csv",
+      "csv_file_sha256": "93a2b1fc2b65bee190918eb58eef4289ae7a571f6666982a2eab74c4f314dc80",
+      "log_file": "sdr-100mbps-250ms-2.log",
+      "log_file_sha256": "f34ab263f0f1ad6a1ff41776bf1df1281473e5b4c51449a4b95304ef831dc035",
+      "native": {
+        "actual_offered_fps": 240.24957426086186,
+        "admission_fps": 240.24957426086186,
+        "backpressure": 73,
+        "bit_depth": 8,
+        "callback_to_client_handoff_ns": {
+          "count": 360,
+          "max": 43541,
+          "mean": 13209.069444444445,
+          "median": 13583,
+          "min": 2667,
+          "p95": 25754.15,
+          "p99": 29173.220000000038
+        },
+        "chroma": "420",
+        "clock": "mav_monotonic_time_ns CLOCK_UPTIME_RAW",
+        "codec": "hevc",
+        "cold_generation_vt_submit_to_callback_ns": {
+          "count": 1,
+          "max": 14405375,
+          "mean": 14405375,
+          "median": 14405375,
+          "min": 14405375,
+          "p95": 14405375,
+          "p99": 14405375
+        },
+        "cold_vt_submit_to_callback_ns": 14405375,
+        "complete_au_to_output_ns": {
+          "count": 360,
+          "max": 16669246,
+          "mean": 2279773.725,
+          "median": 2120828.5,
+          "min": 1079134,
+          "p95": 3276917.4000000013,
+          "p99": 13756166.630000055
+        },
+        "completed": 480,
+        "compressed_copy_bytes": 23842782,
+        "compressed_copy_count": 480,
+        "consumer_delay_semantics": "bounded 32-buffer validation worker delayed per output",
+        "consumer_retention_delay_ms": 0,
+        "correctness_sink": false,
+        "decoded_fps": 240.24957426086186,
+        "displayed_outputs": 480,
+        "expected_display_mismatches": 0,
+        "experiment_busy_wait_wall_ns": 0,
+        "experiment_cpu_percent_one_core": 8.974636216258842,
+        "experiment_cpu_window_seconds": 2.017931375,
+        "experiment_pacing_semantics": "Original absolute arrival deadlines; sleep until bounded final window then poll the monotonic clock; includes busy-wait CPU cost",
+        "experiment_process_cpu_seconds": 0.181102,
+        "experiment_spin_us": 0,
+        "failed_or_cancelled_or_dropped": 0,
+        "fixture_sha256": "4c8c710e3712958c749fc3295390f1d8ba8409012b3b213a247f67e710846682",
+        "hardware_validated": 1,
+        "height": 1440,
+        "inflight": 2,
+        "initial_setup_ns": 65692583,
+        "internal_samples": 480,
+        "iosurface_metal_verified": false,
+        "loop_mode": "continuous",
+        "loops": 2,
+        "manifest_fallback_color_valid": 3,
+        "mode": "paced",
+        "model": "Mac15,3",
+        "no_display": 0,
+        "offered": 480,
+        "os": "Version 26.6.2 (Build 25G83)",
+        "peak_outstanding": 2,
+        "pixel_format": 875704438,
+        "power_effective": -1,
+        "power_requested": -1,
+        "power_state": null,
+        "power_status": -12900,
+        "preparation_ns": {
+          "count": 360,
+          "max": 437167,
+          "mean": 23727.88888888889,
+          "median": 15916.5,
+          "min": 2250,
+          "p95": 55541.65000000001,
+          "p99": 217231.5300000017
+        },
+        "presentation_ns": null,
+        "queue_depth": 16,
+        "queue_wait_ns": {
+          "count": 360,
+          "max": 8349414,
+          "mean": 276941.43611111114,
+          "median": 178731,
+          "min": 11643,
+          "p95": 368934.30000000034,
+          "p99": 5437626.970000055
+        },
+        "realtime_effective": 1,
+        "realtime_status": 0,
+        "rejected": 0,
+        "render_ns": null,
+        "requested_fps": 240,
+        "resets": 0,
+        "retained_after_destroy_verified": false,
+        "retained_peak": 0,
+        "run_seconds": 1.997922375,
+        "scheduled_start_ns": 838559433559541,
+        "scheduler_drop_counts": {
+          "arrival_deadline": 0,
+          "awaiting_random_access": 0,
+          "capacity_deadline": 0,
+          "injected_drop": 0
+        },
+        "scheduler_drops": 0,
+        "scheduler_events": [],
+        "scheduler_lateness_ns": {
+          "count": 480,
+          "max": 71919379,
+          "mean": 2800080.308333333,
+          "median": 177356,
+          "min": 8683,
+          "p95": 13725396.149999848,
+          "p99": 68920102.92999999
+        },
+        "scheduler_lateness_population": "all offered arrivals, including cold, warmup and losses",
+        "show_existing": 0,
+        "software_reference_max_code_error": null,
+        "software_reference_mean_code_error": null,
+        "software_reference_samples": 0,
+        "software_reference_tolerance": 2,
+        "startup_first_output_ns": 80781292,
+        "startup_grace_ms": 250,
+        "startup_policy": "fixed-initial-deadline-v1",
+        "status": "PASS",
+        "steady_excludes_first_output_each_generation": true,
+        "submission_call_ns": {
+          "count": 360,
+          "max": 2382250,
+          "mean": 467966.44166666665,
+          "median": 504125,
+          "min": 90333,
+          "p95": 809894.05,
+          "p99": 1218075.5600000003
+        },
+        "submitted": 480,
+        "thermal_state": 0,
+        "trace_overflow": 0,
+        "variant": "sdr8",
+        "vt_submit_to_callback_ns": {
+          "count": 360,
+          "max": 12699417,
+          "mean": 1966141.2027777778,
+          "median": 1884937.5,
+          "min": 1035583,
+          "p95": 2942233.6500000013,
+          "p99": 9824768.750000004
+        },
+        "warmup_frames": 120,
+        "width": 3440
+      },
+      "derived": {
+        "moonlight_decode_time": {
+          "native_vt": {
+            "sample_count": 480,
+            "total_ns": 978138835,
+            "mean_ms": 2.0377892395833332
+          },
+          "native_submission": {
+            "sample_count": 480,
+            "total_ns": 216966502,
+            "mean_ms": 0.45201354583333336
+          },
+          "public_queue_proxy": {
+            "sample_count": 480,
+            "total_ns": 2483292857,
+            "mean_ms": 5.173526785416667
+          }
+        },
+        "public_complete_au_to_output_ns": {
+          "count": 360,
+          "mean": 2292982.7944444446,
+          "median": 2138179.0,
+          "p95": 3304985.5000000014,
+          "p99": 13764500.940000055,
+          "min": 1082884,
+          "max": 16675788
+        },
+        "public_output_boundary": "Native public completion callback entry in harness",
+        "cold_public_complete_au_to_output_ns": {
+          "count": 1,
+          "mean": 80781292.0,
+          "median": 80781292.0,
+          "p95": 80781292.0,
+          "p99": 80781292.0,
+          "min": 80781292,
+          "max": 80781292
+        },
+        "cold_population": "First successful displayed output in each generation; may follow a cancelled initial submission",
+        "initial_submission_frame_id": 0,
+        "initial_submission_status": 0,
+        "initial_submission_terminal_ns": 80781292,
+        "submit_entry_to_vt_submit_ns": {
+          "count": 360,
+          "mean": 36691.08611111111,
+          "median": 31021.0,
+          "p95": 84966.35,
+          "p99": 219888.2800000017,
+          "min": 4166,
+          "max": 440209
+        },
+        "post_parser_to_vt_submit_ns": {
+          "count": 360,
+          "mean": 12963.197222222223,
+          "median": 12396.5,
+          "p95": 27391.700000000004,
+          "p99": 39810.50000000001,
+          "min": 1375,
+          "max": 108959
+        },
+        "derivation": "Supplemental distributions from raw CSV; warmup and first output per generation excluded from steady distributions. Moonlight arithmetic means include all eligible outputs. Original totals and internal VT callback endpoint remain unchanged."
+      },
+      "first_output_ms": 80.781292,
+      "first_output_origin": "initial scheduled start",
+      "startup": {
+        "policy": "fixed-initial-deadline-v1",
+        "startup_grace_ms": 250,
+        "queue_budget_ms": 66.666656,
+        "scheduled_start_ns": 838559433559541,
+        "first_output_ns": 80781292,
+        "initial_setup_ns": 65692583,
+        "scheduler_drop_counts": {
+          "arrival_deadline": 0,
+          "capacity_deadline": 0,
+          "awaiting_random_access": 0,
+          "injected_drop": 0
+        },
+        "first_output_max_ms": 250.0,
+        "first_output_sla_passed": true
+      },
+      "metrics": {
+        "vt_median_ms": 1.8849375,
+        "vt_p95_ms": 2.9422336500000013,
+        "vt_p99_ms": 9.824768750000004,
+        "public_median_ms": 2.138179,
+        "public_p95_ms": 3.3049855000000012,
+        "public_p99_ms": 13.764500940000055
+      },
+      "thermal_nominal": true,
+      "errors": [],
+      "passed": true,
+      "settings": {
+        "width": 3440,
+        "height": 1440,
+        "fps": 240,
+        "codec": "hevc",
+        "dynamic_range": "sdr",
+        "bitrate_mbps": 100.0,
+        "gop": 60,
+        "frames": 240,
+        "fixture": "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/results/bitrate-matrix-paired-full/fixtures/bbc88d6da5ee3954b91064ec8f74592c3cbf9f531ba590180b0b1aaa13138081/manifest.json",
+        "decoder": {
+          "inflight": 2,
+          "queue_depth": 16,
+          "power": -1,
+          "consumer_delay_ms": 0,
+          "jitter_us": 0,
+          "seed": 7,
+          "startup_grace_ms": 250
+        },
+        "name": "ultrawide-3440x1440p240-hevc-sdr-100mbps",
+        "fixture_info": {
+          "manifest_sha256": "b730b4aaaf79e929a83ac15a2444b205343e8fe4c562afe7535c2c5d74b827c8",
+          "payload_sha256": "4c8c710e3712958c749fc3295390f1d8ba8409012b3b213a247f67e710846682",
+          "payload_file": "payload.bin",
+          "frames": 240,
+          "requested_bitrate_mbps": 100,
+          "measured_bitrate_mbps": 95.373816,
+          "generator": {
+            "bitrate_measurement": "encoded payload bytes including codec headers and HDR metadata divided by generated presentation duration; no transport overhead",
+            "content_profile": "seeded-noise-frame-id-v1",
+            "content_seed": 1835103793,
+            "encoder": "Apple VTCompressionSession HEVC (OS-versioned)",
+            "encoder_settings": {
+              "allow_frame_reordering": false,
+              "average_bitrate_bps": 100000000,
+              "data_rate_limits": [
+                15000000,
+                1
+              ],
+              "expected_frame_rate": 240,
+              "hardware_required": true,
+              "max_key_frame_interval": 60,
+              "profile": "Main_AutoLevel",
+              "realtime": true
+            },
+            "inter_count": 236,
+            "low_delay_verified": true,
+            "measured_bitrate_bps": 95373816,
+            "measured_bitrate_mbps": 95.373816,
+            "name": "mav-fixture",
+            "os": "Version 26.6.2 (Build 25G83)",
+            "pattern": "seeded-noise-software-reference-v1",
+            "random_access_count": 4,
+            "rate_control": "average_bitrate",
+            "requested_bitrate_mbps": 100,
+            "settings": {
+              "bitrate_mbps": 100,
+              "chroma": "420",
+              "codec": "hevc",
+              "fps": 240,
+              "frames": 240,
+              "gop": 60,
+              "height": 1440,
+              "variant": "sdr8",
+              "width": 3440
+            },
+            "target_bitrate_bps": 100000000
+          }
+        }
+      }
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-sdr-100mbps",
+      "setting": "candidate",
+      "phase": "timed",
+      "repetition": 2,
+      "command": [
+        "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/build-startup-release/mav-replay",
+        "--fixture",
+        "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/results/bitrate-matrix-paired-full/fixtures/bbc88d6da5ee3954b91064ec8f74592c3cbf9f531ba590180b0b1aaa13138081/manifest.json",
+        "--output",
+        "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/results/hevc-startup-controls/sdr-100mbps-0ms-2",
+        "--mode",
+        "paced",
+        "--fps",
+        "240",
+        "--loops",
+        "2",
+        "--loop-mode",
+        "continuous",
+        "--warmup",
+        "120",
+        "--inflight",
+        "2",
+        "--queue-depth",
+        "16",
+        "--startup-grace-ms",
+        "0",
+        "--power",
+        "-1",
+        "--seed",
+        "7",
+        "--jitter-us",
+        "0",
+        "--consumer-delay-ms",
+        "0"
+      ],
+      "state": "FINISHED",
+      "exit_code": 1,
+      "expected_offered": 480,
+      "started_at": "2026-09-10T00:35:17.541733+00:00",
+      "result_file": "sdr-100mbps-0ms-2.json",
+      "result_file_sha256": "f177a9d654d2ed5c47908e31bd77948e38d3c0013f7bef03cdee233bc15efb56",
+      "csv_file": "sdr-100mbps-0ms-2.csv",
+      "csv_file_sha256": "8c77ef731230910117ba9bc8c687b43f93272c38c7e58621aa32553a680d97c3",
+      "log_file": "sdr-100mbps-0ms-2.log",
+      "log_file_sha256": "7ec19838dd0069e973b21429de74a90e135e6bfa67bda3016a8719177c3c9eda",
+      "native": {
+        "actual_offered_fps": 240.24388261646257,
+        "admission_fps": 211.21441346697333,
+        "backpressure": 25,
+        "bit_depth": 8,
+        "callback_to_client_handoff_ns": {
+          "count": 360,
+          "max": 63917,
+          "mean": 14477.422222222222,
+          "median": 13083.5,
+          "min": 6959,
+          "p95": 22179.500000000004,
+          "p99": 33915.28000000002
+        },
+        "chroma": "420",
+        "clock": "mav_monotonic_time_ns CLOCK_UPTIME_RAW",
+        "codec": "hevc",
+        "cold_generation_vt_submit_to_callback_ns": {
+          "count": 1,
+          "max": 4236834,
+          "mean": 4236834,
+          "median": 4236834,
+          "min": 4236834,
+          "p95": 4236834,
+          "p99": 4236834
+        },
+        "cold_vt_submit_to_callback_ns": 4236834,
+        "complete_au_to_output_ns": {
+          "count": 360,
+          "max": 18590037,
+          "mean": 2696527.711111111,
+          "median": 2221561.5,
+          "min": 1666839,
+          "p95": 4247692.7,
+          "p99": 15631923.570000056
+        },
+        "completed": 422,
+        "compressed_copy_bytes": 18669166,
+        "compressed_copy_count": 422,
+        "consumer_delay_semantics": "bounded 32-buffer validation worker delayed per output",
+        "consumer_retention_delay_ms": 0,
+        "correctness_sink": false,
+        "decoded_fps": 210.21339728940475,
+        "displayed_outputs": 420,
+        "expected_display_mismatches": 2,
+        "experiment_busy_wait_wall_ns": 0,
+        "experiment_cpu_percent_one_core": 10.93390894219483,
+        "experiment_cpu_window_seconds": 2.017979125,
+        "experiment_pacing_semantics": "Original absolute arrival deadlines; sleep until bounded final window then poll the monotonic clock; includes busy-wait CPU cost",
+        "experiment_process_cpu_seconds": 0.220644,
+        "experiment_spin_us": 0,
+        "failed_or_cancelled_or_dropped": 2,
+        "fixture_sha256": "4c8c710e3712958c749fc3295390f1d8ba8409012b3b213a247f67e710846682",
+        "hardware_validated": 1,
+        "height": 1440,
+        "inflight": 2,
+        "initial_setup_ns": 67226916,
+        "internal_samples": 422,
+        "iosurface_metal_verified": false,
+        "loop_mode": "continuous",
+        "loops": 2,
+        "manifest_fallback_color_valid": 3,
+        "mode": "paced",
+        "model": "Mac15,3",
+        "no_display": 0,
+        "offered": 480,
+        "os": "Version 26.6.2 (Build 25G83)",
+        "peak_outstanding": 2,
+        "pixel_format": 875704438,
+        "power_effective": -1,
+        "power_requested": -1,
+        "power_state": null,
+        "power_status": -12900,
+        "preparation_ns": {
+          "count": 360,
+          "max": 1688417,
+          "mean": 38838.49444444444,
+          "median": 15125,
+          "min": 6208,
+          "p95": 74149.65000000001,
+          "p99": 632470.7800000049
+        },
+        "presentation_ns": null,
+        "queue_depth": 16,
+        "queue_wait_ns": {
+          "count": 360,
+          "max": 10284539,
+          "mean": 380916.2611111111,
+          "median": 216934,
+          "min": 12624,
+          "p95": 352564.6000000004,
+          "p99": 7329785.540000055
+        },
+        "realtime_effective": 1,
+        "realtime_status": 0,
+        "rejected": 0,
+        "render_ns": null,
+        "requested_fps": 240,
+        "resets": 3,
+        "retained_after_destroy_verified": false,
+        "retained_peak": 0,
+        "run_seconds": 1.997969708,
+        "scheduled_start_ns": 838561502278625,
+        "scheduler_drop_counts": {
+          "arrival_deadline": 2,
+          "awaiting_random_access": 55,
+          "capacity_deadline": 1,
+          "injected_drop": 0
+        },
+        "scheduler_drops": 58,
+        "scheduler_events": [
+          {
+            "deadline_ns": 838561577278613,
+            "frame_id": 2,
+            "observed_ns": 838561577829166,
+            "offered_index": 2,
+            "reason": "capacity_deadline",
+            "scheduled_arrival_ns": 838561510611957
+          },
+          {
+            "deadline_ns": 838561581445279,
+            "frame_id": 3,
+            "observed_ns": 838561589682666,
+            "offered_index": 3,
+            "reason": "arrival_deadline",
+            "scheduled_arrival_ns": 838561514778623
+          },
+          {
+            "deadline_ns": 838561585611945,
+            "frame_id": 4,
+            "observed_ns": 838561589683250,
+            "offered_index": 4,
+            "reason": "arrival_deadline",
+            "scheduled_arrival_ns": 838561518945289
+          },
+          {
+            "deadline_ns": 838561589778611,
+            "frame_id": 5,
+            "observed_ns": 838561589683583,
+            "offered_index": 5,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561523111955
+          },
+          {
+            "deadline_ns": 838561593945277,
+            "frame_id": 6,
+            "observed_ns": 838561589683625,
+            "offered_index": 6,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561527278621
+          },
+          {
+            "deadline_ns": 838561598111943,
+            "frame_id": 7,
+            "observed_ns": 838561589683708,
+            "offered_index": 7,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561531445287
+          },
+          {
+            "deadline_ns": 838561602278609,
+            "frame_id": 8,
+            "observed_ns": 838561589683791,
+            "offered_index": 8,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561535611953
+          },
+          {
+            "deadline_ns": 838561606445275,
+            "frame_id": 9,
+            "observed_ns": 838561589683833,
+            "offered_index": 9,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561539778619
+          },
+          {
+            "deadline_ns": 838561610611941,
+            "frame_id": 10,
+            "observed_ns": 838561589683916,
+            "offered_index": 10,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561543945285
+          },
+          {
+            "deadline_ns": 838561614778607,
+            "frame_id": 11,
+            "observed_ns": 838561589683958,
+            "offered_index": 11,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561548111951
+          },
+          {
+            "deadline_ns": 838561618945273,
+            "frame_id": 12,
+            "observed_ns": 838561589684000,
+            "offered_index": 12,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561552278617
+          },
+          {
+            "deadline_ns": 838561623111939,
+            "frame_id": 13,
+            "observed_ns": 838561589684083,
+            "offered_index": 13,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561556445283
+          },
+          {
+            "deadline_ns": 838561627278605,
+            "frame_id": 14,
+            "observed_ns": 838561589684125,
+            "offered_index": 14,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561560611949
+          },
+          {
+            "deadline_ns": 838561631445271,
+            "frame_id": 15,
+            "observed_ns": 838561589684166,
+            "offered_index": 15,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561564778615
+          },
+          {
+            "deadline_ns": 838561635611937,
+            "frame_id": 16,
+            "observed_ns": 838561589684291,
+            "offered_index": 16,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561568945281
+          },
+          {
+            "deadline_ns": 838561639778603,
+            "frame_id": 17,
+            "observed_ns": 838561589684375,
+            "offered_index": 17,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561573111947
+          },
+          {
+            "deadline_ns": 838561643945269,
+            "frame_id": 18,
+            "observed_ns": 838561589684416,
+            "offered_index": 18,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561577278613
+          },
+          {
+            "deadline_ns": 838561648111935,
+            "frame_id": 19,
+            "observed_ns": 838561589684500,
+            "offered_index": 19,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561581445279
+          },
+          {
+            "deadline_ns": 838561652278601,
+            "frame_id": 20,
+            "observed_ns": 838561589684541,
+            "offered_index": 20,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561585611945
+          },
+          {
+            "deadline_ns": 838561656445267,
+            "frame_id": 21,
+            "observed_ns": 838561589807541,
+            "offered_index": 21,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561589778611
+          },
+          {
+            "deadline_ns": 838561660611933,
+            "frame_id": 22,
+            "observed_ns": 838561594043916,
+            "offered_index": 22,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561593945277
+          },
+          {
+            "deadline_ns": 838561664778599,
+            "frame_id": 23,
+            "observed_ns": 838561598194625,
+            "offered_index": 23,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561598111943
+          },
+          {
+            "deadline_ns": 838561668945265,
+            "frame_id": 24,
+            "observed_ns": 838561602358458,
+            "offered_index": 24,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561602278609
+          },
+          {
+            "deadline_ns": 838561673111931,
+            "frame_id": 25,
+            "observed_ns": 838561606526375,
+            "offered_index": 25,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561606445275
+          },
+          {
+            "deadline_ns": 838561677278597,
+            "frame_id": 26,
+            "observed_ns": 838561610693541,
+            "offered_index": 26,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561610611941
+          },
+          {
+            "deadline_ns": 838561681445263,
+            "frame_id": 27,
+            "observed_ns": 838561614860875,
+            "offered_index": 27,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561614778607
+          },
+          {
+            "deadline_ns": 838561685611929,
+            "frame_id": 28,
+            "observed_ns": 838561619006458,
+            "offered_index": 28,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561618945273
+          },
+          {
+            "deadline_ns": 838561689778595,
+            "frame_id": 29,
+            "observed_ns": 838561623197541,
+            "offered_index": 29,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561623111939
+          },
+          {
+            "deadline_ns": 838561693945261,
+            "frame_id": 30,
+            "observed_ns": 838561627357583,
+            "offered_index": 30,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561627278605
+          },
+          {
+            "deadline_ns": 838561698111927,
+            "frame_id": 31,
+            "observed_ns": 838561631530083,
+            "offered_index": 31,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561631445271
+          },
+          {
+            "deadline_ns": 838561702278593,
+            "frame_id": 32,
+            "observed_ns": 838561635699041,
+            "offered_index": 32,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561635611937
+          },
+          {
+            "deadline_ns": 838561706445259,
+            "frame_id": 33,
+            "observed_ns": 838561639859625,
+            "offered_index": 33,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561639778603
+          },
+          {
+            "deadline_ns": 838561710611925,
+            "frame_id": 34,
+            "observed_ns": 838561644032958,
+            "offered_index": 34,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561643945269
+          },
+          {
+            "deadline_ns": 838561714778591,
+            "frame_id": 35,
+            "observed_ns": 838561648191041,
+            "offered_index": 35,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561648111935
+          },
+          {
+            "deadline_ns": 838561718945257,
+            "frame_id": 36,
+            "observed_ns": 838561652363500,
+            "offered_index": 36,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561652278601
+          },
+          {
+            "deadline_ns": 838561723111923,
+            "frame_id": 37,
+            "observed_ns": 838561656531208,
+            "offered_index": 37,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561656445267
+          },
+          {
+            "deadline_ns": 838561727278589,
+            "frame_id": 38,
+            "observed_ns": 838561660691500,
+            "offered_index": 38,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561660611933
+          },
+          {
+            "deadline_ns": 838561731445255,
+            "frame_id": 39,
+            "observed_ns": 838561664863750,
+            "offered_index": 39,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561664778599
+          },
+          {
+            "deadline_ns": 838561735611921,
+            "frame_id": 40,
+            "observed_ns": 838561669030375,
+            "offered_index": 40,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561668945265
+          },
+          {
+            "deadline_ns": 838561739778587,
+            "frame_id": 41,
+            "observed_ns": 838561673195541,
+            "offered_index": 41,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561673111931
+          },
+          {
+            "deadline_ns": 838561743945253,
+            "frame_id": 42,
+            "observed_ns": 838561677357583,
+            "offered_index": 42,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561677278597
+          },
+          {
+            "deadline_ns": 838561748111919,
+            "frame_id": 43,
+            "observed_ns": 838561681529791,
+            "offered_index": 43,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561681445263
+          },
+          {
+            "deadline_ns": 838561752278585,
+            "frame_id": 44,
+            "observed_ns": 838561685691625,
+            "offered_index": 44,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561685611929
+          },
+          {
+            "deadline_ns": 838561756445251,
+            "frame_id": 45,
+            "observed_ns": 838561689859333,
+            "offered_index": 45,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561689778595
+          },
+          {
+            "deadline_ns": 838561760611917,
+            "frame_id": 46,
+            "observed_ns": 838561694029666,
+            "offered_index": 46,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561693945261
+          },
+          {
+            "deadline_ns": 838561764778583,
+            "frame_id": 47,
+            "observed_ns": 838561698194250,
+            "offered_index": 47,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561698111927
+          },
+          {
+            "deadline_ns": 838561768945249,
+            "frame_id": 48,
+            "observed_ns": 838561702360333,
+            "offered_index": 48,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561702278593
+          },
+          {
+            "deadline_ns": 838561773111915,
+            "frame_id": 49,
+            "observed_ns": 838561706528833,
+            "offered_index": 49,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561706445259
+          },
+          {
+            "deadline_ns": 838561777278581,
+            "frame_id": 50,
+            "observed_ns": 838561710695708,
+            "offered_index": 50,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561710611925
+          },
+          {
+            "deadline_ns": 838561781445247,
+            "frame_id": 51,
+            "observed_ns": 838561714861625,
+            "offered_index": 51,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561714778591
+          },
+          {
+            "deadline_ns": 838561785611913,
+            "frame_id": 52,
+            "observed_ns": 838561719029291,
+            "offered_index": 52,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561718945257
+          },
+          {
+            "deadline_ns": 838561789778579,
+            "frame_id": 53,
+            "observed_ns": 838561723191875,
+            "offered_index": 53,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561723111923
+          },
+          {
+            "deadline_ns": 838561793945245,
+            "frame_id": 54,
+            "observed_ns": 838561727360083,
+            "offered_index": 54,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561727278589
+          },
+          {
+            "deadline_ns": 838561798111911,
+            "frame_id": 55,
+            "observed_ns": 838561731525708,
+            "offered_index": 55,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561731445255
+          },
+          {
+            "deadline_ns": 838561802278577,
+            "frame_id": 56,
+            "observed_ns": 838561735694500,
+            "offered_index": 56,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561735611921
+          },
+          {
+            "deadline_ns": 838561806445243,
+            "frame_id": 57,
+            "observed_ns": 838561739864666,
+            "offered_index": 57,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561739778587
+          },
+          {
+            "deadline_ns": 838561810611909,
+            "frame_id": 58,
+            "observed_ns": 838561744025916,
+            "offered_index": 58,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561743945253
+          },
+          {
+            "deadline_ns": 838561814778575,
+            "frame_id": 59,
+            "observed_ns": 838561748195125,
+            "offered_index": 59,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838561748111919
+          }
+        ],
+        "scheduler_lateness_ns": {
+          "count": 480,
+          "max": 74904043,
+          "mean": 2011156.4583333333,
+          "median": 207697.5,
+          "min": 10416,
+          "p95": 3610362.899999978,
+          "p99": 62623123.439999975
+        },
+        "scheduler_lateness_population": "all offered arrivals, including cold, warmup and losses",
+        "show_existing": 0,
+        "software_reference_max_code_error": null,
+        "software_reference_mean_code_error": null,
+        "software_reference_samples": 0,
+        "software_reference_tolerance": 2,
+        "startup_first_output_ns": 256995666,
+        "startup_grace_ms": 0,
+        "startup_policy": "fixed-initial-deadline-v1",
+        "status": "FAIL",
+        "steady_excludes_first_output_each_generation": true,
+        "submission_call_ns": {
+          "count": 359,
+          "max": 3180791,
+          "mean": 650221.4818941504,
+          "median": 604167,
+          "min": 352917,
+          "p95": 971138.0999999978,
+          "p99": 1909947.5000000107
+        },
+        "submitted": 422,
+        "thermal_state": 0,
+        "trace_overflow": 0,
+        "variant": "sdr8",
+        "vt_submit_to_callback_ns": {
+          "count": 360,
+          "max": 13693084,
+          "mean": 2262661.716666667,
+          "median": 1983833,
+          "min": 1427208,
+          "p95": 3230760.4500000007,
+          "p99": 10426029.190000042
+        },
+        "warmup_frames": 120,
+        "width": 3440
+      },
+      "derived": {
+        "moonlight_decode_time": {
+          "native_vt": {
+            "sample_count": 420,
+            "total_ns": 936637880,
+            "mean_ms": 2.2300901904761905
+          },
+          "native_submission": {
+            "sample_count": 419,
+            "total_ns": 272018885,
+            "mean_ms": 0.6492097494033413
+          },
+          "public_queue_proxy": {
+            "sample_count": 420,
+            "total_ns": 1114334781,
+            "mean_ms": 2.6531780499999997
+          }
+        },
+        "public_complete_au_to_output_ns": {
+          "count": 360,
+          "mean": 2711005.1333333333,
+          "median": 2237963.0,
+          "p95": 4264507.600000001,
+          "p99": 15653482.200000055,
+          "min": 1689006,
+          "max": 18609996
+        },
+        "public_output_boundary": "Native public completion callback entry in harness",
+        "cold_public_complete_au_to_output_ns": {
+          "count": 1,
+          "mean": 6995706.0,
+          "median": 6995706.0,
+          "p95": 6995706.0,
+          "p99": 6995706.0,
+          "min": 6995706,
+          "max": 6995706
+        },
+        "cold_population": "First successful displayed output in each generation; may follow a cancelled initial submission",
+        "initial_submission_frame_id": 0,
+        "initial_submission_status": 4,
+        "initial_submission_terminal_ns": 82541916,
+        "submit_entry_to_vt_submit_ns": {
+          "count": 360,
+          "mean": 52949.73333333333,
+          "median": 28333.5,
+          "p95": 94466.65000000011,
+          "p99": 645377.280000005,
+          "min": 11125,
+          "max": 1837542
+        },
+        "post_parser_to_vt_submit_ns": {
+          "count": 360,
+          "mean": 14111.238888888889,
+          "median": 10437.5,
+          "p95": 24404.150000000005,
+          "p99": 76635.78000000004,
+          "min": 4917,
+          "max": 362750
+        },
+        "derivation": "Supplemental distributions from raw CSV; warmup and first output per generation excluded from steady distributions. Moonlight arithmetic means include all eligible outputs. Original totals and internal VT callback endpoint remain unchanged."
+      },
+      "first_output_ms": 256.995666,
+      "first_output_origin": "initial scheduled start",
+      "startup": {
+        "policy": "fixed-initial-deadline-v1",
+        "startup_grace_ms": 0,
+        "queue_budget_ms": 66.666656,
+        "scheduled_start_ns": 838561502278625,
+        "first_output_ns": 256995666,
+        "initial_setup_ns": 67226916,
+        "scheduler_drop_counts": {
+          "arrival_deadline": 2,
+          "capacity_deadline": 1,
+          "awaiting_random_access": 55,
+          "injected_drop": 0
+        },
+        "first_output_max_ms": 250.0,
+        "first_output_sla_passed": false
+      },
+      "metrics": {
+        "vt_median_ms": 1.983833,
+        "vt_p95_ms": 3.2307604500000004,
+        "vt_p99_ms": 10.426029190000042,
+        "public_median_ms": 2.237963,
+        "public_p95_ms": 4.264507600000001,
+        "public_p99_ms": 15.653482200000056
+      },
+      "thermal_nominal": true,
+      "errors": [
+        "native FAIL: accounting/hardware gate failed",
+        "process FINISHED, exit 1",
+        "not every offered frame produced an output",
+        "scheduler_drops=58",
+        "failed_or_cancelled_or_dropped=2",
+        "expected_display_mismatches=2",
+        "resets=3",
+        "CSV contains a non-output terminal completion",
+        "first output exceeds configured startup SLA or no output was delivered",
+        "delivered frame rate below configured ratio"
+      ],
+      "passed": false,
+      "settings": {
+        "width": 3440,
+        "height": 1440,
+        "fps": 240,
+        "codec": "hevc",
+        "dynamic_range": "sdr",
+        "bitrate_mbps": 100.0,
+        "gop": 60,
+        "frames": 240,
+        "fixture": "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/results/bitrate-matrix-paired-full/fixtures/bbc88d6da5ee3954b91064ec8f74592c3cbf9f531ba590180b0b1aaa13138081/manifest.json",
+        "decoder": {
+          "inflight": 2,
+          "queue_depth": 16,
+          "power": -1,
+          "consumer_delay_ms": 0,
+          "jitter_us": 0,
+          "seed": 7,
+          "startup_grace_ms": 0
+        },
+        "name": "ultrawide-3440x1440p240-hevc-sdr-100mbps",
+        "fixture_info": {
+          "manifest_sha256": "b730b4aaaf79e929a83ac15a2444b205343e8fe4c562afe7535c2c5d74b827c8",
+          "payload_sha256": "4c8c710e3712958c749fc3295390f1d8ba8409012b3b213a247f67e710846682",
+          "payload_file": "payload.bin",
+          "frames": 240,
+          "requested_bitrate_mbps": 100,
+          "measured_bitrate_mbps": 95.373816,
+          "generator": {
+            "bitrate_measurement": "encoded payload bytes including codec headers and HDR metadata divided by generated presentation duration; no transport overhead",
+            "content_profile": "seeded-noise-frame-id-v1",
+            "content_seed": 1835103793,
+            "encoder": "Apple VTCompressionSession HEVC (OS-versioned)",
+            "encoder_settings": {
+              "allow_frame_reordering": false,
+              "average_bitrate_bps": 100000000,
+              "data_rate_limits": [
+                15000000,
+                1
+              ],
+              "expected_frame_rate": 240,
+              "hardware_required": true,
+              "max_key_frame_interval": 60,
+              "profile": "Main_AutoLevel",
+              "realtime": true
+            },
+            "inter_count": 236,
+            "low_delay_verified": true,
+            "measured_bitrate_bps": 95373816,
+            "measured_bitrate_mbps": 95.373816,
+            "name": "mav-fixture",
+            "os": "Version 26.6.2 (Build 25G83)",
+            "pattern": "seeded-noise-software-reference-v1",
+            "random_access_count": 4,
+            "rate_control": "average_bitrate",
+            "requested_bitrate_mbps": 100,
+            "settings": {
+              "bitrate_mbps": 100,
+              "chroma": "420",
+              "codec": "hevc",
+              "fps": 240,
+              "frames": 240,
+              "gop": 60,
+              "height": 1440,
+              "variant": "sdr8",
+              "width": 3440
+            },
+            "target_bitrate_bps": 100000000
+          }
+        }
+      }
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-hdr10-350mbps",
+      "setting": "candidate",
+      "phase": "timed",
+      "repetition": 1,
+      "command": [
+        "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/build-startup-release/mav-replay",
+        "--fixture",
+        "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/results/bitrate-matrix-paired-full/fixtures/0ca74e31a50b4e802d9f8de390f48a626b176a31b9b4a86092bfa39414c6341c/manifest.json",
+        "--output",
+        "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/results/hevc-startup-controls/hdr10-350mbps-0ms-1",
+        "--mode",
+        "paced",
+        "--fps",
+        "240",
+        "--loops",
+        "2",
+        "--loop-mode",
+        "continuous",
+        "--warmup",
+        "120",
+        "--inflight",
+        "2",
+        "--queue-depth",
+        "16",
+        "--startup-grace-ms",
+        "0",
+        "--power",
+        "-1",
+        "--seed",
+        "7",
+        "--jitter-us",
+        "0",
+        "--consumer-delay-ms",
+        "0"
+      ],
+      "state": "FINISHED",
+      "exit_code": 1,
+      "expected_offered": 480,
+      "started_at": "2026-09-10T00:35:19.610929+00:00",
+      "result_file": "hdr10-350mbps-0ms-1.json",
+      "result_file_sha256": "d11a9c248ab13f0fed2d56954bc933425e9bf1108fa76ece31476c7dbebf3953",
+      "csv_file": "hdr10-350mbps-0ms-1.csv",
+      "csv_file_sha256": "d5f99beaa3479324df92fc31be1f17a28b6a8aa6a0228ef6cd6e174c262e2156",
+      "log_file": "hdr10-350mbps-0ms-1.log",
+      "log_file_sha256": "77d0977d7180d7e607300126d340cdb275b150e6d7e6ae704ddcc8bbab713cd7",
+      "native": {
+        "actual_offered_fps": 240.0823131814035,
+        "admission_fps": 211.07236700531723,
+        "backpressure": 53,
+        "bit_depth": 10,
+        "callback_to_client_handoff_ns": {
+          "count": 360,
+          "max": 98084,
+          "mean": 17676.269444444446,
+          "median": 16417,
+          "min": 5125,
+          "p95": 27877.05,
+          "p99": 43295.28000000016
+        },
+        "chroma": "420",
+        "clock": "mav_monotonic_time_ns CLOCK_UPTIME_RAW",
+        "codec": "hevc",
+        "cold_generation_vt_submit_to_callback_ns": {
+          "count": 1,
+          "max": 5367542,
+          "mean": 5367542,
+          "median": 5367542,
+          "min": 5367542,
+          "p95": 5367542,
+          "p99": 5367542
+        },
+        "cold_vt_submit_to_callback_ns": 5367542,
+        "complete_au_to_output_ns": {
+          "count": 360,
+          "max": 38336872,
+          "mean": 4284086.244444445,
+          "median": 3272977,
+          "min": 1242714,
+          "p95": 7542987.300000031,
+          "p99": 35224397.32000005
+        },
+        "completed": 422,
+        "compressed_copy_bytes": 63060011,
+        "compressed_copy_count": 422,
+        "consumer_delay_semantics": "bounded 32-buffer validation worker delayed per output",
+        "consumer_retention_delay_ms": 0,
+        "correctness_sink": false,
+        "decoded_fps": 210.07202403372807,
+        "displayed_outputs": 420,
+        "expected_display_mismatches": 2,
+        "experiment_busy_wait_wall_ns": 0,
+        "experiment_cpu_percent_one_core": 10.695229844392156,
+        "experiment_cpu_window_seconds": 2.019320792,
+        "experiment_pacing_semantics": "Original absolute arrival deadlines; sleep until bounded final window then poll the monotonic clock; includes busy-wait CPU cost",
+        "experiment_process_cpu_seconds": 0.215971,
+        "experiment_spin_us": 0,
+        "failed_or_cancelled_or_dropped": 2,
+        "fixture_sha256": "f31898641673a99dee7815db33a8d05230661a08320bd0c2093693a985ba69ac",
+        "hardware_validated": 1,
+        "height": 1440,
+        "inflight": 2,
+        "initial_setup_ns": 62293250,
+        "internal_samples": 422,
+        "iosurface_metal_verified": false,
+        "loop_mode": "continuous",
+        "loops": 2,
+        "manifest_fallback_color_valid": 27,
+        "mode": "paced",
+        "model": "Mac15,3",
+        "no_display": 0,
+        "offered": 480,
+        "os": "Version 26.6.2 (Build 25G83)",
+        "peak_outstanding": 2,
+        "pixel_format": 2016686640,
+        "power_effective": -1,
+        "power_requested": -1,
+        "power_state": null,
+        "power_status": -12900,
+        "preparation_ns": {
+          "count": 360,
+          "max": 1434584,
+          "mean": 58305.63888888889,
+          "median": 40874.5,
+          "min": 3917,
+          "p95": 121100.00000000013,
+          "p99": 384642.4400000032
+        },
+        "presentation_ns": null,
+        "queue_depth": 16,
+        "queue_wait_ns": {
+          "count": 360,
+          "max": 30023290,
+          "mean": 1095242.1444444444,
+          "median": 194780,
+          "min": 2522,
+          "p95": 1961350.150000038,
+          "p99": 26908313.26000005
+        },
+        "realtime_effective": 1,
+        "realtime_status": 0,
+        "rejected": 0,
+        "render_ns": null,
+        "requested_fps": 240,
+        "resets": 3,
+        "retained_after_destroy_verified": false,
+        "retained_peak": 0,
+        "run_seconds": 1.999314292,
+        "scheduled_start_ns": 838563603997458,
+        "scheduler_drop_counts": {
+          "arrival_deadline": 2,
+          "awaiting_random_access": 55,
+          "capacity_deadline": 1,
+          "injected_drop": 0
+        },
+        "scheduler_drops": 58,
+        "scheduler_events": [
+          {
+            "deadline_ns": 838563678997446,
+            "frame_id": 2,
+            "observed_ns": 838563679089666,
+            "offered_index": 2,
+            "reason": "capacity_deadline",
+            "scheduled_arrival_ns": 838563612330790
+          },
+          {
+            "deadline_ns": 838563683164112,
+            "frame_id": 3,
+            "observed_ns": 838563690459166,
+            "offered_index": 3,
+            "reason": "arrival_deadline",
+            "scheduled_arrival_ns": 838563616497456
+          },
+          {
+            "deadline_ns": 838563687330778,
+            "frame_id": 4,
+            "observed_ns": 838563690459500,
+            "offered_index": 4,
+            "reason": "arrival_deadline",
+            "scheduled_arrival_ns": 838563620664122
+          },
+          {
+            "deadline_ns": 838563691497444,
+            "frame_id": 5,
+            "observed_ns": 838563690459875,
+            "offered_index": 5,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563624830788
+          },
+          {
+            "deadline_ns": 838563695664110,
+            "frame_id": 6,
+            "observed_ns": 838563690459958,
+            "offered_index": 6,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563628997454
+          },
+          {
+            "deadline_ns": 838563699830776,
+            "frame_id": 7,
+            "observed_ns": 838563690460000,
+            "offered_index": 7,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563633164120
+          },
+          {
+            "deadline_ns": 838563703997442,
+            "frame_id": 8,
+            "observed_ns": 838563690460083,
+            "offered_index": 8,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563637330786
+          },
+          {
+            "deadline_ns": 838563708164108,
+            "frame_id": 9,
+            "observed_ns": 838563690460125,
+            "offered_index": 9,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563641497452
+          },
+          {
+            "deadline_ns": 838563712330774,
+            "frame_id": 10,
+            "observed_ns": 838563690460208,
+            "offered_index": 10,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563645664118
+          },
+          {
+            "deadline_ns": 838563716497440,
+            "frame_id": 11,
+            "observed_ns": 838563690460250,
+            "offered_index": 11,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563649830784
+          },
+          {
+            "deadline_ns": 838563720664106,
+            "frame_id": 12,
+            "observed_ns": 838563690460333,
+            "offered_index": 12,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563653997450
+          },
+          {
+            "deadline_ns": 838563724830772,
+            "frame_id": 13,
+            "observed_ns": 838563690460375,
+            "offered_index": 13,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563658164116
+          },
+          {
+            "deadline_ns": 838563728997438,
+            "frame_id": 14,
+            "observed_ns": 838563690460416,
+            "offered_index": 14,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563662330782
+          },
+          {
+            "deadline_ns": 838563733164104,
+            "frame_id": 15,
+            "observed_ns": 838563690460500,
+            "offered_index": 15,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563666497448
+          },
+          {
+            "deadline_ns": 838563737330770,
+            "frame_id": 16,
+            "observed_ns": 838563690460625,
+            "offered_index": 16,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563670664114
+          },
+          {
+            "deadline_ns": 838563741497436,
+            "frame_id": 17,
+            "observed_ns": 838563690460666,
+            "offered_index": 17,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563674830780
+          },
+          {
+            "deadline_ns": 838563745664102,
+            "frame_id": 18,
+            "observed_ns": 838563690460750,
+            "offered_index": 18,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563678997446
+          },
+          {
+            "deadline_ns": 838563749830768,
+            "frame_id": 19,
+            "observed_ns": 838563690460791,
+            "offered_index": 19,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563683164112
+          },
+          {
+            "deadline_ns": 838563753997434,
+            "frame_id": 20,
+            "observed_ns": 838563690460833,
+            "offered_index": 20,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563687330778
+          },
+          {
+            "deadline_ns": 838563758164100,
+            "frame_id": 21,
+            "observed_ns": 838563691727166,
+            "offered_index": 21,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563691497444
+          },
+          {
+            "deadline_ns": 838563762330766,
+            "frame_id": 22,
+            "observed_ns": 838563695707375,
+            "offered_index": 22,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563695664110
+          },
+          {
+            "deadline_ns": 838563766497432,
+            "frame_id": 23,
+            "observed_ns": 838563699921250,
+            "offered_index": 23,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563699830776
+          },
+          {
+            "deadline_ns": 838563770664098,
+            "frame_id": 24,
+            "observed_ns": 838563704144750,
+            "offered_index": 24,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563703997442
+          },
+          {
+            "deadline_ns": 838563774830764,
+            "frame_id": 25,
+            "observed_ns": 838563708226375,
+            "offered_index": 25,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563708164108
+          },
+          {
+            "deadline_ns": 838563778997430,
+            "frame_id": 26,
+            "observed_ns": 838563712416041,
+            "offered_index": 26,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563712330774
+          },
+          {
+            "deadline_ns": 838563783164096,
+            "frame_id": 27,
+            "observed_ns": 838563716622375,
+            "offered_index": 27,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563716497440
+          },
+          {
+            "deadline_ns": 838563787330762,
+            "frame_id": 28,
+            "observed_ns": 838563720732875,
+            "offered_index": 28,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563720664106
+          },
+          {
+            "deadline_ns": 838563791497428,
+            "frame_id": 29,
+            "observed_ns": 838563724914500,
+            "offered_index": 29,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563724830772
+          },
+          {
+            "deadline_ns": 838563795664094,
+            "frame_id": 30,
+            "observed_ns": 838563729084458,
+            "offered_index": 30,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563728997438
+          },
+          {
+            "deadline_ns": 838563799830760,
+            "frame_id": 31,
+            "observed_ns": 838563733241166,
+            "offered_index": 31,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563733164104
+          },
+          {
+            "deadline_ns": 838563803997426,
+            "frame_id": 32,
+            "observed_ns": 838563737417958,
+            "offered_index": 32,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563737330770
+          },
+          {
+            "deadline_ns": 838563808164092,
+            "frame_id": 33,
+            "observed_ns": 838563741576291,
+            "offered_index": 33,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563741497436
+          },
+          {
+            "deadline_ns": 838563812330758,
+            "frame_id": 34,
+            "observed_ns": 838563745745458,
+            "offered_index": 34,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563745664102
+          },
+          {
+            "deadline_ns": 838563816497424,
+            "frame_id": 35,
+            "observed_ns": 838563749914958,
+            "offered_index": 35,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563749830768
+          },
+          {
+            "deadline_ns": 838563820664090,
+            "frame_id": 36,
+            "observed_ns": 838563754077708,
+            "offered_index": 36,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563753997434
+          },
+          {
+            "deadline_ns": 838563824830756,
+            "frame_id": 37,
+            "observed_ns": 838563758245500,
+            "offered_index": 37,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563758164100
+          },
+          {
+            "deadline_ns": 838563828997422,
+            "frame_id": 38,
+            "observed_ns": 838563762411083,
+            "offered_index": 38,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563762330766
+          },
+          {
+            "deadline_ns": 838563833164088,
+            "frame_id": 39,
+            "observed_ns": 838563766581875,
+            "offered_index": 39,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563766497432
+          },
+          {
+            "deadline_ns": 838563837330754,
+            "frame_id": 40,
+            "observed_ns": 838563770744541,
+            "offered_index": 40,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563770664098
+          },
+          {
+            "deadline_ns": 838563841497420,
+            "frame_id": 41,
+            "observed_ns": 838563774913375,
+            "offered_index": 41,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563774830764
+          },
+          {
+            "deadline_ns": 838563845664086,
+            "frame_id": 42,
+            "observed_ns": 838563779081500,
+            "offered_index": 42,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563778997430
+          },
+          {
+            "deadline_ns": 838563849830752,
+            "frame_id": 43,
+            "observed_ns": 838563783249750,
+            "offered_index": 43,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563783164096
+          },
+          {
+            "deadline_ns": 838563853997418,
+            "frame_id": 44,
+            "observed_ns": 838563787410958,
+            "offered_index": 44,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563787330762
+          },
+          {
+            "deadline_ns": 838563858164084,
+            "frame_id": 45,
+            "observed_ns": 838563791577958,
+            "offered_index": 45,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563791497428
+          },
+          {
+            "deadline_ns": 838563862330750,
+            "frame_id": 46,
+            "observed_ns": 838563795745750,
+            "offered_index": 46,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563795664094
+          },
+          {
+            "deadline_ns": 838563866497416,
+            "frame_id": 47,
+            "observed_ns": 838563799914333,
+            "offered_index": 47,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563799830760
+          },
+          {
+            "deadline_ns": 838563870664082,
+            "frame_id": 48,
+            "observed_ns": 838563804078250,
+            "offered_index": 48,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563803997426
+          },
+          {
+            "deadline_ns": 838563874830748,
+            "frame_id": 49,
+            "observed_ns": 838563808246125,
+            "offered_index": 49,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563808164092
+          },
+          {
+            "deadline_ns": 838563878997414,
+            "frame_id": 50,
+            "observed_ns": 838563812414541,
+            "offered_index": 50,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563812330758
+          },
+          {
+            "deadline_ns": 838563883164080,
+            "frame_id": 51,
+            "observed_ns": 838563816580541,
+            "offered_index": 51,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563816497424
+          },
+          {
+            "deadline_ns": 838563887330746,
+            "frame_id": 52,
+            "observed_ns": 838563820745250,
+            "offered_index": 52,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563820664090
+          },
+          {
+            "deadline_ns": 838563891497412,
+            "frame_id": 53,
+            "observed_ns": 838563824914458,
+            "offered_index": 53,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563824830756
+          },
+          {
+            "deadline_ns": 838563895664078,
+            "frame_id": 54,
+            "observed_ns": 838563829078958,
+            "offered_index": 54,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563828997422
+          },
+          {
+            "deadline_ns": 838563899830744,
+            "frame_id": 55,
+            "observed_ns": 838563833248083,
+            "offered_index": 55,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563833164088
+          },
+          {
+            "deadline_ns": 838563903997410,
+            "frame_id": 56,
+            "observed_ns": 838563837411583,
+            "offered_index": 56,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563837330754
+          },
+          {
+            "deadline_ns": 838563908164076,
+            "frame_id": 57,
+            "observed_ns": 838563841579416,
+            "offered_index": 57,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563841497420
+          },
+          {
+            "deadline_ns": 838563912330742,
+            "frame_id": 58,
+            "observed_ns": 838563845745458,
+            "offered_index": 58,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563845664086
+          },
+          {
+            "deadline_ns": 838563916497408,
+            "frame_id": 59,
+            "observed_ns": 838563849915250,
+            "offered_index": 59,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838563849830752
+          }
+        ],
+        "scheduler_lateness_ns": {
+          "count": 480,
+          "max": 73961710,
+          "mean": 2447520.627083333,
+          "median": 187756,
+          "min": 730,
+          "p95": 15751389.69999989,
+          "p99": 59612919.74999996
+        },
+        "scheduler_lateness_population": "all offered arrivals, including cold, warmup and losses",
+        "show_existing": 0,
+        "software_reference_max_code_error": null,
+        "software_reference_mean_code_error": null,
+        "software_reference_samples": 0,
+        "software_reference_tolerance": 8,
+        "startup_first_output_ns": 258114625,
+        "startup_grace_ms": 0,
+        "startup_policy": "fixed-initial-deadline-v1",
+        "status": "FAIL",
+        "steady_excludes_first_output_each_generation": true,
+        "submission_call_ns": {
+          "count": 360,
+          "max": 4701500,
+          "mean": 642519.1055555556,
+          "median": 642042,
+          "min": 135209,
+          "p95": 1031658.0000000003,
+          "p99": 1692186.810000001
+        },
+        "submitted": 422,
+        "thermal_state": 0,
+        "trace_overflow": 0,
+        "variant": "hdr10",
+        "vt_submit_to_callback_ns": {
+          "count": 360,
+          "max": 18684958,
+          "mean": 3119197.9166666665,
+          "median": 3000396,
+          "min": 1174666,
+          "p95": 3756913.95,
+          "p99": 14857965.120000007
+        },
+        "warmup_frames": 120,
+        "width": 3440
+      },
+      "derived": {
+        "moonlight_decode_time": {
+          "native_vt": {
+            "sample_count": 420,
+            "total_ns": 1284788748,
+            "mean_ms": 3.0590208285714287
+          },
+          "native_submission": {
+            "sample_count": 420,
+            "total_ns": 276733085,
+            "mean_ms": 0.6588882976190475
+          },
+          "public_queue_proxy": {
+            "sample_count": 420,
+            "total_ns": 1730950338,
+            "mean_ms": 4.121310328571429
+          }
+        },
+        "public_complete_au_to_output_ns": {
+          "count": 360,
+          "mean": 4301762.513888889,
+          "median": 3294268.0,
+          "p95": 7551545.300000031,
+          "p99": 35234226.01000005,
+          "min": 1250964,
+          "max": 38348080
+        },
+        "public_output_boundary": "Native public completion callback entry in harness",
+        "cold_public_complete_au_to_output_ns": {
+          "count": 1,
+          "mean": 8114665.0,
+          "median": 8114665.0,
+          "p95": 8114665.0,
+          "p99": 8114665.0,
+          "min": 8114665,
+          "max": 8114665
+        },
+        "cold_population": "First successful displayed output in each generation; may follow a cancelled initial submission",
+        "initial_submission_frame_id": 0,
+        "initial_submission_status": 4,
+        "initial_submission_terminal_ns": 80812583,
+        "submit_entry_to_vt_submit_ns": {
+          "count": 360,
+          "mean": 69646.18333333333,
+          "median": 51520.5,
+          "p95": 155616.70000000004,
+          "p99": 392775.16000000347,
+          "min": 7208,
+          "max": 1439584
+        },
+        "post_parser_to_vt_submit_ns": {
+          "count": 360,
+          "mean": 11340.544444444444,
+          "median": 9833.0,
+          "p95": 21458.0,
+          "p99": 48933.97000000027,
+          "min": 1750,
+          "max": 93417
+        },
+        "derivation": "Supplemental distributions from raw CSV; warmup and first output per generation excluded from steady distributions. Moonlight arithmetic means include all eligible outputs. Original totals and internal VT callback endpoint remain unchanged."
+      },
+      "first_output_ms": 258.114625,
+      "first_output_origin": "initial scheduled start",
+      "startup": {
+        "policy": "fixed-initial-deadline-v1",
+        "startup_grace_ms": 0,
+        "queue_budget_ms": 66.666656,
+        "scheduled_start_ns": 838563603997458,
+        "first_output_ns": 258114625,
+        "initial_setup_ns": 62293250,
+        "scheduler_drop_counts": {
+          "arrival_deadline": 2,
+          "capacity_deadline": 1,
+          "awaiting_random_access": 55,
+          "injected_drop": 0
+        },
+        "first_output_max_ms": 250.0,
+        "first_output_sla_passed": false
+      },
+      "metrics": {
+        "vt_median_ms": 3.000396,
+        "vt_p95_ms": 3.7569139500000004,
+        "vt_p99_ms": 14.857965120000006,
+        "public_median_ms": 3.294268,
+        "public_p95_ms": 7.551545300000031,
+        "public_p99_ms": 35.23422601000005
+      },
+      "thermal_nominal": true,
+      "errors": [
+        "native FAIL: accounting/hardware gate failed",
+        "process FINISHED, exit 1",
+        "not every offered frame produced an output",
+        "scheduler_drops=58",
+        "failed_or_cancelled_or_dropped=2",
+        "expected_display_mismatches=2",
+        "resets=3",
+        "CSV contains a non-output terminal completion",
+        "first output exceeds configured startup SLA or no output was delivered",
+        "delivered frame rate below configured ratio"
+      ],
+      "passed": false,
+      "settings": {
+        "width": 3440,
+        "height": 1440,
+        "fps": 240,
+        "codec": "hevc",
+        "dynamic_range": "hdr10",
+        "bitrate_mbps": 350.0,
+        "gop": 60,
+        "frames": 240,
+        "fixture": "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/results/bitrate-matrix-paired-full/fixtures/0ca74e31a50b4e802d9f8de390f48a626b176a31b9b4a86092bfa39414c6341c/manifest.json",
+        "decoder": {
+          "inflight": 2,
+          "queue_depth": 16,
+          "power": -1,
+          "consumer_delay_ms": 0,
+          "jitter_us": 0,
+          "seed": 7,
+          "startup_grace_ms": 0
+        },
+        "name": "ultrawide-3440x1440p240-hevc-hdr10-350mbps",
+        "fixture_info": {
+          "manifest_sha256": "7e1836ebfee223b7cbafa8aece64a16a369b30cd76dad7078e94514843151c0a",
+          "payload_sha256": "f31898641673a99dee7815db33a8d05230661a08320bd0c2093693a985ba69ac",
+          "payload_file": "payload.bin",
+          "frames": 240,
+          "requested_bitrate_mbps": 350,
+          "measured_bitrate_mbps": 297.753136,
+          "generator": {
+            "bitrate_measurement": "encoded payload bytes including codec headers and HDR metadata divided by generated presentation duration; no transport overhead",
+            "content_profile": "seeded-noise-frame-id-v1",
+            "content_seed": 1835103793,
+            "encoder": "Apple VTCompressionSession HEVC (OS-versioned)",
+            "encoder_settings": {
+              "allow_frame_reordering": false,
+              "average_bitrate_bps": 350000000,
+              "data_rate_limits": [
+                52500000,
+                1
+              ],
+              "expected_frame_rate": 240,
+              "hardware_required": true,
+              "max_key_frame_interval": 60,
+              "profile": "Main10_AutoLevel",
+              "realtime": true
+            },
+            "inter_count": 236,
+            "low_delay_verified": true,
+            "measured_bitrate_bps": 297753136,
+            "measured_bitrate_mbps": 297.753136,
+            "name": "mav-fixture",
+            "os": "Version 26.6.2 (Build 25G83)",
+            "pattern": "seeded-noise-software-reference-v1",
+            "random_access_count": 4,
+            "rate_control": "average_bitrate",
+            "requested_bitrate_mbps": 350,
+            "settings": {
+              "bitrate_mbps": 350,
+              "chroma": "420",
+              "codec": "hevc",
+              "fps": 240,
+              "frames": 240,
+              "gop": 60,
+              "height": 1440,
+              "variant": "hdr10",
+              "width": 3440
+            },
+            "target_bitrate_bps": 350000000
+          }
+        }
+      }
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-hdr10-350mbps",
+      "setting": "candidate",
+      "phase": "timed",
+      "repetition": 1,
+      "command": [
+        "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/build-startup-release/mav-replay",
+        "--fixture",
+        "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/results/bitrate-matrix-paired-full/fixtures/0ca74e31a50b4e802d9f8de390f48a626b176a31b9b4a86092bfa39414c6341c/manifest.json",
+        "--output",
+        "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/results/hevc-startup-controls/hdr10-350mbps-250ms-1",
+        "--mode",
+        "paced",
+        "--fps",
+        "240",
+        "--loops",
+        "2",
+        "--loop-mode",
+        "continuous",
+        "--warmup",
+        "120",
+        "--inflight",
+        "2",
+        "--queue-depth",
+        "16",
+        "--startup-grace-ms",
+        "250",
+        "--power",
+        "-1",
+        "--seed",
+        "7",
+        "--jitter-us",
+        "0",
+        "--consumer-delay-ms",
+        "0"
+      ],
+      "state": "FINISHED",
+      "exit_code": 0,
+      "expected_offered": 480,
+      "started_at": "2026-09-10T00:35:21.711062+00:00",
+      "result_file": "hdr10-350mbps-250ms-1.json",
+      "result_file_sha256": "15ba7698c582d0d27016016973f608d7efd55212c34c39bbfb5fc783fe74e138",
+      "csv_file": "hdr10-350mbps-250ms-1.csv",
+      "csv_file_sha256": "0da03bc98c0b4b3739867e80c355fa183d57810ed34fe77433531b1b81c88ac3",
+      "log_file": "hdr10-350mbps-250ms-1.log",
+      "log_file_sha256": "01960d746390bedac419b0fde7687deac81a393b32baa6c8a9334d837dfe6d13",
+      "native": {
+        "actual_offered_fps": 240.14488733531067,
+        "admission_fps": 240.14488733531067,
+        "backpressure": 108,
+        "bit_depth": 10,
+        "callback_to_client_handoff_ns": {
+          "count": 360,
+          "max": 101292,
+          "mean": 19037.969444444443,
+          "median": 17438,
+          "min": 9917,
+          "p95": 30573.250000000007,
+          "p99": 45181.03000000008
+        },
+        "chroma": "420",
+        "clock": "mav_monotonic_time_ns CLOCK_UPTIME_RAW",
+        "codec": "hevc",
+        "cold_generation_vt_submit_to_callback_ns": {
+          "count": 1,
+          "max": 16977667,
+          "mean": 16977667,
+          "median": 16977667,
+          "min": 16977667,
+          "p95": 16977667,
+          "p99": 16977667
+        },
+        "cold_vt_submit_to_callback_ns": 16977667,
+        "complete_au_to_output_ns": {
+          "count": 360,
+          "max": 32100080,
+          "mean": 4095291.436111111,
+          "median": 3158699.5,
+          "min": 2070343,
+          "p95": 7811332.450000005,
+          "p99": 29025322.000000045
+        },
+        "completed": 480,
+        "compressed_copy_bytes": 74437604,
+        "compressed_copy_count": 480,
+        "consumer_delay_semantics": "bounded 32-buffer validation worker delayed per output",
+        "consumer_retention_delay_ms": 0,
+        "correctness_sink": false,
+        "decoded_fps": 240.14488733531067,
+        "displayed_outputs": 480,
+        "expected_display_mismatches": 0,
+        "experiment_busy_wait_wall_ns": 0,
+        "experiment_cpu_percent_one_core": 11.108151196229958,
+        "experiment_cpu_window_seconds": 2.018796792,
+        "experiment_pacing_semantics": "Original absolute arrival deadlines; sleep until bounded final window then poll the monotonic clock; includes busy-wait CPU cost",
+        "experiment_process_cpu_seconds": 0.224251,
+        "experiment_spin_us": 0,
+        "failed_or_cancelled_or_dropped": 0,
+        "fixture_sha256": "f31898641673a99dee7815db33a8d05230661a08320bd0c2093693a985ba69ac",
+        "hardware_validated": 1,
+        "height": 1440,
+        "inflight": 2,
+        "initial_setup_ns": 58352458,
+        "internal_samples": 480,
+        "iosurface_metal_verified": false,
+        "loop_mode": "continuous",
+        "loops": 2,
+        "manifest_fallback_color_valid": 27,
+        "mode": "paced",
+        "model": "Mac15,3",
+        "no_display": 0,
+        "offered": 480,
+        "os": "Version 26.6.2 (Build 25G83)",
+        "peak_outstanding": 2,
+        "pixel_format": 2016686640,
+        "power_effective": -1,
+        "power_requested": -1,
+        "power_state": null,
+        "power_status": -12900,
+        "preparation_ns": {
+          "count": 360,
+          "max": 1087584,
+          "mean": 55705.680555555555,
+          "median": 39291.5,
+          "min": 8583,
+          "p95": 99430.6,
+          "p99": 474165.0000000008
+        },
+        "presentation_ns": null,
+        "queue_depth": 16,
+        "queue_wait_ns": {
+          "count": 360,
+          "max": 23802748,
+          "mean": 860883.5666666667,
+          "median": 216805.5,
+          "min": 11296,
+          "p95": 1735622.4000000074,
+          "p99": 20735487.840000045
+        },
+        "realtime_effective": 1,
+        "realtime_status": 0,
+        "rejected": 0,
+        "render_ns": null,
+        "requested_fps": 240,
+        "resets": 0,
+        "retained_after_destroy_verified": false,
+        "retained_peak": 0,
+        "run_seconds": 1.998793334,
+        "scheduled_start_ns": 838565700033166,
+        "scheduler_drop_counts": {
+          "arrival_deadline": 0,
+          "awaiting_random_access": 0,
+          "capacity_deadline": 0,
+          "injected_drop": 0
+        },
+        "scheduler_drops": 0,
+        "scheduler_events": [],
+        "scheduler_lateness_ns": {
+          "count": 480,
+          "max": 78319547,
+          "mean": 3808379.2104166667,
+          "median": 210671,
+          "min": 7004,
+          "p95": 27717583.299999848,
+          "p99": 73486530.22999997
+        },
+        "scheduler_lateness_population": "all offered arrivals, including cold, warmup and losses",
+        "show_existing": 0,
+        "software_reference_max_code_error": null,
+        "software_reference_mean_code_error": null,
+        "software_reference_samples": 0,
+        "software_reference_tolerance": 8,
+        "startup_first_output_ns": 76057584,
+        "startup_grace_ms": 250,
+        "startup_policy": "fixed-initial-deadline-v1",
+        "status": "PASS",
+        "steady_excludes_first_output_each_generation": true,
+        "submission_call_ns": {
+          "count": 360,
+          "max": 5241792,
+          "mean": 708609.7972222222,
+          "median": 585458,
+          "min": 332000,
+          "p95": 1342073.25,
+          "p99": 2976098.97
+        },
+        "submitted": 480,
+        "thermal_state": 0,
+        "trace_overflow": 0,
+        "variant": "hdr10",
+        "vt_submit_to_callback_ns": {
+          "count": 360,
+          "max": 18813041,
+          "mean": 3164152.066666667,
+          "median": 2879708.5,
+          "min": 1848250,
+          "p95": 4440763.95,
+          "p99": 14015681.25000002
+        },
+        "warmup_frames": 120,
+        "width": 3440
+      },
+      "derived": {
+        "moonlight_decode_time": {
+          "native_vt": {
+            "sample_count": 480,
+            "total_ns": 1500848118,
+            "mean_ms": 3.1267669125
+          },
+          "native_submission": {
+            "sample_count": 480,
+            "total_ns": 308037022,
+            "mean_ms": 0.6417437958333333
+          },
+          "public_queue_proxy": {
+            "sample_count": 480,
+            "total_ns": 3540438759,
+            "mean_ms": 7.3759140812499995
+          }
+        },
+        "public_complete_au_to_output_ns": {
+          "count": 360,
+          "mean": 4114329.4055555556,
+          "median": 3178214.0,
+          "p95": 7843687.250000005,
+          "p99": 29054022.120000046,
+          "min": 2082343,
+          "max": 32125205
+        },
+        "public_output_boundary": "Native public completion callback entry in harness",
+        "cold_public_complete_au_to_output_ns": {
+          "count": 1,
+          "mean": 76057584.0,
+          "median": 76057584.0,
+          "p95": 76057584.0,
+          "p99": 76057584.0,
+          "min": 76057584,
+          "max": 76057584
+        },
+        "cold_population": "First successful displayed output in each generation; may follow a cancelled initial submission",
+        "initial_submission_frame_id": 0,
+        "initial_submission_status": 0,
+        "initial_submission_terminal_ns": 76057584,
+        "submit_entry_to_vt_submit_ns": {
+          "count": 360,
+          "mean": 70255.80277777778,
+          "median": 52937.5,
+          "p95": 119362.80000000002,
+          "p99": 487671.7800000007,
+          "min": 13875,
+          "max": 1100792
+        },
+        "post_parser_to_vt_submit_ns": {
+          "count": 360,
+          "mean": 14550.122222222222,
+          "median": 12646.0,
+          "p95": 24412.500000000007,
+          "p99": 45830.81000000008,
+          "min": 5292,
+          "max": 174291
+        },
+        "derivation": "Supplemental distributions from raw CSV; warmup and first output per generation excluded from steady distributions. Moonlight arithmetic means include all eligible outputs. Original totals and internal VT callback endpoint remain unchanged."
+      },
+      "first_output_ms": 76.057584,
+      "first_output_origin": "initial scheduled start",
+      "startup": {
+        "policy": "fixed-initial-deadline-v1",
+        "startup_grace_ms": 250,
+        "queue_budget_ms": 66.666656,
+        "scheduled_start_ns": 838565700033166,
+        "first_output_ns": 76057584,
+        "initial_setup_ns": 58352458,
+        "scheduler_drop_counts": {
+          "arrival_deadline": 0,
+          "capacity_deadline": 0,
+          "awaiting_random_access": 0,
+          "injected_drop": 0
+        },
+        "first_output_max_ms": 250.0,
+        "first_output_sla_passed": true
+      },
+      "metrics": {
+        "vt_median_ms": 2.8797085,
+        "vt_p95_ms": 4.44076395,
+        "vt_p99_ms": 14.01568125000002,
+        "public_median_ms": 3.178214,
+        "public_p95_ms": 7.843687250000005,
+        "public_p99_ms": 29.054022120000045
+      },
+      "thermal_nominal": true,
+      "errors": [],
+      "passed": true,
+      "settings": {
+        "width": 3440,
+        "height": 1440,
+        "fps": 240,
+        "codec": "hevc",
+        "dynamic_range": "hdr10",
+        "bitrate_mbps": 350.0,
+        "gop": 60,
+        "frames": 240,
+        "fixture": "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/results/bitrate-matrix-paired-full/fixtures/0ca74e31a50b4e802d9f8de390f48a626b176a31b9b4a86092bfa39414c6341c/manifest.json",
+        "decoder": {
+          "inflight": 2,
+          "queue_depth": 16,
+          "power": -1,
+          "consumer_delay_ms": 0,
+          "jitter_us": 0,
+          "seed": 7,
+          "startup_grace_ms": 250
+        },
+        "name": "ultrawide-3440x1440p240-hevc-hdr10-350mbps",
+        "fixture_info": {
+          "manifest_sha256": "7e1836ebfee223b7cbafa8aece64a16a369b30cd76dad7078e94514843151c0a",
+          "payload_sha256": "f31898641673a99dee7815db33a8d05230661a08320bd0c2093693a985ba69ac",
+          "payload_file": "payload.bin",
+          "frames": 240,
+          "requested_bitrate_mbps": 350,
+          "measured_bitrate_mbps": 297.753136,
+          "generator": {
+            "bitrate_measurement": "encoded payload bytes including codec headers and HDR metadata divided by generated presentation duration; no transport overhead",
+            "content_profile": "seeded-noise-frame-id-v1",
+            "content_seed": 1835103793,
+            "encoder": "Apple VTCompressionSession HEVC (OS-versioned)",
+            "encoder_settings": {
+              "allow_frame_reordering": false,
+              "average_bitrate_bps": 350000000,
+              "data_rate_limits": [
+                52500000,
+                1
+              ],
+              "expected_frame_rate": 240,
+              "hardware_required": true,
+              "max_key_frame_interval": 60,
+              "profile": "Main10_AutoLevel",
+              "realtime": true
+            },
+            "inter_count": 236,
+            "low_delay_verified": true,
+            "measured_bitrate_bps": 297753136,
+            "measured_bitrate_mbps": 297.753136,
+            "name": "mav-fixture",
+            "os": "Version 26.6.2 (Build 25G83)",
+            "pattern": "seeded-noise-software-reference-v1",
+            "random_access_count": 4,
+            "rate_control": "average_bitrate",
+            "requested_bitrate_mbps": 350,
+            "settings": {
+              "bitrate_mbps": 350,
+              "chroma": "420",
+              "codec": "hevc",
+              "fps": 240,
+              "frames": 240,
+              "gop": 60,
+              "height": 1440,
+              "variant": "hdr10",
+              "width": 3440
+            },
+            "target_bitrate_bps": 350000000
+          }
+        }
+      }
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-hdr10-350mbps",
+      "setting": "candidate",
+      "phase": "timed",
+      "repetition": 2,
+      "command": [
+        "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/build-startup-release/mav-replay",
+        "--fixture",
+        "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/results/bitrate-matrix-paired-full/fixtures/0ca74e31a50b4e802d9f8de390f48a626b176a31b9b4a86092bfa39414c6341c/manifest.json",
+        "--output",
+        "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/results/hevc-startup-controls/hdr10-350mbps-250ms-2",
+        "--mode",
+        "paced",
+        "--fps",
+        "240",
+        "--loops",
+        "2",
+        "--loop-mode",
+        "continuous",
+        "--warmup",
+        "120",
+        "--inflight",
+        "2",
+        "--queue-depth",
+        "16",
+        "--startup-grace-ms",
+        "250",
+        "--power",
+        "-1",
+        "--seed",
+        "7",
+        "--jitter-us",
+        "0",
+        "--consumer-delay-ms",
+        "0"
+      ],
+      "state": "FINISHED",
+      "exit_code": 0,
+      "expected_offered": 480,
+      "started_at": "2026-09-10T00:35:23.801171+00:00",
+      "result_file": "hdr10-350mbps-250ms-2.json",
+      "result_file_sha256": "693a131338614f9a387e457be5d2b5d0aec7fd29a6b68ac115b59ddbaea98b2a",
+      "csv_file": "hdr10-350mbps-250ms-2.csv",
+      "csv_file_sha256": "5e441e0c7699917da3976acfa9ec3f92f1d3390cab60d795b82915825b8f9e18",
+      "log_file": "hdr10-350mbps-250ms-2.log",
+      "log_file_sha256": "65c8b7170f063cd4943ffe14efab19cf28a39355fcbe8f221cbfb1e240bd3169",
+      "native": {
+        "actual_offered_fps": 240.06048023723977,
+        "admission_fps": 240.06048023723977,
+        "backpressure": 111,
+        "bit_depth": 10,
+        "callback_to_client_handoff_ns": {
+          "count": 360,
+          "max": 59000,
+          "mean": 19380.78888888889,
+          "median": 17208,
+          "min": 9708,
+          "p95": 30835.100000000002,
+          "p99": 45645.47000000003
+        },
+        "chroma": "420",
+        "clock": "mav_monotonic_time_ns CLOCK_UPTIME_RAW",
+        "codec": "hevc",
+        "cold_generation_vt_submit_to_callback_ns": {
+          "count": 1,
+          "max": 17306084,
+          "mean": 17306084,
+          "median": 17306084,
+          "min": 17306084,
+          "p95": 17306084,
+          "p99": 17306084
+        },
+        "cold_vt_submit_to_callback_ns": 17306084,
+        "complete_au_to_output_ns": {
+          "count": 360,
+          "max": 32684664,
+          "mean": 4196266.536111111,
+          "median": 3303415.5,
+          "min": 1552256,
+          "p95": 7705891.700000008,
+          "p99": 29426511.780000042
+        },
+        "completed": 480,
+        "compressed_copy_bytes": 74437604,
+        "compressed_copy_count": 480,
+        "consumer_delay_semantics": "bounded 32-buffer validation worker delayed per output",
+        "consumer_retention_delay_ms": 0,
+        "correctness_sink": false,
+        "decoded_fps": 240.06048023723977,
+        "displayed_outputs": 480,
+        "expected_display_mismatches": 0,
+        "experiment_busy_wait_wall_ns": 0,
+        "experiment_cpu_percent_one_core": 12.099120717686793,
+        "experiment_cpu_window_seconds": 2.019502125,
+        "experiment_pacing_semantics": "Original absolute arrival deadlines; sleep until bounded final window then poll the monotonic clock; includes busy-wait CPU cost",
+        "experiment_process_cpu_seconds": 0.244342,
+        "experiment_spin_us": 0,
+        "failed_or_cancelled_or_dropped": 0,
+        "fixture_sha256": "f31898641673a99dee7815db33a8d05230661a08320bd0c2093693a985ba69ac",
+        "hardware_validated": 1,
+        "height": 1440,
+        "inflight": 2,
+        "initial_setup_ns": 62638166,
+        "internal_samples": 480,
+        "iosurface_metal_verified": false,
+        "loop_mode": "continuous",
+        "loops": 2,
+        "manifest_fallback_color_valid": 27,
+        "mode": "paced",
+        "model": "Mac15,3",
+        "no_display": 0,
+        "offered": 480,
+        "os": "Version 26.6.2 (Build 25G83)",
+        "peak_outstanding": 2,
+        "pixel_format": 2016686640,
+        "power_effective": -1,
+        "power_requested": -1,
+        "power_state": null,
+        "power_status": -12900,
+        "preparation_ns": {
+          "count": 360,
+          "max": 892375,
+          "mean": 64464.822222222225,
+          "median": 42562.5,
+          "min": 6625,
+          "p95": 99179.50000000006,
+          "p99": 753184.5600000003
+        },
+        "presentation_ns": null,
+        "queue_depth": 16,
+        "queue_wait_ns": {
+          "count": 360,
+          "max": 24379957,
+          "mean": 857255.7833333333,
+          "median": 200831,
+          "min": 15096,
+          "p95": 1700284.7000000044,
+          "p99": 21125755.280000042
+        },
+        "realtime_effective": 1,
+        "realtime_status": 0,
+        "rejected": 0,
+        "render_ns": null,
+        "requested_fps": 240,
+        "resets": 0,
+        "retained_after_destroy_verified": false,
+        "retained_peak": 0,
+        "run_seconds": 1.999496125,
+        "scheduled_start_ns": 838567797077291,
+        "scheduler_drop_counts": {
+          "arrival_deadline": 0,
+          "awaiting_random_access": 0,
+          "capacity_deadline": 0,
+          "injected_drop": 0
+        },
+        "scheduler_drops": 0,
+        "scheduler_events": [],
+        "scheduler_lateness_ns": {
+          "count": 480,
+          "max": 82579006,
+          "mean": 4104667.560416667,
+          "median": 197687.5,
+          "min": 11638,
+          "p95": 32009979.799999848,
+          "p99": 77803672.22999997
+        },
+        "scheduler_lateness_population": "all offered arrivals, including cold, warmup and losses",
+        "show_existing": 0,
+        "software_reference_max_code_error": null,
+        "software_reference_mean_code_error": null,
+        "software_reference_samples": 0,
+        "software_reference_tolerance": 8,
+        "startup_first_output_ns": 80452834,
+        "startup_grace_ms": 250,
+        "startup_policy": "fixed-initial-deadline-v1",
+        "status": "PASS",
+        "steady_excludes_first_output_each_generation": true,
+        "submission_call_ns": {
+          "count": 360,
+          "max": 3952542,
+          "mean": 731430.8944444444,
+          "median": 667124.5,
+          "min": 265542,
+          "p95": 1267841.9500000004,
+          "p99": 2313019.2800000045
+        },
+        "submitted": 480,
+        "thermal_state": 0,
+        "trace_overflow": 0,
+        "variant": "hdr10",
+        "vt_submit_to_callback_ns": {
+          "count": 360,
+          "max": 19254417,
+          "mean": 3261672.2055555554,
+          "median": 3036041.5,
+          "min": 1327583,
+          "p95": 4835948.200000001,
+          "p99": 14277963.250000007
+        },
+        "warmup_frames": 120,
+        "width": 3440
+      },
+      "derived": {
+        "moonlight_decode_time": {
+          "native_vt": {
+            "sample_count": 480,
+            "total_ns": 1536937984,
+            "mean_ms": 3.2019541333333335
+          },
+          "native_submission": {
+            "sample_count": 480,
+            "total_ns": 315980492,
+            "mean_ms": 0.6582926916666666
+          },
+          "public_queue_proxy": {
+            "sample_count": 480,
+            "total_ns": 3725397128,
+            "mean_ms": 7.761244016666667
+          }
+        },
+        "public_complete_au_to_output_ns": {
+          "count": 360,
+          "mean": 4215647.325,
+          "median": 3328577.5,
+          "p95": 7729344.100000007,
+          "p99": 29448327.00000004,
+          "min": 1564131,
+          "max": 32708664
+        },
+        "public_output_boundary": "Native public completion callback entry in harness",
+        "cold_public_complete_au_to_output_ns": {
+          "count": 1,
+          "mean": 80452834.0,
+          "median": 80452834.0,
+          "p95": 80452834.0,
+          "p99": 80452834.0,
+          "min": 80452834,
+          "max": 80452834
+        },
+        "cold_population": "First successful displayed output in each generation; may follow a cancelled initial submission",
+        "initial_submission_frame_id": 0,
+        "initial_submission_status": 0,
+        "initial_submission_terminal_ns": 80452834,
+        "submit_entry_to_vt_submit_ns": {
+          "count": 360,
+          "mean": 77338.54722222222,
+          "median": 56562.0,
+          "p95": 118575.00000000007,
+          "p99": 768153.1900000003,
+          "min": 12542,
+          "max": 910500
+        },
+        "post_parser_to_vt_submit_ns": {
+          "count": 360,
+          "mean": 12873.725,
+          "median": 11083.5,
+          "p95": 21635.4,
+          "p99": 48085.81000000053,
+          "min": 3542,
+          "max": 188417
+        },
+        "derivation": "Supplemental distributions from raw CSV; warmup and first output per generation excluded from steady distributions. Moonlight arithmetic means include all eligible outputs. Original totals and internal VT callback endpoint remain unchanged."
+      },
+      "first_output_ms": 80.452834,
+      "first_output_origin": "initial scheduled start",
+      "startup": {
+        "policy": "fixed-initial-deadline-v1",
+        "startup_grace_ms": 250,
+        "queue_budget_ms": 66.666656,
+        "scheduled_start_ns": 838567797077291,
+        "first_output_ns": 80452834,
+        "initial_setup_ns": 62638166,
+        "scheduler_drop_counts": {
+          "arrival_deadline": 0,
+          "capacity_deadline": 0,
+          "awaiting_random_access": 0,
+          "injected_drop": 0
+        },
+        "first_output_max_ms": 250.0,
+        "first_output_sla_passed": true
+      },
+      "metrics": {
+        "vt_median_ms": 3.0360415,
+        "vt_p95_ms": 4.835948200000001,
+        "vt_p99_ms": 14.277963250000008,
+        "public_median_ms": 3.3285775,
+        "public_p95_ms": 7.729344100000007,
+        "public_p99_ms": 29.44832700000004
+      },
+      "thermal_nominal": true,
+      "errors": [],
+      "passed": true,
+      "settings": {
+        "width": 3440,
+        "height": 1440,
+        "fps": 240,
+        "codec": "hevc",
+        "dynamic_range": "hdr10",
+        "bitrate_mbps": 350.0,
+        "gop": 60,
+        "frames": 240,
+        "fixture": "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/results/bitrate-matrix-paired-full/fixtures/0ca74e31a50b4e802d9f8de390f48a626b176a31b9b4a86092bfa39414c6341c/manifest.json",
+        "decoder": {
+          "inflight": 2,
+          "queue_depth": 16,
+          "power": -1,
+          "consumer_delay_ms": 0,
+          "jitter_us": 0,
+          "seed": 7,
+          "startup_grace_ms": 250
+        },
+        "name": "ultrawide-3440x1440p240-hevc-hdr10-350mbps",
+        "fixture_info": {
+          "manifest_sha256": "7e1836ebfee223b7cbafa8aece64a16a369b30cd76dad7078e94514843151c0a",
+          "payload_sha256": "f31898641673a99dee7815db33a8d05230661a08320bd0c2093693a985ba69ac",
+          "payload_file": "payload.bin",
+          "frames": 240,
+          "requested_bitrate_mbps": 350,
+          "measured_bitrate_mbps": 297.753136,
+          "generator": {
+            "bitrate_measurement": "encoded payload bytes including codec headers and HDR metadata divided by generated presentation duration; no transport overhead",
+            "content_profile": "seeded-noise-frame-id-v1",
+            "content_seed": 1835103793,
+            "encoder": "Apple VTCompressionSession HEVC (OS-versioned)",
+            "encoder_settings": {
+              "allow_frame_reordering": false,
+              "average_bitrate_bps": 350000000,
+              "data_rate_limits": [
+                52500000,
+                1
+              ],
+              "expected_frame_rate": 240,
+              "hardware_required": true,
+              "max_key_frame_interval": 60,
+              "profile": "Main10_AutoLevel",
+              "realtime": true
+            },
+            "inter_count": 236,
+            "low_delay_verified": true,
+            "measured_bitrate_bps": 297753136,
+            "measured_bitrate_mbps": 297.753136,
+            "name": "mav-fixture",
+            "os": "Version 26.6.2 (Build 25G83)",
+            "pattern": "seeded-noise-software-reference-v1",
+            "random_access_count": 4,
+            "rate_control": "average_bitrate",
+            "requested_bitrate_mbps": 350,
+            "settings": {
+              "bitrate_mbps": 350,
+              "chroma": "420",
+              "codec": "hevc",
+              "fps": 240,
+              "frames": 240,
+              "gop": 60,
+              "height": 1440,
+              "variant": "hdr10",
+              "width": 3440
+            },
+            "target_bitrate_bps": 350000000
+          }
+        }
+      }
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-hdr10-350mbps",
+      "setting": "candidate",
+      "phase": "timed",
+      "repetition": 2,
+      "command": [
+        "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/build-startup-release/mav-replay",
+        "--fixture",
+        "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/results/bitrate-matrix-paired-full/fixtures/0ca74e31a50b4e802d9f8de390f48a626b176a31b9b4a86092bfa39414c6341c/manifest.json",
+        "--output",
+        "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/results/hevc-startup-controls/hdr10-350mbps-0ms-2",
+        "--mode",
+        "paced",
+        "--fps",
+        "240",
+        "--loops",
+        "2",
+        "--loop-mode",
+        "continuous",
+        "--warmup",
+        "120",
+        "--inflight",
+        "2",
+        "--queue-depth",
+        "16",
+        "--startup-grace-ms",
+        "0",
+        "--power",
+        "-1",
+        "--seed",
+        "7",
+        "--jitter-us",
+        "0",
+        "--consumer-delay-ms",
+        "0"
+      ],
+      "state": "FINISHED",
+      "exit_code": 1,
+      "expected_offered": 480,
+      "started_at": "2026-09-10T00:35:25.902827+00:00",
+      "result_file": "hdr10-350mbps-0ms-2.json",
+      "result_file_sha256": "157b59bc1d5176a8ea0fde0d6fe5b6bce5542cf22b2e82634fc1e39b9ec9e9b7",
+      "csv_file": "hdr10-350mbps-0ms-2.csv",
+      "csv_file_sha256": "008dcbeeeac70f50b95db74a32ad3459ea9876522f2739d76fa0ff1eb007aee4",
+      "log_file": "hdr10-350mbps-0ms-2.log",
+      "log_file_sha256": "1950c2fadcbc9e1aa08b353c806c49177d64d465a613bf66d996d6813d1fd73b",
+      "native": {
+        "actual_offered_fps": 240.09238058537022,
+        "admission_fps": 211.08121793130465,
+        "backpressure": 54,
+        "bit_depth": 10,
+        "callback_to_client_handoff_ns": {
+          "count": 360,
+          "max": 55167,
+          "mean": 20993.425,
+          "median": 19354.5,
+          "min": 5917,
+          "p95": 32791.05,
+          "p99": 43086.310000000136
+        },
+        "chroma": "420",
+        "clock": "mav_monotonic_time_ns CLOCK_UPTIME_RAW",
+        "codec": "hevc",
+        "cold_generation_vt_submit_to_callback_ns": {
+          "count": 1,
+          "max": 5960625,
+          "mean": 5960625,
+          "median": 5960625,
+          "min": 5960625,
+          "p95": 5960625,
+          "p99": 5960625
+        },
+        "cold_vt_submit_to_callback_ns": 5960625,
+        "complete_au_to_output_ns": {
+          "count": 360,
+          "max": 30871372,
+          "mean": 4070612.736111111,
+          "median": 3341890,
+          "min": 1964673,
+          "p95": 7318818.200000004,
+          "p99": 27755953.79000005
+        },
+        "completed": 422,
+        "compressed_copy_bytes": 63060011,
+        "compressed_copy_count": 422,
+        "consumer_delay_semantics": "bounded 32-buffer validation worker delayed per output",
+        "consumer_retention_delay_ms": 0,
+        "correctness_sink": false,
+        "decoded_fps": 210.08083301219895,
+        "displayed_outputs": 420,
+        "expected_display_mismatches": 2,
+        "experiment_busy_wait_wall_ns": 0,
+        "experiment_cpu_percent_one_core": 11.259459334980987,
+        "experiment_cpu_window_seconds": 2.0192355,
+        "experiment_pacing_semantics": "Original absolute arrival deadlines; sleep until bounded final window then poll the monotonic clock; includes busy-wait CPU cost",
+        "experiment_process_cpu_seconds": 0.227355,
+        "experiment_spin_us": 0,
+        "failed_or_cancelled_or_dropped": 2,
+        "fixture_sha256": "f31898641673a99dee7815db33a8d05230661a08320bd0c2093693a985ba69ac",
+        "hardware_validated": 1,
+        "height": 1440,
+        "inflight": 2,
+        "initial_setup_ns": 58618917,
+        "internal_samples": 422,
+        "iosurface_metal_verified": false,
+        "loop_mode": "continuous",
+        "loops": 2,
+        "manifest_fallback_color_valid": 27,
+        "mode": "paced",
+        "model": "Mac15,3",
+        "no_display": 0,
+        "offered": 480,
+        "os": "Version 26.6.2 (Build 25G83)",
+        "peak_outstanding": 2,
+        "pixel_format": 2016686640,
+        "power_effective": -1,
+        "power_requested": -1,
+        "power_state": null,
+        "power_status": -12900,
+        "preparation_ns": {
+          "count": 360,
+          "max": 4700041,
+          "mean": 73301.75277777777,
+          "median": 43687,
+          "min": 6667,
+          "p95": 110704.20000000007,
+          "p99": 458177.34000000055
+        },
+        "presentation_ns": null,
+        "queue_depth": 16,
+        "queue_wait_ns": {
+          "count": 360,
+          "max": 22576623,
+          "mean": 758780.5583333333,
+          "median": 199788.5,
+          "min": 15196,
+          "p95": 1290312.7500000002,
+          "p99": 19469667.54000005
+        },
+        "realtime_effective": 1,
+        "realtime_status": 0,
+        "rejected": 0,
+        "render_ns": null,
+        "requested_fps": 240,
+        "resets": 2,
+        "retained_after_destroy_verified": false,
+        "retained_peak": 0,
+        "run_seconds": 1.999230458,
+        "scheduled_start_ns": 838569892717458,
+        "scheduler_drop_counts": {
+          "arrival_deadline": 1,
+          "awaiting_random_access": 56,
+          "capacity_deadline": 1,
+          "injected_drop": 0
+        },
+        "scheduler_drops": 58,
+        "scheduler_events": [
+          {
+            "deadline_ns": 838569967717446,
+            "frame_id": 2,
+            "observed_ns": 838569968309500,
+            "offered_index": 2,
+            "reason": "capacity_deadline",
+            "scheduled_arrival_ns": 838569901050790
+          },
+          {
+            "deadline_ns": 838569971884112,
+            "frame_id": 3,
+            "observed_ns": 838569975749541,
+            "offered_index": 3,
+            "reason": "arrival_deadline",
+            "scheduled_arrival_ns": 838569905217456
+          },
+          {
+            "deadline_ns": 838569976050778,
+            "frame_id": 4,
+            "observed_ns": 838569975750083,
+            "offered_index": 4,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838569909384122
+          },
+          {
+            "deadline_ns": 838569980217444,
+            "frame_id": 5,
+            "observed_ns": 838569975750125,
+            "offered_index": 5,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838569913550788
+          },
+          {
+            "deadline_ns": 838569984384110,
+            "frame_id": 6,
+            "observed_ns": 838569975750208,
+            "offered_index": 6,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838569917717454
+          },
+          {
+            "deadline_ns": 838569988550776,
+            "frame_id": 7,
+            "observed_ns": 838569975750250,
+            "offered_index": 7,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838569921884120
+          },
+          {
+            "deadline_ns": 838569992717442,
+            "frame_id": 8,
+            "observed_ns": 838569975750333,
+            "offered_index": 8,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838569926050786
+          },
+          {
+            "deadline_ns": 838569996884108,
+            "frame_id": 9,
+            "observed_ns": 838569975750375,
+            "offered_index": 9,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838569930217452
+          },
+          {
+            "deadline_ns": 838570001050774,
+            "frame_id": 10,
+            "observed_ns": 838569975750458,
+            "offered_index": 10,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838569934384118
+          },
+          {
+            "deadline_ns": 838570005217440,
+            "frame_id": 11,
+            "observed_ns": 838569975750500,
+            "offered_index": 11,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838569938550784
+          },
+          {
+            "deadline_ns": 838570009384106,
+            "frame_id": 12,
+            "observed_ns": 838569975750541,
+            "offered_index": 12,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838569942717450
+          },
+          {
+            "deadline_ns": 838570013550772,
+            "frame_id": 13,
+            "observed_ns": 838569975750625,
+            "offered_index": 13,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838569946884116
+          },
+          {
+            "deadline_ns": 838570017717438,
+            "frame_id": 14,
+            "observed_ns": 838569975750666,
+            "offered_index": 14,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838569951050782
+          },
+          {
+            "deadline_ns": 838570021884104,
+            "frame_id": 15,
+            "observed_ns": 838569975750708,
+            "offered_index": 15,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838569955217448
+          },
+          {
+            "deadline_ns": 838570026050770,
+            "frame_id": 16,
+            "observed_ns": 838569975750791,
+            "offered_index": 16,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838569959384114
+          },
+          {
+            "deadline_ns": 838570030217436,
+            "frame_id": 17,
+            "observed_ns": 838569975750875,
+            "offered_index": 17,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838569963550780
+          },
+          {
+            "deadline_ns": 838570034384102,
+            "frame_id": 18,
+            "observed_ns": 838569975750916,
+            "offered_index": 18,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838569967717446
+          },
+          {
+            "deadline_ns": 838570038550768,
+            "frame_id": 19,
+            "observed_ns": 838569975750958,
+            "offered_index": 19,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838569971884112
+          },
+          {
+            "deadline_ns": 838570042717434,
+            "frame_id": 20,
+            "observed_ns": 838569976131000,
+            "offered_index": 20,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838569976050778
+          },
+          {
+            "deadline_ns": 838570046884100,
+            "frame_id": 21,
+            "observed_ns": 838569980298333,
+            "offered_index": 21,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838569980217444
+          },
+          {
+            "deadline_ns": 838570051050766,
+            "frame_id": 22,
+            "observed_ns": 838569984471166,
+            "offered_index": 22,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838569984384110
+          },
+          {
+            "deadline_ns": 838570055217432,
+            "frame_id": 23,
+            "observed_ns": 838569988629125,
+            "offered_index": 23,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838569988550776
+          },
+          {
+            "deadline_ns": 838570059384098,
+            "frame_id": 24,
+            "observed_ns": 838569992798541,
+            "offered_index": 24,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838569992717442
+          },
+          {
+            "deadline_ns": 838570063550764,
+            "frame_id": 25,
+            "observed_ns": 838569996972416,
+            "offered_index": 25,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838569996884108
+          },
+          {
+            "deadline_ns": 838570067717430,
+            "frame_id": 26,
+            "observed_ns": 838570001130708,
+            "offered_index": 26,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570001050774
+          },
+          {
+            "deadline_ns": 838570071884096,
+            "frame_id": 27,
+            "observed_ns": 838570005299708,
+            "offered_index": 27,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570005217440
+          },
+          {
+            "deadline_ns": 838570076050762,
+            "frame_id": 28,
+            "observed_ns": 838570009463625,
+            "offered_index": 28,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570009384106
+          },
+          {
+            "deadline_ns": 838570080217428,
+            "frame_id": 29,
+            "observed_ns": 838570013632666,
+            "offered_index": 29,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570013550772
+          },
+          {
+            "deadline_ns": 838570084384094,
+            "frame_id": 30,
+            "observed_ns": 838570017801666,
+            "offered_index": 30,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570017717438
+          },
+          {
+            "deadline_ns": 838570088550760,
+            "frame_id": 31,
+            "observed_ns": 838570021967541,
+            "offered_index": 31,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570021884104
+          },
+          {
+            "deadline_ns": 838570092717426,
+            "frame_id": 32,
+            "observed_ns": 838570026134875,
+            "offered_index": 32,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570026050770
+          },
+          {
+            "deadline_ns": 838570096884092,
+            "frame_id": 33,
+            "observed_ns": 838570030300041,
+            "offered_index": 33,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570030217436
+          },
+          {
+            "deadline_ns": 838570101050758,
+            "frame_id": 34,
+            "observed_ns": 838570034467833,
+            "offered_index": 34,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570034384102
+          },
+          {
+            "deadline_ns": 838570105217424,
+            "frame_id": 35,
+            "observed_ns": 838570038631833,
+            "offered_index": 35,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570038550768
+          },
+          {
+            "deadline_ns": 838570109384090,
+            "frame_id": 36,
+            "observed_ns": 838570042802958,
+            "offered_index": 36,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570042717434
+          },
+          {
+            "deadline_ns": 838570113550756,
+            "frame_id": 37,
+            "observed_ns": 838570046965583,
+            "offered_index": 37,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570046884100
+          },
+          {
+            "deadline_ns": 838570117717422,
+            "frame_id": 38,
+            "observed_ns": 838570051132000,
+            "offered_index": 38,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570051050766
+          },
+          {
+            "deadline_ns": 838570121884088,
+            "frame_id": 39,
+            "observed_ns": 838570055298250,
+            "offered_index": 39,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570055217432
+          },
+          {
+            "deadline_ns": 838570126050754,
+            "frame_id": 40,
+            "observed_ns": 838570059467500,
+            "offered_index": 40,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570059384098
+          },
+          {
+            "deadline_ns": 838570130217420,
+            "frame_id": 41,
+            "observed_ns": 838570063660333,
+            "offered_index": 41,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570063550764
+          },
+          {
+            "deadline_ns": 838570134384086,
+            "frame_id": 42,
+            "observed_ns": 838570067792625,
+            "offered_index": 42,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570067717430
+          },
+          {
+            "deadline_ns": 838570138550752,
+            "frame_id": 43,
+            "observed_ns": 838570071987083,
+            "offered_index": 43,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570071884096
+          },
+          {
+            "deadline_ns": 838570142717418,
+            "frame_id": 44,
+            "observed_ns": 838570076125500,
+            "offered_index": 44,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570076050762
+          },
+          {
+            "deadline_ns": 838570146884084,
+            "frame_id": 45,
+            "observed_ns": 838570080300875,
+            "offered_index": 45,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570080217428
+          },
+          {
+            "deadline_ns": 838570151050750,
+            "frame_id": 46,
+            "observed_ns": 838570084464750,
+            "offered_index": 46,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570084384094
+          },
+          {
+            "deadline_ns": 838570155217416,
+            "frame_id": 47,
+            "observed_ns": 838570088632833,
+            "offered_index": 47,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570088550760
+          },
+          {
+            "deadline_ns": 838570159384082,
+            "frame_id": 48,
+            "observed_ns": 838570092865666,
+            "offered_index": 48,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570092717426
+          },
+          {
+            "deadline_ns": 838570163550748,
+            "frame_id": 49,
+            "observed_ns": 838570096956541,
+            "offered_index": 49,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570096884092
+          },
+          {
+            "deadline_ns": 838570167717414,
+            "frame_id": 50,
+            "observed_ns": 838570101140041,
+            "offered_index": 50,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570101050758
+          },
+          {
+            "deadline_ns": 838570171884080,
+            "frame_id": 51,
+            "observed_ns": 838570105297166,
+            "offered_index": 51,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570105217424
+          },
+          {
+            "deadline_ns": 838570176050746,
+            "frame_id": 52,
+            "observed_ns": 838570109468375,
+            "offered_index": 52,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570109384090
+          },
+          {
+            "deadline_ns": 838570180217412,
+            "frame_id": 53,
+            "observed_ns": 838570113636541,
+            "offered_index": 53,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570113550756
+          },
+          {
+            "deadline_ns": 838570184384078,
+            "frame_id": 54,
+            "observed_ns": 838570117797416,
+            "offered_index": 54,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570117717422
+          },
+          {
+            "deadline_ns": 838570188550744,
+            "frame_id": 55,
+            "observed_ns": 838570121969291,
+            "offered_index": 55,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570121884088
+          },
+          {
+            "deadline_ns": 838570192717410,
+            "frame_id": 56,
+            "observed_ns": 838570126129500,
+            "offered_index": 56,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570126050754
+          },
+          {
+            "deadline_ns": 838570196884076,
+            "frame_id": 57,
+            "observed_ns": 838570130306625,
+            "offered_index": 57,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570130217420
+          },
+          {
+            "deadline_ns": 838570201050742,
+            "frame_id": 58,
+            "observed_ns": 838570134460916,
+            "offered_index": 58,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570134384086
+          },
+          {
+            "deadline_ns": 838570205217408,
+            "frame_id": 59,
+            "observed_ns": 838570138634166,
+            "offered_index": 59,
+            "reason": "awaiting_random_access",
+            "scheduled_arrival_ns": 838570138550752
+          }
+        ],
+        "scheduler_lateness_ns": {
+          "count": 480,
+          "max": 70532085,
+          "mean": 2058190.4020833333,
+          "median": 181656.5,
+          "min": 256,
+          "p95": 11531065.69999999,
+          "p99": 56286979.10999996
+        },
+        "scheduler_lateness_population": "all offered arrivals, including cold, warmup and losses",
+        "show_existing": 0,
+        "software_reference_max_code_error": null,
+        "software_reference_mean_code_error": null,
+        "software_reference_samples": 0,
+        "software_reference_tolerance": 8,
+        "startup_first_output_ns": 259311167,
+        "startup_grace_ms": 0,
+        "startup_policy": "fixed-initial-deadline-v1",
+        "status": "FAIL",
+        "steady_excludes_first_output_each_generation": true,
+        "submission_call_ns": {
+          "count": 359,
+          "max": 2706375,
+          "mean": 680605.495821727,
+          "median": 671167,
+          "min": 166167,
+          "p95": 981496.0999999996,
+          "p99": 1643602.7800000126
+        },
+        "submitted": 422,
+        "thermal_state": 0,
+        "trace_overflow": 0,
+        "variant": "hdr10",
+        "vt_submit_to_callback_ns": {
+          "count": 360,
+          "max": 17456875,
+          "mean": 3222944.561111111,
+          "median": 3051625.5,
+          "min": 1557209,
+          "p95": 3934394.0500000017,
+          "p99": 13612754.310000045
+        },
+        "warmup_frames": 120,
+        "width": 3440
+      },
+      "derived": {
+        "moonlight_decode_time": {
+          "native_vt": {
+            "sample_count": 420,
+            "total_ns": 1321572003,
+            "mean_ms": 3.1466000071428573
+          },
+          "native_submission": {
+            "sample_count": 419,
+            "total_ns": 284344582,
+            "mean_ms": 0.6786266873508353
+          },
+          "public_queue_proxy": {
+            "sample_count": 420,
+            "total_ns": 1653184841,
+            "mean_ms": 3.9361543833333332
+          }
+        },
+        "public_complete_au_to_output_ns": {
+          "count": 360,
+          "mean": 4091606.1611111113,
+          "median": 3360711.0,
+          "p95": 7329938.700000004,
+          "p99": 27779351.29000005,
+          "min": 1977381,
+          "max": 30896497
+        },
+        "public_output_boundary": "Native public completion callback entry in harness",
+        "cold_public_complete_au_to_output_ns": {
+          "count": 1,
+          "mean": 9311207.0,
+          "median": 9311207.0,
+          "p95": 9311207.0,
+          "p99": 9311207.0,
+          "min": 9311207,
+          "max": 9311207
+        },
+        "cold_population": "First successful displayed output in each generation; may follow a cancelled initial submission",
+        "initial_submission_frame_id": 0,
+        "initial_submission_status": 4,
+        "initial_submission_terminal_ns": 76662250,
+        "submit_entry_to_vt_submit_ns": {
+          "count": 360,
+          "mean": 88887.61666666667,
+          "median": 61062.5,
+          "p95": 136010.40000000005,
+          "p99": 461889.5600000006,
+          "min": 10792,
+          "max": 4712333
+        },
+        "post_parser_to_vt_submit_ns": {
+          "count": 360,
+          "mean": 15585.863888888889,
+          "median": 14854.5,
+          "p95": 24605.950000000004,
+          "p99": 49038.25000000005,
+          "min": 2375,
+          "max": 143875
+        },
+        "derivation": "Supplemental distributions from raw CSV; warmup and first output per generation excluded from steady distributions. Moonlight arithmetic means include all eligible outputs. Original totals and internal VT callback endpoint remain unchanged."
+      },
+      "first_output_ms": 259.311167,
+      "first_output_origin": "initial scheduled start",
+      "startup": {
+        "policy": "fixed-initial-deadline-v1",
+        "startup_grace_ms": 0,
+        "queue_budget_ms": 66.666656,
+        "scheduled_start_ns": 838569892717458,
+        "first_output_ns": 259311167,
+        "initial_setup_ns": 58618917,
+        "scheduler_drop_counts": {
+          "arrival_deadline": 1,
+          "capacity_deadline": 1,
+          "awaiting_random_access": 56,
+          "injected_drop": 0
+        },
+        "first_output_max_ms": 250.0,
+        "first_output_sla_passed": false
+      },
+      "metrics": {
+        "vt_median_ms": 3.0516255,
+        "vt_p95_ms": 3.9343940500000016,
+        "vt_p99_ms": 13.612754310000046,
+        "public_median_ms": 3.360711,
+        "public_p95_ms": 7.329938700000004,
+        "public_p99_ms": 27.77935129000005
+      },
+      "thermal_nominal": true,
+      "errors": [
+        "native FAIL: accounting/hardware gate failed",
+        "process FINISHED, exit 1",
+        "not every offered frame produced an output",
+        "scheduler_drops=58",
+        "failed_or_cancelled_or_dropped=2",
+        "expected_display_mismatches=2",
+        "resets=2",
+        "CSV contains a non-output terminal completion",
+        "first output exceeds configured startup SLA or no output was delivered",
+        "delivered frame rate below configured ratio"
+      ],
+      "passed": false,
+      "settings": {
+        "width": 3440,
+        "height": 1440,
+        "fps": 240,
+        "codec": "hevc",
+        "dynamic_range": "hdr10",
+        "bitrate_mbps": 350.0,
+        "gop": 60,
+        "frames": 240,
+        "fixture": "/Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/results/bitrate-matrix-paired-full/fixtures/0ca74e31a50b4e802d9f8de390f48a626b176a31b9b4a86092bfa39414c6341c/manifest.json",
+        "decoder": {
+          "inflight": 2,
+          "queue_depth": 16,
+          "power": -1,
+          "consumer_delay_ms": 0,
+          "jitter_us": 0,
+          "seed": 7,
+          "startup_grace_ms": 0
+        },
+        "name": "ultrawide-3440x1440p240-hevc-hdr10-350mbps",
+        "fixture_info": {
+          "manifest_sha256": "7e1836ebfee223b7cbafa8aece64a16a369b30cd76dad7078e94514843151c0a",
+          "payload_sha256": "f31898641673a99dee7815db33a8d05230661a08320bd0c2093693a985ba69ac",
+          "payload_file": "payload.bin",
+          "frames": 240,
+          "requested_bitrate_mbps": 350,
+          "measured_bitrate_mbps": 297.753136,
+          "generator": {
+            "bitrate_measurement": "encoded payload bytes including codec headers and HDR metadata divided by generated presentation duration; no transport overhead",
+            "content_profile": "seeded-noise-frame-id-v1",
+            "content_seed": 1835103793,
+            "encoder": "Apple VTCompressionSession HEVC (OS-versioned)",
+            "encoder_settings": {
+              "allow_frame_reordering": false,
+              "average_bitrate_bps": 350000000,
+              "data_rate_limits": [
+                52500000,
+                1
+              ],
+              "expected_frame_rate": 240,
+              "hardware_required": true,
+              "max_key_frame_interval": 60,
+              "profile": "Main10_AutoLevel",
+              "realtime": true
+            },
+            "inter_count": 236,
+            "low_delay_verified": true,
+            "measured_bitrate_bps": 297753136,
+            "measured_bitrate_mbps": 297.753136,
+            "name": "mav-fixture",
+            "os": "Version 26.6.2 (Build 25G83)",
+            "pattern": "seeded-noise-software-reference-v1",
+            "random_access_count": 4,
+            "rate_control": "average_bitrate",
+            "requested_bitrate_mbps": 350,
+            "settings": {
+              "bitrate_mbps": 350,
+              "chroma": "420",
+              "codec": "hevc",
+              "fps": 240,
+              "frames": 240,
+              "gop": 60,
+              "height": 1440,
+              "variant": "hdr10",
+              "width": 3440
+            },
+            "target_bitrate_bps": 350000000
+          }
+        }
+      }
+    }
+  ]
+}
