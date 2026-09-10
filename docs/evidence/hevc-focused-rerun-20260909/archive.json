@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "description": "New focused paired HEVC hardware rerun on September 9, 2026 (local time): 3440x1440 at 240 fps and 3840x2160 at 60 fps, SDR/HDR10, 50/100/250/350 Mbps targets. The 32 correctness checks and 96 timed trials reuse verified fixture bytes and native replay binaries from the earlier full comparison. Generated evidence files are copied unchanged. Compressed payloads, raw traces, native JSON, logs and harness snapshots remain in results/hevc-focused-rerun-20260909. Earlier bitrate-matrix evidence remains unchanged.",
+  "files": {
+    "config.yaml": {
+      "source": "results/hevc-focused-rerun-20260909/config.yaml",
+      "bytes": 7216,
+      "sha256": "c731460256ae33610d8815f10ac3a509c9c69be1bd47694bfc038005af98bee8"
+    },
+    "plan.json": {
+      "source": "results/hevc-focused-rerun-20260909/plan.json",
+      "bytes": 353393,
+      "sha256": "b3833fb644b8e202d4ad16e9f2e311dfedcb6dc61118f459886f5a45af22e075"
+    },
+    "results.json": {
+      "source": "results/hevc-focused-rerun-20260909/results.json",
+      "bytes": 1535727,
+      "sha256": "c034cf7ffa8d894393b61472994ed08b5dce9e4de30d577a6ab3ba399fb4d677"
+    },
+    "report.md": {
+      "source": "results/hevc-focused-rerun-20260909/report.md",
+      "bytes": 42032,
+      "sha256": "219d8b6ed4702aff832732762adf0895259b8c4abf5e0db0956d18ee6be09071"
+    },
+    "moonlight-decode-times.json": {
+      "source": "results/hevc-focused-rerun-20260909/moonlight-decode-times.json",
+      "bytes": 123772,
+      "sha256": "42e2813a0a7e62178f13a41fa1dbd5eb80804b6816c033b785d2b8801ca5c4c8"
+    },
+    "junit.xml": {
+      "source": "results/hevc-focused-rerun-20260909/junit.xml",
+      "bytes": 17659,
+      "sha256": "667ca6f0a6bf0eed61816238b799ed404ff6d1a9be771546c2b4fc6b2061449e"
+    },
+    "metric-audit.md": {
+      "source": "results/hevc-focused-rerun-20260909/metric-audit.md",
+      "bytes": 1411,
+      "sha256": "a2fcc79d3682500154de30070a9084071e38058c308c76c538ce337b08c77c0a"
+    },
+    "metric-audit.json": {
+      "source": "results/hevc-focused-rerun-20260909/metric-audit.json",
+      "bytes": 133479,
+      "sha256": "8d624b5d221888a6c1703b023a50b418ce52d0e127ebaab29c64f6e6ebe808f3"
+    },
+    "framework-tests.log": {
+      "source": "results/hevc-focused-rerun-20260909/framework-tests.log",
+      "bytes": 197,
+      "sha256": "0abb6c5a86d88bcad8972a023ec2a82ad777e23a10935fa0a7468af9b8e912ca"
+    },
+    "loss-audit.md": {
+      "source": "results/hevc-focused-rerun-20260909/loss-audit.md",
+      "bytes": 6395,
+      "sha256": "944b4337e8441ee748075191135d809b60c1b80cfc4bf4c603a418e47d8e14be"
+    },
+    "loss-audit.json": {
+      "source": "results/hevc-focused-rerun-20260909/loss-audit.json",
+      "bytes": 347296,
+      "sha256": "ae8d91fda69673d06751065c6de76f1e947dc5a3c566b1b909a12b113f0c53c8"
+    }
+  }
+}

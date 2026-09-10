@@ -13,6 +13,66 @@ zero pixel difference. The full run is **not an all-pass performance result**:
 50 workloads passed every gate, 24 were inconclusive, 21 had baseline failures,
 and one was flagged by an isolated candidate startup failure.
 
+## Focused HEVC rerun — September 9, 2026
+
+The requested repeat covers **3440×1440 at 240 fps and 3840×2160 at 60 fps**,
+HEVC SDR/HDR10, and 50/100/250/350 Mbps targets: 16 workloads. It reuses the
+same verified compressed fixtures and C++17/C++23 replay binaries as the full
+comparison, with three 10-second trials per build and 120 warmup offered
+frames. The candidate source revision is `381f897`; the intervening reporting
+and Qt overlay edits did not change the native replay binary.
+
+All **32 correctness checks passed with zero pixel difference**. All **96 timed
+trials completed**, each recording nominal thermal state at completion. The separate
+[Markdown report](evidence/hevc-focused-rerun-20260909/report.md),
+[machine-readable results](evidence/hevc-focused-rerun-20260909/results.json),
+and [Moonlight timing means](evidence/hevc-focused-rerun-20260909/moonlight-decode-times.json)
+preserve this rerun independently of the original full and confirmation runs.
+
+| Mode | PASS | INCONCLUSIVE | BASELINE_FAILURE | Timed delivery failures, C++17 / C++23 |
+|---|---:|---:|---:|---:|
+| 3440×1440 at 240 fps | 0 | 0 | 8 | 21/24 / 24/24 |
+| 3840×2160 at 60 fps | 6 | 2 | 0 | 0/24 / 0/24 |
+
+At **4K 60 fps**, all 48 trials delivered every frame. The six SDR/HDR10
+workloads at 100, 250, and 350 Mbps passed all configured gates. The two 50 Mbps
+fixtures remain inconclusive because their measured rates are 60.820 Mbps
+(SDR) and 83.905 Mbps (HDR10), outside the ±20% tolerance. The SDR 50 Mbps
+case also exceeded the queue-inclusive public p95 latency threshold: median
+paired increase **1.005 ms / 10.23%**, against a 0.491 ms allowance. Its
+INCONCLUSIVE status takes precedence over that latency flag. No 4K workload
+exceeded the VT median/p95/p99 thresholds.
+
+At **ultrawide 240 fps**, delivery failed in both builds across all eight
+workloads. These measurements cannot establish a clean no-regression result.
+The HDR10 350 Mbps case additionally exceeded the VT p95 latency threshold:
+median paired increase **0.222 ms / 5.19%**, against a 0.207 ms allowance.
+That flag remains descriptive because delivery failed. The previous full run's
+same 16 workloads had 9 PASS, 2 INCONCLUSIVE, 4 BASELINE_FAILURE, and 1 REGRESSION;
+this repeat does not clear those results or identify the cause of the changed
+failure frequency.
+
+The [loss audit](evidence/hevc-focused-rerun-20260909/loss-audit.md) locates all
+2,659 missing outputs in frame IDs 0–59: 2,583 scheduler drops and 76
+failed/cancelled completions. Every one of the 45 failing trials delivered
+frame 60 and every post-warmup frame (IDs 120–2399). Startup losses still count
+as delivery failures; this localization does not identify their cause.
+
+An [independent metric audit](evidence/hevc-focused-rerun-20260909/metric-audit.md)
+recomputed all 96 timed traces and matched the reported means, sample counts,
+weighted case means, and six latency distributions and comparisons. There
+are 141,341 frame-ready samples and 141,108 submission samples; the 233
+missing API-return timestamps are excluded only from submission timing.
+
+Before hardware timing, the framework suite ran 86 tests: 85 passed and the
+optional real-encoder process test was skipped because `MAV_FIXTURE_TOOL` was
+not set. This native replay rerun does not add runtime validation of the Qt
+overlay, presentation, network, or physical iPhone/Apple TV behavior. Generated
+reports and provenance are archived byte for byte in a
+[separate manifest](evidence/hevc-focused-rerun-20260909/archive.json); raw traces,
+native JSON, logs, fixtures, and harness snapshots remain under
+`results/hevc-focused-rerun-20260909` locally.
+
 ## Full comparison
 
 Read the [generated Markdown report](evidence/bitrate-matrix/full/report.md) or
