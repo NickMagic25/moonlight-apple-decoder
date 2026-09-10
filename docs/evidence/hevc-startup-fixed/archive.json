@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "description": "Startup-policy fix validation: eight controls and a new 16-workload paired HEVC comparison with 250 ms initial admission grace plus an independent 250 ms first-output gate. Generated reports and independent audits are copied unchanged. Earlier strict failures remain separate; new 4K50 Mbps coverage misses remain INCONCLUSIVE. Raw traces, logs, payloads, software-reference metadata and harness snapshots remain in the complete local results directories.",
+  "implementation_revision": "a181a0090f746445c3daa62e5ea0bc3ead318119",
+  "code_ci_url": "https://github.com/NickMagic25/moonlight-apple-decoder/actions/runs/34422076617",
+  "files": {
+    "config.yaml": {
+      "source": "results/hevc-startup-fixed/config.yaml",
+      "bytes": 7659,
+      "sha256": "4c443cf10d479fe9af7797f654596ae3f8f2beb2d6287dc7e188367c26ea75ef"
+    },
+    "plan.json": {
+      "source": "results/hevc-startup-fixed/plan.json",
+      "bytes": 357475,
+      "sha256": "eda2d8524cbb8a3771638ed9707a630f25fde864fbd04dc2b72017f73d2410e6"
+    },
+    "results.json": {
+      "source": "results/hevc-startup-fixed/results.json",
+      "bytes": 1664366,
+      "sha256": "065fc0d08f991f02df5a0656e90f2b1dd3278183a133e05ccfcfc8f616244d42"
+    },
+    "report.md": {
+      "source": "results/hevc-startup-fixed/report.md",
+      "bytes": 39165,
+      "sha256": "1c4be86f763c15fd0f2a0d416e17d30108f595e85a77039fa7ef1e53ca87258e"
+    },
+    "moonlight-decode-times.json": {
+      "source": "results/hevc-startup-fixed/moonlight-decode-times.json",
+      "bytes": 123505,
+      "sha256": "559a4d4af35f2d3e86705fea2383e1a46a1627a529ff0a0135b9fc3e41fd6d67"
+    },
+    "junit.xml": {
+      "source": "results/hevc-startup-fixed/junit.xml",
+      "bytes": 1914,
+      "sha256": "f953e2ba2f2a65670f524035c68040ab5e15290a197d3a53af76ed75c81d1b7c"
+    },
+    "startup-audit.json": {
+      "source": "results/hevc-startup-fixed/startup-audit.json",
+      "bytes": 246495,
+      "sha256": "e102446fa3582fe4d02e790b537b3cd2ce5f55a064c2c80d2cc718c8612e8866"
+    },
+    "startup-audit.md": {
+      "source": "results/hevc-startup-fixed/startup-audit.md",
+      "bytes": 3450,
+      "sha256": "aeb8f887214167c823fb1d56d78bf5a358235f658efd9e8abbd3be4eb1eebe3f"
+    },
+    "metric-audit.json": {
+      "source": "results/hevc-startup-fixed/metric-audit.json",
+      "bytes": 131210,
+      "sha256": "7779aad8d137e97f2cd5dfac62cb583acabef9fa290ed5800d47d2b0390c0823"
+    },
+    "metric-audit.md": {
+      "source": "results/hevc-startup-fixed/metric-audit.md",
+      "bytes": 1258,
+      "sha256": "7eb50322a5f3f1f7f9fdc204698ff67a9e8ab1860db3910c710d2922c758b4f7"
+    },
+    "baseline-startup-capabilities.json": {
+      "source": "results/hevc-startup-fixed/baseline-startup-capabilities.json",
+      "bytes": 76,
+      "sha256": "28f5e3158ed0ac9a86d4437ae6bc25e142eb1d80d965d74760581df25ed89e1a"
+    },
+    "baseline-startup-capabilities.log": {
+      "source": "results/hevc-startup-fixed/baseline-startup-capabilities.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "candidate-startup-capabilities.json": {
+      "source": "results/hevc-startup-fixed/candidate-startup-capabilities.json",
+      "bytes": 76,
+      "sha256": "28f5e3158ed0ac9a86d4437ae6bc25e142eb1d80d965d74760581df25ed89e1a"
+    },
+    "candidate-startup-capabilities.log": {
+      "source": "results/hevc-startup-fixed/candidate-startup-capabilities.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "controls/report.md": {
+      "source": "results/hevc-startup-controls/report.md",
+      "bytes": 1574,
+      "sha256": "dee175bcfc7f6c83ff726ac95660bf72a64c3daf354ca5a8f49291664d41c611"
+    },
+    "controls/controls.json": {
+      "source": "results/hevc-startup-controls/controls.json",
+      "bytes": 14419,
+      "sha256": "7182c76d409a09e69003235f3c16af89c01d92be8783719d19e73454ebe6f47c"
+    },
+    "controls/controls-analysis.json": {
+      "source": "results/hevc-startup-controls/controls-analysis.json",
+      "bytes": 168230,
+      "sha256": "deaad678276a55681ba2c04e14cc9c3c4d1b850b3f3ddd62662c62852e0cbff5"
+    },
+    "checks/framework-tests.log": {
+      "source": "results/hevc-startup-fix-setup/framework-tests.log",
+      "bytes": 210,
+      "sha256": "bc957ba0be604742d9ebad35d8546c3a699863ea8357e35b46b6903668c2cd03"
+    },
+    "checks/debug-tests.log": {
+      "source": "results/hevc-startup-fix-setup/debug-tests.log",
+      "bytes": 852,
+      "sha256": "2b982f98ce82ec50d1e94b0c769997b07bf0991052b37822a1a26dfc1614bd22"
+    },
+    "checks/release-tests.log": {
+      "source": "results/hevc-startup-fix-setup/release-tests.log",
+      "bytes": 856,
+      "sha256": "f1e79686006230a2ed2dd19ce3e8b2467d05477b2d5aaa81178184c418489428"
+    },
+    "checks/debug-ctest.xml": {
+      "source": "results/hevc-startup-fix-setup/debug-ctest.xml",
+      "bytes": 1385,
+      "sha256": "36d7597b6537ab11137dd58473778117d6b049c30de752e24776d349e2e1cb41"
+    },
+    "checks/release-ctest.xml": {
+      "source": "results/hevc-startup-fix-setup/release-ctest.xml",
+      "bytes": 1385,
+      "sha256": "820edb5c97fb7ff741bda9c88a243eb97bd92856ba0e3d40cf64d61bb0f8c0d8"
+    },
+    "replay-harness-overlay.json": {
+      "source": "results/hevc-startup-fix-setup/replay-harness-overlay.json",
+      "bytes": 1016,
+      "sha256": "4681265cb25bddd6b58df277e6775d27c826e7facc44a7c79302ca29dc791de0"
+    },
+    "library-identity.json": {
+      "source": "results/hevc-startup-fix-setup/library-identity.json",
+      "bytes": 5145,
+      "sha256": "514da00ae93f48e5a1ad34bed1e9490df7d9e88c1cc5655eed26250fa2e5d05b"
+    }
+  }
+}

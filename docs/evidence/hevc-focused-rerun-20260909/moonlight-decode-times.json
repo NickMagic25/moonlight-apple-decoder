@@ -1,0 +1,3443 @@
+{
+  "schema_version": 1,
+  "status": "FAIL",
+  "report_generator_sha256": "c823672c494e9efc9028309b20caf04e6cf164f11b1a4e2aa021eea627451639",
+  "moonlight_report_derivation": null,
+  "native_label": "Frame-ready mean (VT submit -> callback)",
+  "native_formula": "sum(callback_ns - vt_submit_ns) / eligible outputs / 1000000",
+  "submission_label": "VT submission mean (submit -> return)",
+  "submission_formula": "sum(vt_return_ns - vt_submit_ns) / outputs with valid submit and return timestamps / 1000000",
+  "submission_population": "Successful new single-sample outputs with valid ordered submit/return timestamps. A callback may precede API return, leaving no captured return timestamp. Such outputs remain in frame-ready accounting when eligible but contribute no submission sample. Submission and frame-ready intervals share a start and must not be added together.",
+  "native_source": "integration/moonlight-qt/apple_video.cpp: AppleVideoDecoder::receive/updateOverlay",
+  "native_adapter_sha256": "9760eff6ea432af34bd2f3b47d0106d100987915561fd6eb33dfd6addbbfe29b",
+  "population": "All eligible timed outputs, including cold/warmup and recovery generations; not medians. Case means pool duration sums/counts across separate trials. Dropped/cancelled frames contribute no decode sample; failure gates remain unchanged.",
+  "public_proxy_formula": "sum(sink_entry_ns - scheduled_arrival_ns) / valid outputs / 1000000",
+  "limitation": "Native means reproduce the adapter formula on captured replay outputs, not a live Moonlight session. Public means are a queue-inclusive proxy, not the Qt/FFmpeg rolling-window measurement; app output wrapping, pacing, rendering and network are not measured.",
+  "cases": [
+    {
+      "name": "ultrawide-3440x1440p240-hevc-sdr-50mbps",
+      "status": "BASELINE_FAILURE",
+      "bitrate": {
+        "requested_mbps": 50.0,
+        "measured_mbps": 55.488088,
+        "measured_to_requested_ratio": 1.10976176,
+        "tolerance_pct": 20.0,
+        "coverage_passed": true
+      },
+      "stream": {
+        "width": 3440,
+        "height": 1440,
+        "fps": 240,
+        "codec": "hevc",
+        "dynamic_range": "sdr"
+      },
+      "builds": {
+        "baseline": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 7140,
+            "total_ns": 14856504707,
+            "mean_ms": 2.080742956162465
+          },
+          "native_submission": {
+            "sample_count": 7124,
+            "total_ns": 4244638257,
+            "mean_ms": 0.5958223269230769
+          },
+          "public_queue_proxy": {
+            "sample_count": 7140,
+            "total_ns": 18728464800,
+            "mean_ms": 2.623034285714286
+          }
+        },
+        "candidate": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 7020,
+            "total_ns": 14690545177,
+            "mean_ms": 2.092670253133903
+          },
+          "native_submission": {
+            "sample_count": 7012,
+            "total_ns": 4304991317,
+            "mean_ms": 0.6139462802338849
+          },
+          "public_queue_proxy": {
+            "sample_count": 7020,
+            "total_ns": 16756884320,
+            "mean_ms": 2.3870205584045583
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "passed": true,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-sdr-50mbps/timed-baseline-1.json",
+          "result_file_sha256": "10da11bae26598429c8f609a4f823fe72b8af6209e706f0679cf1ef39c001c8e",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-50mbps/timed-baseline-1.csv",
+          "csv_file_sha256": "3839a09bb95179a6b122041655fd82d7014de41d9a2b96a19f6585188f607563",
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 4966749175,
+              "mean_ms": 2.069478822916667
+            },
+            "native_submission": {
+              "sample_count": 2394,
+              "total_ns": 1395643953,
+              "mean_ms": 0.5829757531328321
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 6569303929,
+              "mean_ms": 2.7372099704166666
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-sdr-50mbps/timed-candidate-1.json",
+          "result_file_sha256": "992dc05a8cfa99a6ec95a79a94572911493301c19431bc67fe2170a994467581",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-50mbps/timed-candidate-1.csv",
+          "csv_file_sha256": "8359dfe0198dad8f08853f1d878fb57f0442fc350f9a24287f2186f78a98d551",
+          "means": {
+            "native_vt": {
+              "sample_count": 2340,
+              "total_ns": 4911869308,
+              "mean_ms": 2.0990894478632476
+            },
+            "native_submission": {
+              "sample_count": 2337,
+              "total_ns": 1438123954,
+              "mean_ms": 0.6153718245614035
+            },
+            "public_queue_proxy": {
+              "sample_count": 2340,
+              "total_ns": 5618166296,
+              "mean_ms": 2.4009257675213673
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-sdr-50mbps/timed-candidate-2.json",
+          "result_file_sha256": "120d0edc0c6ed855829eba0a62fa16b244640f1efb78efda1cd9661b76707f59",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-50mbps/timed-candidate-2.csv",
+          "csv_file_sha256": "af289db1ee44793cc61129501ea5be6a9250e8df2f9ef47be198a91faccf0d7f",
+          "means": {
+            "native_vt": {
+              "sample_count": 2340,
+              "total_ns": 4862311769,
+              "mean_ms": 2.0779110123931623
+            },
+            "native_submission": {
+              "sample_count": 2337,
+              "total_ns": 1419272052,
+              "mean_ms": 0.6073051142490372
+            },
+            "public_queue_proxy": {
+              "sample_count": 2340,
+              "total_ns": 5528982588,
+              "mean_ms": 2.362813071794872
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "passed": true,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-sdr-50mbps/timed-baseline-2.json",
+          "result_file_sha256": "1213d0764a1f633cd572e5ec3a5ca92ae70237c108ec0f91c34c154910126391",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-50mbps/timed-baseline-2.csv",
+          "csv_file_sha256": "bca0b5b35b1c10fa85329a31aadc15203ad97644b0e8cb1f0cc4a3e0b19ce931",
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 4947279171,
+              "mean_ms": 2.06136632125
+            },
+            "native_submission": {
+              "sample_count": 2394,
+              "total_ns": 1400806471,
+              "mean_ms": 0.5851321934001671
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 6489811487,
+              "mean_ms": 2.7040881195833335
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-sdr-50mbps/timed-baseline-3.json",
+          "result_file_sha256": "c8bc2eb637709755457133ee14e2cbad3805b49fcda2457f12c983cbd443e990",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-50mbps/timed-baseline-3.csv",
+          "csv_file_sha256": "131ff904bebf1557c98525214b007fe89e4f512f415cd6732121740ec2a0880e",
+          "means": {
+            "native_vt": {
+              "sample_count": 2340,
+              "total_ns": 4942476361,
+              "mean_ms": 2.1121693850427348
+            },
+            "native_submission": {
+              "sample_count": 2336,
+              "total_ns": 1448187833,
+              "mean_ms": 0.619943421660959
+            },
+            "public_queue_proxy": {
+              "sample_count": 2340,
+              "total_ns": 5669349384,
+              "mean_ms": 2.422798882051282
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-sdr-50mbps/timed-candidate-3.json",
+          "result_file_sha256": "ae8a93930cf1f2c9b56b1d51cc4b54d9885ac5c21000f9723daabe3375965043",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-50mbps/timed-candidate-3.csv",
+          "csv_file_sha256": "4c479103c0cf44a2a92e52c4ae644e230952038ef5cde341e99b08bc3c110fe1",
+          "means": {
+            "native_vt": {
+              "sample_count": 2340,
+              "total_ns": 4916364100,
+              "mean_ms": 2.101010299145299
+            },
+            "native_submission": {
+              "sample_count": 2338,
+              "total_ns": 1447595311,
+              "mean_ms": 0.6191596710863987
+            },
+            "public_queue_proxy": {
+              "sample_count": 2340,
+              "total_ns": 5609735436,
+              "mean_ms": 2.397322835897436
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ultrawide-3440x1440p240-hevc-sdr-100mbps",
+      "status": "BASELINE_FAILURE",
+      "bitrate": {
+        "requested_mbps": 100.0,
+        "measured_mbps": 95.373816,
+        "measured_to_requested_ratio": 0.95373816,
+        "tolerance_pct": 20.0,
+        "coverage_passed": true
+      },
+      "stream": {
+        "width": 3440,
+        "height": 1440,
+        "fps": 240,
+        "codec": "hevc",
+        "dynamic_range": "sdr"
+      },
+      "builds": {
+        "baseline": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 7023,
+            "total_ns": 15888048868,
+            "mean_ms": 2.2622880347429875
+          },
+          "native_submission": {
+            "sample_count": 7012,
+            "total_ns": 4454093195,
+            "mean_ms": 0.6352100962635483
+          },
+          "public_queue_proxy": {
+            "sample_count": 7023,
+            "total_ns": 19576013927,
+            "mean_ms": 2.787414769614125
+          }
+        },
+        "candidate": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 7021,
+            "total_ns": 15795273549,
+            "mean_ms": 2.249718494374021
+          },
+          "native_submission": {
+            "sample_count": 7009,
+            "total_ns": 4438761993,
+            "mean_ms": 0.6332946202025966
+          },
+          "public_queue_proxy": {
+            "sample_count": 7021,
+            "total_ns": 19365189652,
+            "mean_ms": 2.7581811212078056
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-sdr-100mbps/timed-candidate-1.json",
+          "result_file_sha256": "a5533706364ae520a01f99f53a27604b0f41280d4c8b1806856b014f0d3a211f",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-100mbps/timed-candidate-1.csv",
+          "csv_file_sha256": "c9d8cd623a690752432138ecb771003f3285551e061863c63a1f98986cb267c0",
+          "means": {
+            "native_vt": {
+              "sample_count": 2340,
+              "total_ns": 5244443095,
+              "mean_ms": 2.241214997863248
+            },
+            "native_submission": {
+              "sample_count": 2335,
+              "total_ns": 1455523785,
+              "mean_ms": 0.6233506573875802
+            },
+            "public_queue_proxy": {
+              "sample_count": 2340,
+              "total_ns": 6403213251,
+              "mean_ms": 2.7364159192307693
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-sdr-100mbps/timed-baseline-1.json",
+          "result_file_sha256": "b340365ec4ca95983093ecdff5cc644d8ccac13637082f3088e975950d1a390e",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-100mbps/timed-baseline-1.csv",
+          "csv_file_sha256": "16bd5d8d8e326dedc9a51d7f3349d8739e5552b3d14e0c9253b27193ea10d0a2",
+          "means": {
+            "native_vt": {
+              "sample_count": 2341,
+              "total_ns": 5281820848,
+              "mean_ms": 2.256224198205895
+            },
+            "native_submission": {
+              "sample_count": 2336,
+              "total_ns": 1473015252,
+              "mean_ms": 0.6305715976027397
+            },
+            "public_queue_proxy": {
+              "sample_count": 2341,
+              "total_ns": 6497565066,
+              "mean_ms": 2.7755510747543783
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-sdr-100mbps/timed-baseline-2.json",
+          "result_file_sha256": "6ce0448dad51be779e801188412be3aa6b567c6bf6b373e45fc381ee497812fb",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-100mbps/timed-baseline-2.csv",
+          "csv_file_sha256": "01fbf01286244a2e1b6569a09788f3770c602cefb4eaf8ea5be7108cbe5edfb1",
+          "means": {
+            "native_vt": {
+              "sample_count": 2342,
+              "total_ns": 5286793608,
+              "mean_ms": 2.2573841195559354
+            },
+            "native_submission": {
+              "sample_count": 2339,
+              "total_ns": 1478405321,
+              "mean_ms": 0.6320672599401453
+            },
+            "public_queue_proxy": {
+              "sample_count": 2342,
+              "total_ns": 6568796999,
+              "mean_ms": 2.8047809560204953
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-sdr-100mbps/timed-candidate-2.json",
+          "result_file_sha256": "8db25aeb0ccdd1752712c33fa88c035861d7f339d81a09daf9aaa032bf3c7695",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-100mbps/timed-candidate-2.csv",
+          "csv_file_sha256": "a2ff146b65cf1ab8962db0e2bd756e360253ffd6eddc175b456edc8ce6a1cd0e",
+          "means": {
+            "native_vt": {
+              "sample_count": 2340,
+              "total_ns": 5207847184,
+              "mean_ms": 2.2255757196581194
+            },
+            "native_submission": {
+              "sample_count": 2338,
+              "total_ns": 1461769378,
+              "mean_ms": 0.6252221462788708
+            },
+            "public_queue_proxy": {
+              "sample_count": 2340,
+              "total_ns": 6349614709,
+              "mean_ms": 2.7135105594017097
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-sdr-100mbps/timed-candidate-3.json",
+          "result_file_sha256": "c6b176841b9b2b7cae334b38d03867510607635cbe0d8756701782bbd7780da4",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-100mbps/timed-candidate-3.csv",
+          "csv_file_sha256": "44469e9de0ab10da938fafbaac5a764faa7a57e59b7363cf1b5a71b0dbcdd32f",
+          "means": {
+            "native_vt": {
+              "sample_count": 2341,
+              "total_ns": 5342983270,
+              "mean_ms": 2.282350820162324
+            },
+            "native_submission": {
+              "sample_count": 2336,
+              "total_ns": 1521468830,
+              "mean_ms": 0.6513137114726028
+            },
+            "public_queue_proxy": {
+              "sample_count": 2341,
+              "total_ns": 6612361692,
+              "mean_ms": 2.824588505766766
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-sdr-100mbps/timed-baseline-3.json",
+          "result_file_sha256": "0cc4983bd6c4ed67c264f56a2d40f7cfdecdb69dfff16a89132a391d3721c715",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-100mbps/timed-baseline-3.csv",
+          "csv_file_sha256": "7da49bf1d9477f31e350285f8105e6cfd3ef07982851a83538f5ec43a584735b",
+          "means": {
+            "native_vt": {
+              "sample_count": 2340,
+              "total_ns": 5319434412,
+              "mean_ms": 2.273262569230769
+            },
+            "native_submission": {
+              "sample_count": 2337,
+              "total_ns": 1502672622,
+              "mean_ms": 0.642992136071887
+            },
+            "public_queue_proxy": {
+              "sample_count": 2340,
+              "total_ns": 6509651862,
+              "mean_ms": 2.781902505128205
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ultrawide-3440x1440p240-hevc-sdr-250mbps",
+      "status": "BASELINE_FAILURE",
+      "bitrate": {
+        "requested_mbps": 250.0,
+        "measured_mbps": 213.95852,
+        "measured_to_requested_ratio": 0.8558340799999999,
+        "tolerance_pct": 20.0,
+        "coverage_passed": true
+      },
+      "stream": {
+        "width": 3440,
+        "height": 1440,
+        "fps": 240,
+        "codec": "hevc",
+        "dynamic_range": "sdr"
+      },
+      "builds": {
+        "baseline": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 7023,
+            "total_ns": 19189590876,
+            "mean_ms": 2.7323922648440835
+          },
+          "native_submission": {
+            "sample_count": 7009,
+            "total_ns": 4943786201,
+            "mean_ms": 0.7053482951918961
+          },
+          "public_queue_proxy": {
+            "sample_count": 7023,
+            "total_ns": 26238572821,
+            "mean_ms": 3.7360918156058665
+          }
+        },
+        "candidate": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 7025,
+            "total_ns": 19301831491,
+            "mean_ms": 2.747591671316726
+          },
+          "native_submission": {
+            "sample_count": 7016,
+            "total_ns": 4947805811,
+            "mean_ms": 0.7052174759122006
+          },
+          "public_queue_proxy": {
+            "sample_count": 7025,
+            "total_ns": 26239195100,
+            "mean_ms": 3.735116740213523
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-sdr-250mbps/timed-baseline-1.json",
+          "result_file_sha256": "baad2a6a0b139794870f7293f08ddb6e65e4a231918d3f5e63d69b2ef4b38925",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-250mbps/timed-baseline-1.csv",
+          "csv_file_sha256": "1aae2aac705d204b7d3fd377a025a9e79d087f10a636bc4f265e118fcfab3fef",
+          "means": {
+            "native_vt": {
+              "sample_count": 2341,
+              "total_ns": 6332253494,
+              "mean_ms": 2.704935281503631
+            },
+            "native_submission": {
+              "sample_count": 2334,
+              "total_ns": 1589866085,
+              "mean_ms": 0.6811765574121679
+            },
+            "public_queue_proxy": {
+              "sample_count": 2341,
+              "total_ns": 8730458273,
+              "mean_ms": 3.729371325501922
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-sdr-250mbps/timed-candidate-1.json",
+          "result_file_sha256": "9aacfd719de2bff53ea8c6f212041d5a919200175c8645e0dc70abb2e31a64e0",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-250mbps/timed-candidate-1.csv",
+          "csv_file_sha256": "769d3b0ad88f98f43c5671443f3c622465076edc8ec1633a2121961d5d297fef",
+          "means": {
+            "native_vt": {
+              "sample_count": 2342,
+              "total_ns": 6456952481,
+              "mean_ms": 2.7570249705380014
+            },
+            "native_submission": {
+              "sample_count": 2342,
+              "total_ns": 1662985235,
+              "mean_ms": 0.7100705529461998
+            },
+            "public_queue_proxy": {
+              "sample_count": 2342,
+              "total_ns": 8742649128,
+              "mean_ms": 3.7329842561912896
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-sdr-250mbps/timed-candidate-2.json",
+          "result_file_sha256": "f1e842a38412d0ad8f1445ad91bb515b9b065f032a2c1938df32973d060ae2c1",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-250mbps/timed-candidate-2.csv",
+          "csv_file_sha256": "7fb355dc484bae575e36bbb28c50dc4d4fcbd6474ef285f525dea301e217be7e",
+          "means": {
+            "native_vt": {
+              "sample_count": 2341,
+              "total_ns": 6350999082,
+              "mean_ms": 2.712942794532251
+            },
+            "native_submission": {
+              "sample_count": 2333,
+              "total_ns": 1595237936,
+              "mean_ms": 0.6837710827261038
+            },
+            "public_queue_proxy": {
+              "sample_count": 2341,
+              "total_ns": 8710793086,
+              "mean_ms": 3.720970989320803
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-sdr-250mbps/timed-baseline-2.json",
+          "result_file_sha256": "e64c0d1ec56defec93f64321f4127dc08b0a53e76767e835e601ccec8fb1af73",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-250mbps/timed-baseline-2.csv",
+          "csv_file_sha256": "af679ef71eee6aeb8b61ad8180e2e572a59e42e6cbf38a3ba057969f4d27e642",
+          "means": {
+            "native_vt": {
+              "sample_count": 2341,
+              "total_ns": 6440593870,
+              "mean_ms": 2.7512148099102944
+            },
+            "native_submission": {
+              "sample_count": 2339,
+              "total_ns": 1690266639,
+              "mean_ms": 0.72264499315947
+            },
+            "public_queue_proxy": {
+              "sample_count": 2341,
+              "total_ns": 8805882049,
+              "mean_ms": 3.7615899397693293
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-sdr-250mbps/timed-baseline-3.json",
+          "result_file_sha256": "10810ad33fcced9870e87a67d39f23ce7f79fae6b300e529abd82ca4f3c6ed1f",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-250mbps/timed-baseline-3.csv",
+          "csv_file_sha256": "cb93481c13477967dabe47fdea99d795f57c667b69cbeadac7161dbf90c9e2e8",
+          "means": {
+            "native_vt": {
+              "sample_count": 2341,
+              "total_ns": 6416743512,
+              "mean_ms": 2.7410267031183255
+            },
+            "native_submission": {
+              "sample_count": 2336,
+              "total_ns": 1663653477,
+              "mean_ms": 0.7121804267979451
+            },
+            "public_queue_proxy": {
+              "sample_count": 2341,
+              "total_ns": 8702232499,
+              "mean_ms": 3.7173141815463477
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-sdr-250mbps/timed-candidate-3.json",
+          "result_file_sha256": "d298ca0b97318a5469b405ff507b6a4eac506256f00cd23a6054bdd40f6317af",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-250mbps/timed-candidate-3.csv",
+          "csv_file_sha256": "48bba46654d25d0579b395eab20c588a3f7bebc0e06f52c8e7252a9137eb3c6b",
+          "means": {
+            "native_vt": {
+              "sample_count": 2342,
+              "total_ns": 6493879928,
+              "mean_ms": 2.7727924543125533
+            },
+            "native_submission": {
+              "sample_count": 2341,
+              "total_ns": 1689582640,
+              "mean_ms": 0.7217354293037164
+            },
+            "public_queue_proxy": {
+              "sample_count": 2342,
+              "total_ns": 8785752886,
+              "mean_ms": 3.751388935098207
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ultrawide-3440x1440p240-hevc-sdr-350mbps",
+      "status": "BASELINE_FAILURE",
+      "bitrate": {
+        "requested_mbps": 350.0,
+        "measured_mbps": 297.694952,
+        "measured_to_requested_ratio": 0.8505570057142857,
+        "tolerance_pct": 20.0,
+        "coverage_passed": true
+      },
+      "stream": {
+        "width": 3440,
+        "height": 1440,
+        "fps": 240,
+        "codec": "hevc",
+        "dynamic_range": "sdr"
+      },
+      "builds": {
+        "baseline": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 7025,
+            "total_ns": 22333180406,
+            "mean_ms": 3.1791004136654806
+          },
+          "native_submission": {
+            "sample_count": 7023,
+            "total_ns": 4961480868,
+            "mean_ms": 0.706461749679624
+          },
+          "public_queue_proxy": {
+            "sample_count": 7025,
+            "total_ns": 31662471913,
+            "mean_ms": 4.5071134395729535
+          }
+        },
+        "candidate": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 7024,
+            "total_ns": 22257825734,
+            "mean_ms": 3.168824848234624
+          },
+          "native_submission": {
+            "sample_count": 7020,
+            "total_ns": 4916944786,
+            "mean_ms": 0.7004194851851853
+          },
+          "public_queue_proxy": {
+            "sample_count": 7024,
+            "total_ns": 31490110605,
+            "mean_ms": 4.4832162023063775
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-sdr-350mbps/timed-candidate-1.json",
+          "result_file_sha256": "5594c4f18f6bd32bc7dafcaa93058604fba962d9eb85e160a580fd41bfb1e90f",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-350mbps/timed-candidate-1.csv",
+          "csv_file_sha256": "4c80e23a5e583b1d728cd7e65b875fd804e2eb31a09cc6a30e0d188bcf22ef6b",
+          "means": {
+            "native_vt": {
+              "sample_count": 2341,
+              "total_ns": 7343397398,
+              "mean_ms": 3.1368634762921825
+            },
+            "native_submission": {
+              "sample_count": 2340,
+              "total_ns": 1595475479,
+              "mean_ms": 0.6818271277777778
+            },
+            "public_queue_proxy": {
+              "sample_count": 2341,
+              "total_ns": 10410168955,
+              "mean_ms": 4.446889771465186
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-sdr-350mbps/timed-baseline-1.json",
+          "result_file_sha256": "ba60b0c8a515caa33c3336376dd35159ad7ad8e63db72d7dc82b1e50016c67d1",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-350mbps/timed-baseline-1.csv",
+          "csv_file_sha256": "cd220df0cfc52de6cff59ed78c01083877e02f4ffd3ac7a511598b317d41717e",
+          "means": {
+            "native_vt": {
+              "sample_count": 2342,
+              "total_ns": 7468545425,
+              "mean_ms": 3.188960471818958
+            },
+            "native_submission": {
+              "sample_count": 2341,
+              "total_ns": 1669244736,
+              "mean_ms": 0.7130477300299017
+            },
+            "public_queue_proxy": {
+              "sample_count": 2342,
+              "total_ns": 10656417019,
+              "mean_ms": 4.550135362510675
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-sdr-350mbps/timed-baseline-2.json",
+          "result_file_sha256": "b2b922fc56a9b425a4d8af5aa8c9c771671246ee9611883871cda58457bf046e",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-350mbps/timed-baseline-2.csv",
+          "csv_file_sha256": "d8ddde173081d9198649fdcf807edec0eaaf8ac3a5b7016724c9b324da5f31f9",
+          "means": {
+            "native_vt": {
+              "sample_count": 2342,
+              "total_ns": 7471646231,
+              "mean_ms": 3.190284470964987
+            },
+            "native_submission": {
+              "sample_count": 2341,
+              "total_ns": 1657226003,
+              "mean_ms": 0.7079137133703545
+            },
+            "public_queue_proxy": {
+              "sample_count": 2342,
+              "total_ns": 10562214947,
+              "mean_ms": 4.509912445345858
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-sdr-350mbps/timed-candidate-2.json",
+          "result_file_sha256": "152657a067b21aef739f4203dc5dc06f98881b1903e79ddb3fb9b33e89a67de4",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-350mbps/timed-candidate-2.csv",
+          "csv_file_sha256": "6db48032d1bb7f9586bcf3d0ac47d9daa669f7d39deaebcae9d093281fae235b",
+          "means": {
+            "native_vt": {
+              "sample_count": 2341,
+              "total_ns": 7454095920,
+              "mean_ms": 3.1841503289192654
+            },
+            "native_submission": {
+              "sample_count": 2339,
+              "total_ns": 1659910580,
+              "mean_ms": 0.7096667721248398
+            },
+            "public_queue_proxy": {
+              "sample_count": 2341,
+              "total_ns": 10486797480,
+              "mean_ms": 4.4796230158052115
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-sdr-350mbps/timed-candidate-3.json",
+          "result_file_sha256": "e48bbedda7e4af1da7fc6cd177b29a71d04a77c22bc748ade62466286639acc1",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-350mbps/timed-candidate-3.csv",
+          "csv_file_sha256": "bae2e20fdab8df9f1dd088c9ba7f917af4ed1e56bb74e2a0caeba0a8ed818067",
+          "means": {
+            "native_vt": {
+              "sample_count": 2342,
+              "total_ns": 7460332416,
+              "mean_ms": 3.185453636208369
+            },
+            "native_submission": {
+              "sample_count": 2341,
+              "total_ns": 1661558727,
+              "mean_ms": 0.709764513882956
+            },
+            "public_queue_proxy": {
+              "sample_count": 2342,
+              "total_ns": 10593144170,
+              "mean_ms": 4.523118774551666
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-sdr-350mbps/timed-baseline-3.json",
+          "result_file_sha256": "67b7a9f01dfb4f8947327d5149bf1053a4ff9ec6949f75f2f53ce2b7d04c31ce",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-sdr-350mbps/timed-baseline-3.csv",
+          "csv_file_sha256": "67d9f7e7976c94b4881106ddc7500bb2116b93ad5beaa054a5f61b24c217ffc0",
+          "means": {
+            "native_vt": {
+              "sample_count": 2341,
+              "total_ns": 7392988750,
+              "mean_ms": 3.158047308842375
+            },
+            "native_submission": {
+              "sample_count": 2341,
+              "total_ns": 1635010129,
+              "mean_ms": 0.698423805638616
+            },
+            "public_queue_proxy": {
+              "sample_count": 2341,
+              "total_ns": 10443839947,
+              "mean_ms": 4.46127293763349
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ultrawide-3440x1440p240-hevc-hdr10-50mbps",
+      "status": "BASELINE_FAILURE",
+      "bitrate": {
+        "requested_mbps": 50.0,
+        "measured_mbps": 50.946848,
+        "measured_to_requested_ratio": 1.01893696,
+        "tolerance_pct": 20.0,
+        "coverage_passed": true
+      },
+      "stream": {
+        "width": 3440,
+        "height": 1440,
+        "fps": 240,
+        "codec": "hevc",
+        "dynamic_range": "hdr10"
+      },
+      "builds": {
+        "baseline": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 7080,
+            "total_ns": 14910689619,
+            "mean_ms": 2.10602960720339
+          },
+          "native_submission": {
+            "sample_count": 7063,
+            "total_ns": 4399924015,
+            "mean_ms": 0.6229539876822879
+          },
+          "public_queue_proxy": {
+            "sample_count": 7080,
+            "total_ns": 18042792850,
+            "mean_ms": 2.5484170692090395
+          }
+        },
+        "candidate": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 7020,
+            "total_ns": 15322532583,
+            "mean_ms": 2.1826969491452988
+          },
+          "native_submission": {
+            "sample_count": 7002,
+            "total_ns": 4754853487,
+            "mean_ms": 0.6790707636389604
+          },
+          "public_queue_proxy": {
+            "sample_count": 7020,
+            "total_ns": 17307103823,
+            "mean_ms": 2.4653994049857553
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-50mbps/timed-baseline-1.json",
+          "result_file_sha256": "e1e8a39dc34092031e4e2a1ab64e069a710b4ce690c5375855a136f8a08f2a6d",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-50mbps/timed-baseline-1.csv",
+          "csv_file_sha256": "fe6580230c613ed0c5cfe028847d5ee9ab6f1522060bb35c88ec9c971bee47c7",
+          "means": {
+            "native_vt": {
+              "sample_count": 2340,
+              "total_ns": 5106193041,
+              "mean_ms": 2.182133778205128
+            },
+            "native_submission": {
+              "sample_count": 2333,
+              "total_ns": 1563122591,
+              "mean_ms": 0.6700053969138449
+            },
+            "public_queue_proxy": {
+              "sample_count": 2340,
+              "total_ns": 5925235038,
+              "mean_ms": 2.5321517256410258
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-50mbps/timed-candidate-1.json",
+          "result_file_sha256": "3bad0e182ead049ea17f29e6a995c304b9b69f391b3979a31f97483ae7a4da87",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-50mbps/timed-candidate-1.csv",
+          "csv_file_sha256": "80895f848ae5a9a6737e18c85e9308ce1df3a74e9a0dd15e221aed7f316f0f1f",
+          "means": {
+            "native_vt": {
+              "sample_count": 2340,
+              "total_ns": 5109827975,
+              "mean_ms": 2.183687168803419
+            },
+            "native_submission": {
+              "sample_count": 2334,
+              "total_ns": 1584764921,
+              "mean_ms": 0.678990968723222
+            },
+            "public_queue_proxy": {
+              "sample_count": 2340,
+              "total_ns": 5788300817,
+              "mean_ms": 2.4736328277777777
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-50mbps/timed-candidate-2.json",
+          "result_file_sha256": "3b98d42e9b7a8a4c26392d0768db253649fac8e1eb290f23fc131aebdfc12c84",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-50mbps/timed-candidate-2.csv",
+          "csv_file_sha256": "32622451b5ac7848c2f7b99864692e45b6e26748970ff9660720301da042b0d7",
+          "means": {
+            "native_vt": {
+              "sample_count": 2340,
+              "total_ns": 5157933868,
+              "mean_ms": 2.2042452427350425
+            },
+            "native_submission": {
+              "sample_count": 2336,
+              "total_ns": 1627779723,
+              "mean_ms": 0.6968235115582192
+            },
+            "public_queue_proxy": {
+              "sample_count": 2340,
+              "total_ns": 5797694942,
+              "mean_ms": 2.477647411111111
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "passed": true,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-50mbps/timed-baseline-2.json",
+          "result_file_sha256": "4b4430577906f0e5189f131cd6edc796e5e0d538e8ba574b6996848efa034e0c",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-50mbps/timed-baseline-2.csv",
+          "csv_file_sha256": "7fd75cb3a298c17532875e6111109678ef372195eda7bce57bf9aa33e2ba95ea",
+          "means": {
+            "native_vt": {
+              "sample_count": 2400,
+              "total_ns": 4793497092,
+              "mean_ms": 1.9972904550000001
+            },
+            "native_submission": {
+              "sample_count": 2396,
+              "total_ns": 1335737356,
+              "mean_ms": 0.5574863756260434
+            },
+            "public_queue_proxy": {
+              "sample_count": 2400,
+              "total_ns": 6424124877,
+              "mean_ms": 2.67671869875
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-50mbps/timed-baseline-3.json",
+          "result_file_sha256": "e6c0f09765dc3fbb3270340fb3343f43e3f73cba67dd54725bddd36ff39061a2",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-50mbps/timed-baseline-3.csv",
+          "csv_file_sha256": "384979b5b329c8a2fb0f0cb8b49d2f2a08d6e633cefb426c43ae8beb25bbb6ac",
+          "means": {
+            "native_vt": {
+              "sample_count": 2340,
+              "total_ns": 5010999486,
+              "mean_ms": 2.1414527717948717
+            },
+            "native_submission": {
+              "sample_count": 2334,
+              "total_ns": 1501064068,
+              "mean_ms": 0.6431294207369324
+            },
+            "public_queue_proxy": {
+              "sample_count": 2340,
+              "total_ns": 5693432935,
+              "mean_ms": 2.433090997863248
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-50mbps/timed-candidate-3.json",
+          "result_file_sha256": "11140d91a059dead1740958734e75d1a33b4f0d4de7d43aa7398f5e7a85d371d",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-50mbps/timed-candidate-3.csv",
+          "csv_file_sha256": "283b8fb09e1c48f8d2ba720b6b489f399ae042b3e5b067c6cd6d949302ff8992",
+          "means": {
+            "native_vt": {
+              "sample_count": 2340,
+              "total_ns": 5054770740,
+              "mean_ms": 2.160158435897436
+            },
+            "native_submission": {
+              "sample_count": 2332,
+              "total_ns": 1542308843,
+              "mean_ms": 0.6613674283876501
+            },
+            "public_queue_proxy": {
+              "sample_count": 2340,
+              "total_ns": 5721108064,
+              "mean_ms": 2.444917976068376
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ultrawide-3440x1440p240-hevc-hdr10-100mbps",
+      "status": "BASELINE_FAILURE",
+      "bitrate": {
+        "requested_mbps": 100.0,
+        "measured_mbps": 92.181096,
+        "measured_to_requested_ratio": 0.92181096,
+        "tolerance_pct": 20.0,
+        "coverage_passed": true
+      },
+      "stream": {
+        "width": 3440,
+        "height": 1440,
+        "fps": 240,
+        "codec": "hevc",
+        "dynamic_range": "hdr10"
+      },
+      "builds": {
+        "baseline": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 7020,
+            "total_ns": 16274319040,
+            "mean_ms": 2.3182790655270655
+          },
+          "native_submission": {
+            "sample_count": 7010,
+            "total_ns": 4859107716,
+            "mean_ms": 0.6931680051355207
+          },
+          "public_queue_proxy": {
+            "sample_count": 7020,
+            "total_ns": 19135952887,
+            "mean_ms": 2.725919214672365
+          }
+        },
+        "candidate": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 7022,
+            "total_ns": 16354764007,
+            "mean_ms": 2.3290749084306466
+          },
+          "native_submission": {
+            "sample_count": 7001,
+            "total_ns": 4881807715,
+            "mean_ms": 0.6973014876446222
+          },
+          "public_queue_proxy": {
+            "sample_count": 7022,
+            "total_ns": 19422309610,
+            "mean_ms": 2.765922758473369
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-100mbps/timed-candidate-1.json",
+          "result_file_sha256": "61451e543340c220f442efdfe7e5af0ae7e315a10ed9df4dfb8a2ad5d4a398b1",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-100mbps/timed-candidate-1.csv",
+          "csv_file_sha256": "5734a4377483e4fb2d611cfde5112eb505bcb08cfd7a0106cabca6bfab1a23cb",
+          "means": {
+            "native_vt": {
+              "sample_count": 2341,
+              "total_ns": 5423672919,
+              "mean_ms": 2.3168188462195642
+            },
+            "native_submission": {
+              "sample_count": 2333,
+              "total_ns": 1601209742,
+              "mean_ms": 0.6863307938276897
+            },
+            "public_queue_proxy": {
+              "sample_count": 2341,
+              "total_ns": 6464955800,
+              "mean_ms": 2.761621443827424
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-100mbps/timed-baseline-1.json",
+          "result_file_sha256": "fb92b03e737c41e4b29b00c0e1e88381c8f85feaba670d53768f36afde0f4632",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-100mbps/timed-baseline-1.csv",
+          "csv_file_sha256": "75292c406f90120737bab315f35dbaba0e21b2fedfc7b8e2dd14df0cee688354",
+          "means": {
+            "native_vt": {
+              "sample_count": 2340,
+              "total_ns": 5426497090,
+              "mean_ms": 2.3190158504273506
+            },
+            "native_submission": {
+              "sample_count": 2335,
+              "total_ns": 1623780263,
+              "mean_ms": 0.6954091062098501
+            },
+            "public_queue_proxy": {
+              "sample_count": 2340,
+              "total_ns": 6368650216,
+              "mean_ms": 2.7216453914529914
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-100mbps/timed-baseline-2.json",
+          "result_file_sha256": "665320bfce2580652d419dfd39fe95fb000cf02c4449ad68b8adceb69f250d48",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-100mbps/timed-baseline-2.csv",
+          "csv_file_sha256": "99bac33699dede0b97a26d20c9462c50e6622957955c403da95da1f92ea5a769",
+          "means": {
+            "native_vt": {
+              "sample_count": 2340,
+              "total_ns": 5409935840,
+              "mean_ms": 2.311938393162393
+            },
+            "native_submission": {
+              "sample_count": 2339,
+              "total_ns": 1614064001,
+              "mean_ms": 0.6900658405301412
+            },
+            "public_queue_proxy": {
+              "sample_count": 2340,
+              "total_ns": 6357337210,
+              "mean_ms": 2.7168107735042737
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-100mbps/timed-candidate-2.json",
+          "result_file_sha256": "d43ea588452f353fda28b4c91e8572b8aeb83989acef6a2fc0137d19bf640bb0",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-100mbps/timed-candidate-2.csv",
+          "csv_file_sha256": "d5193470bc77cb2e9d63f651b84de8bb025e0843923605823f9f8559f4a9ba0d",
+          "means": {
+            "native_vt": {
+              "sample_count": 2341,
+              "total_ns": 5475040999,
+              "mean_ms": 2.3387616398974798
+            },
+            "native_submission": {
+              "sample_count": 2335,
+              "total_ns": 1648373699,
+              "mean_ms": 0.705941626980728
+            },
+            "public_queue_proxy": {
+              "sample_count": 2341,
+              "total_ns": 6536510111,
+              "mean_ms": 2.79218714694575
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-100mbps/timed-candidate-3.json",
+          "result_file_sha256": "691c68154045662b51917b591279ff363e4a0ce64306ac53f3cd848a23c43a70",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-100mbps/timed-candidate-3.csv",
+          "csv_file_sha256": "25d11ad587d02573083f6dc8f16ef424fed6eb704dce2a45c84925a9e1950122",
+          "means": {
+            "native_vt": {
+              "sample_count": 2340,
+              "total_ns": 5456050089,
+              "mean_ms": 2.331645337179487
+            },
+            "native_submission": {
+              "sample_count": 2333,
+              "total_ns": 1632224274,
+              "mean_ms": 0.6996246352336049
+            },
+            "public_queue_proxy": {
+              "sample_count": 2340,
+              "total_ns": 6420843699,
+              "mean_ms": 2.7439502987179485
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-100mbps/timed-baseline-3.json",
+          "result_file_sha256": "450d35ba928fb5ffc72049a0077cf5f852db5102912788fd6cc7ed0327c7e507",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-100mbps/timed-baseline-3.csv",
+          "csv_file_sha256": "8688bdcc04af79dc1cc110ee5b4aefcd3dec275ecd9f5410057657f76092d536",
+          "means": {
+            "native_vt": {
+              "sample_count": 2340,
+              "total_ns": 5437886110,
+              "mean_ms": 2.323882952991453
+            },
+            "native_submission": {
+              "sample_count": 2336,
+              "total_ns": 1621263452,
+              "mean_ms": 0.6940340119863014
+            },
+            "public_queue_proxy": {
+              "sample_count": 2340,
+              "total_ns": 6409965461,
+              "mean_ms": 2.739301479059829
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ultrawide-3440x1440p240-hevc-hdr10-250mbps",
+      "status": "BASELINE_FAILURE",
+      "bitrate": {
+        "requested_mbps": 250.0,
+        "measured_mbps": 213.563224,
+        "measured_to_requested_ratio": 0.854252896,
+        "tolerance_pct": 20.0,
+        "coverage_passed": true
+      },
+      "stream": {
+        "width": 3440,
+        "height": 1440,
+        "fps": 240,
+        "codec": "hevc",
+        "dynamic_range": "hdr10"
+      },
+      "builds": {
+        "baseline": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 7026,
+            "total_ns": 19980426228,
+            "mean_ms": 2.843783977796755
+          },
+          "native_submission": {
+            "sample_count": 7011,
+            "total_ns": 5309705490,
+            "mean_ms": 0.7573392511767223
+          },
+          "public_queue_proxy": {
+            "sample_count": 7026,
+            "total_ns": 25790062617,
+            "mean_ms": 3.6706607766865926
+          }
+        },
+        "candidate": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 7026,
+            "total_ns": 19867641610,
+            "mean_ms": 2.827731512951893
+          },
+          "native_submission": {
+            "sample_count": 7013,
+            "total_ns": 5259728636,
+            "mean_ms": 0.7499969536574932
+          },
+          "public_queue_proxy": {
+            "sample_count": 7026,
+            "total_ns": 25521457493,
+            "mean_ms": 3.632430613862795
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-250mbps/timed-baseline-1.json",
+          "result_file_sha256": "21c8b4ca87c61118b27e5a52db0f4775a101ea7ba30a82e2ead373a38ff755f0",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-250mbps/timed-baseline-1.csv",
+          "csv_file_sha256": "ba67cdfb20ac91d50598aabf21a20bf9cdee388783cabb499cf497bfac7b12a3",
+          "means": {
+            "native_vt": {
+              "sample_count": 2342,
+              "total_ns": 6643108699,
+              "mean_ms": 2.8365109730999145
+            },
+            "native_submission": {
+              "sample_count": 2336,
+              "total_ns": 1750095624,
+              "mean_ms": 0.7491847705479452
+            },
+            "public_queue_proxy": {
+              "sample_count": 2342,
+              "total_ns": 8540104502,
+              "mean_ms": 3.6465006413321945
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-250mbps/timed-candidate-1.json",
+          "result_file_sha256": "b67669893a55100f2bf84717b9aabebed134cc1d20858623551882843b37c82a",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-250mbps/timed-candidate-1.csv",
+          "csv_file_sha256": "6d0f3335f428eb5f942fce15dc564bd03fb5ef8147f933e4c07cf69d4d2fabe4",
+          "means": {
+            "native_vt": {
+              "sample_count": 2342,
+              "total_ns": 6643508817,
+              "mean_ms": 2.836681817677199
+            },
+            "native_submission": {
+              "sample_count": 2340,
+              "total_ns": 1766184792,
+              "mean_ms": 0.7547798256410256
+            },
+            "public_queue_proxy": {
+              "sample_count": 2342,
+              "total_ns": 8523560876,
+              "mean_ms": 3.6394367532023915
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-250mbps/timed-candidate-2.json",
+          "result_file_sha256": "f7e6f1ebe7e00a2ac22b11c4dc2b0d2b64d21f273bc09d944df98e297d504649",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-250mbps/timed-candidate-2.csv",
+          "csv_file_sha256": "e562b344103435693f94f1cdc25e45577f07ee610b434c25a1df4a5689593421",
+          "means": {
+            "native_vt": {
+              "sample_count": 2342,
+              "total_ns": 6606560343,
+              "mean_ms": 2.820905355678907
+            },
+            "native_submission": {
+              "sample_count": 2337,
+              "total_ns": 1742925823,
+              "mean_ms": 0.7457962443303381
+            },
+            "public_queue_proxy": {
+              "sample_count": 2342,
+              "total_ns": 8471359710,
+              "mean_ms": 3.617147613151153
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-250mbps/timed-baseline-2.json",
+          "result_file_sha256": "cf35b67c071d5a570334603558f8c8291a2982ab1206aecb2839ed6473c2f266",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-250mbps/timed-baseline-2.csv",
+          "csv_file_sha256": "308cbba4e7832404d47e0d311f66c680ddacacd288c31e7d95d2d58c7000fac1",
+          "means": {
+            "native_vt": {
+              "sample_count": 2342,
+              "total_ns": 6633041689,
+              "mean_ms": 2.8322125059777967
+            },
+            "native_submission": {
+              "sample_count": 2339,
+              "total_ns": 1756320169,
+              "mean_ms": 0.7508850658401026
+            },
+            "public_queue_proxy": {
+              "sample_count": 2342,
+              "total_ns": 8503781372,
+              "mean_ms": 3.630991192143467
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-250mbps/timed-baseline-3.json",
+          "result_file_sha256": "14bc8a0dd611c79e39fec973275a21d0b031f7ae98d68e46e2d6813dd06f1ef5",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-250mbps/timed-baseline-3.csv",
+          "csv_file_sha256": "e7598d30ed85fe2460589078610a5d962e4f8b3f23d4c94efdcefb0ff2f52db1",
+          "means": {
+            "native_vt": {
+              "sample_count": 2342,
+              "total_ns": 6704275840,
+              "mean_ms": 2.8626284543125533
+            },
+            "native_submission": {
+              "sample_count": 2336,
+              "total_ns": 1803289697,
+              "mean_ms": 0.7719562059075342
+            },
+            "public_queue_proxy": {
+              "sample_count": 2342,
+              "total_ns": 8746176743,
+              "mean_ms": 3.734490496584116
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-250mbps/timed-candidate-3.json",
+          "result_file_sha256": "029b6f52efec120312d0a0363a3743f89c6061975971889c1c380e6971dda148",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-250mbps/timed-candidate-3.csv",
+          "csv_file_sha256": "ecc22babf5831ec17105262a8a848b25473386fb541c4eb5e797c29c95a69e6d",
+          "means": {
+            "native_vt": {
+              "sample_count": 2342,
+              "total_ns": 6617572450,
+              "mean_ms": 2.825607365499573
+            },
+            "native_submission": {
+              "sample_count": 2336,
+              "total_ns": 1750618021,
+              "mean_ms": 0.7494083994006849
+            },
+            "public_queue_proxy": {
+              "sample_count": 2342,
+              "total_ns": 8526536907,
+              "mean_ms": 3.640707475234842
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ultrawide-3440x1440p240-hevc-hdr10-350mbps",
+      "status": "BASELINE_FAILURE",
+      "bitrate": {
+        "requested_mbps": 350.0,
+        "measured_mbps": 297.753136,
+        "measured_to_requested_ratio": 0.8507232457142857,
+        "tolerance_pct": 20.0,
+        "coverage_passed": true
+      },
+      "stream": {
+        "width": 3440,
+        "height": 1440,
+        "fps": 240,
+        "codec": "hevc",
+        "dynamic_range": "hdr10"
+      },
+      "builds": {
+        "baseline": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 7025,
+            "total_ns": 22655904533,
+            "mean_ms": 3.2250397911743773
+          },
+          "native_submission": {
+            "sample_count": 7018,
+            "total_ns": 5067898880,
+            "mean_ms": 0.7221286520376176
+          },
+          "public_queue_proxy": {
+            "sample_count": 7025,
+            "total_ns": 31358133579,
+            "mean_ms": 4.463791256797153
+          }
+        },
+        "candidate": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 7021,
+            "total_ns": 22755261427,
+            "mean_ms": 3.2410285467882067
+          },
+          "native_submission": {
+            "sample_count": 7005,
+            "total_ns": 5184123174,
+            "mean_ms": 0.7400604102783725
+          },
+          "public_queue_proxy": {
+            "sample_count": 7021,
+            "total_ns": 31169971099,
+            "mean_ms": 4.4395344109101265
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-350mbps/timed-candidate-1.json",
+          "result_file_sha256": "c41c9a1bb7fb105fbde721757c320fcde03d648257e3ccaa812d71d73a5d7de1",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-350mbps/timed-candidate-1.csv",
+          "csv_file_sha256": "4ae809c67c4d56f41ac7485f0f25a42a77558047614c8558c7391ff42012295e",
+          "means": {
+            "native_vt": {
+              "sample_count": 2340,
+              "total_ns": 7628066200,
+              "mean_ms": 3.2598573504273505
+            },
+            "native_submission": {
+              "sample_count": 2332,
+              "total_ns": 1755147855,
+              "mean_ms": 0.752636301457976
+            },
+            "public_queue_proxy": {
+              "sample_count": 2340,
+              "total_ns": 10494781782,
+              "mean_ms": 4.48494947948718
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-350mbps/timed-baseline-1.json",
+          "result_file_sha256": "8876b54339a32f1cd41744db8963096427c8289f4fae8c72021e803931ee5670",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-350mbps/timed-baseline-1.csv",
+          "csv_file_sha256": "50b46c0d786856ca702ec71135fe474004bcb9974cde5bff62a15fc3e6048363",
+          "means": {
+            "native_vt": {
+              "sample_count": 2341,
+              "total_ns": 7543050935,
+              "mean_ms": 3.2221490538231525
+            },
+            "native_submission": {
+              "sample_count": 2340,
+              "total_ns": 1685706506,
+              "mean_ms": 0.7203873957264958
+            },
+            "public_queue_proxy": {
+              "sample_count": 2341,
+              "total_ns": 10352435258,
+              "mean_ms": 4.42222779068774
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-350mbps/timed-baseline-2.json",
+          "result_file_sha256": "5b2bacafa6459018a9a222d78f3898c1a1d18619ed3ad800e9b7dcec7950feea",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-350mbps/timed-baseline-2.csv",
+          "csv_file_sha256": "ce8ddadca9e67bbb9da5028c243a06cac3efbb114cf0cc592a2890728710bf77",
+          "means": {
+            "native_vt": {
+              "sample_count": 2342,
+              "total_ns": 7585498260,
+              "mean_ms": 3.238897634500427
+            },
+            "native_submission": {
+              "sample_count": 2341,
+              "total_ns": 1714425481,
+              "mean_ms": 0.7323474929517301
+            },
+            "public_queue_proxy": {
+              "sample_count": 2342,
+              "total_ns": 10461871903,
+              "mean_ms": 4.467067422288642
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-350mbps/timed-candidate-2.json",
+          "result_file_sha256": "6964cbf9f3a529d5a7395eb91edbc9032251c10c2d1eec219ea8d7790c301fd9",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-350mbps/timed-candidate-2.csv",
+          "csv_file_sha256": "ff533479b0fb15f4946432a2a1cb5618092a1c827b2aae8b2863e7c533d169ee",
+          "means": {
+            "native_vt": {
+              "sample_count": 2340,
+              "total_ns": 7519025843,
+              "mean_ms": 3.213258907264957
+            },
+            "native_submission": {
+              "sample_count": 2337,
+              "total_ns": 1700384720,
+              "mean_ms": 0.727592948224219
+            },
+            "public_queue_proxy": {
+              "sample_count": 2340,
+              "total_ns": 10220861018,
+              "mean_ms": 4.3678893239316245
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-350mbps/timed-candidate-3.json",
+          "result_file_sha256": "e55b6bbd1e2f8a19fd588dc5655d8b8b278e63fc3cda3b29b147cb9fad9dc55a",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-350mbps/timed-candidate-3.csv",
+          "csv_file_sha256": "5a9772de9b7f4a9a333a00de582182806cdab378cd7a1038a9619e3dd3485a85",
+          "means": {
+            "native_vt": {
+              "sample_count": 2341,
+              "total_ns": 7608169384,
+              "mean_ms": 3.2499655634344298
+            },
+            "native_submission": {
+              "sample_count": 2336,
+              "total_ns": 1728590599,
+              "mean_ms": 0.7399788523116438
+            },
+            "public_queue_proxy": {
+              "sample_count": 2341,
+              "total_ns": 10454328299,
+              "mean_ms": 4.465753224690303
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "passed": false,
+          "result_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-350mbps/timed-baseline-3.json",
+          "result_file_sha256": "19517be9387aa7376b482958acec7f6811f60c9e35c24a6c5878852df71e3282",
+          "csv_file": "runs/ultrawide-3440x1440p240-hevc-hdr10-350mbps/timed-baseline-3.csv",
+          "csv_file_sha256": "ea2b714fe474dd199f7fa7fade485c045a4f36045c4393db16c1836286a10e1b",
+          "means": {
+            "native_vt": {
+              "sample_count": 2342,
+              "total_ns": 7527355338,
+              "mean_ms": 3.2140714508966695
+            },
+            "native_submission": {
+              "sample_count": 2337,
+              "total_ns": 1667766893,
+              "mean_ms": 0.7136358121523321
+            },
+            "public_queue_proxy": {
+              "sample_count": 2342,
+              "total_ns": 10543826418,
+              "mean_ms": 4.502060810418445
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4k-3840x2160p60-hevc-sdr-50mbps",
+      "status": "INCONCLUSIVE",
+      "bitrate": {
+        "requested_mbps": 50.0,
+        "measured_mbps": 60.819572,
+        "measured_to_requested_ratio": 1.21639144,
+        "tolerance_pct": 20.0,
+        "coverage_passed": false
+      },
+      "stream": {
+        "width": 3840,
+        "height": 2160,
+        "fps": 60,
+        "codec": "hevc",
+        "dynamic_range": "sdr"
+      },
+      "builds": {
+        "baseline": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 6563739192,
+            "mean_ms": 3.6465217733333333
+          },
+          "native_submission": {
+            "sample_count": 1797,
+            "total_ns": 1663758081,
+            "mean_ms": 0.9258531335559265
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 8174822248,
+            "mean_ms": 4.5415679155555555
+          }
+        },
+        "candidate": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 6497921867,
+            "mean_ms": 3.609956592777778
+          },
+          "native_submission": {
+            "sample_count": 1796,
+            "total_ns": 1591011083,
+            "mean_ms": 0.885863631959911
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 8157681813,
+            "mean_ms": 4.532045451666667
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-sdr-50mbps/timed-baseline-1.json",
+          "result_file_sha256": "e2c40daae6a13d5e94d29f8e03910e44ca5a2df22a01e6cd246513781f65484c",
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-50mbps/timed-baseline-1.csv",
+          "csv_file_sha256": "82c9911c82a9b2dc4d9f8cdae7bbfa7d22b14e3f51b19a49518614c0caf5a770",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2132620939,
+              "mean_ms": 3.5543682316666665
+            },
+            "native_submission": {
+              "sample_count": 598,
+              "total_ns": 522438445,
+              "mean_ms": 0.8736428846153846
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 2701696335,
+              "mean_ms": 4.502827225
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-sdr-50mbps/timed-candidate-1.json",
+          "result_file_sha256": "de436e052562981806398357b9b21ff21cc9fe7bb121619bb294e7f8f06bd13f",
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-50mbps/timed-candidate-1.csv",
+          "csv_file_sha256": "b50c2530ccb4315cd3ade30d2c4033a53dba37db50806756ec41afacabda60ac",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2111075800,
+              "mean_ms": 3.5184596666666663
+            },
+            "native_submission": {
+              "sample_count": 598,
+              "total_ns": 498700801,
+              "mean_ms": 0.8339478277591973
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 2680641842,
+              "mean_ms": 4.467736403333333
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-sdr-50mbps/timed-candidate-2.json",
+          "result_file_sha256": "1b9d47e3c0d950da92e252dfe75d66e60914293e4f0ea85d52c96c6db2d849dd",
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-50mbps/timed-candidate-2.csv",
+          "csv_file_sha256": "4966012d98cdb80b87a1b6bb0d80fca5a53a9ad7f3ee581c464d6fbd7bf40eaf",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2178110539,
+              "mean_ms": 3.6301842316666666
+            },
+            "native_submission": {
+              "sample_count": 599,
+              "total_ns": 529046627,
+              "mean_ms": 0.8832164056761268
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 2738459639,
+              "mean_ms": 4.564099398333333
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-sdr-50mbps/timed-baseline-2.json",
+          "result_file_sha256": "9099b47d1635a68d1b333ae32530945af7bd56abb21e413d1ed57704f6be3104",
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-50mbps/timed-baseline-2.csv",
+          "csv_file_sha256": "d8d1012f99e0718c3badf66c09eab78e96b84ab45adb1c5c866a8b9cf91f6a60",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2222034330,
+              "mean_ms": 3.70339055
+            },
+            "native_submission": {
+              "sample_count": 599,
+              "total_ns": 568299259,
+              "mean_ms": 0.9487466761268781
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 2743894450,
+              "mean_ms": 4.573157416666667
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-sdr-50mbps/timed-baseline-3.json",
+          "result_file_sha256": "af3f3ebb357b8af699517ffcc57d012e526604e6a2f837821443fe3618909406",
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-50mbps/timed-baseline-3.csv",
+          "csv_file_sha256": "36ea293d56863985950fa9eb93733b1da38e7a46832763a83fbd5c801617e61d",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2209083923,
+              "mean_ms": 3.6818065383333334
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 573020377,
+              "mean_ms": 0.9550339616666667
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 2729231463,
+              "mean_ms": 4.548719105000001
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-sdr-50mbps/timed-candidate-3.json",
+          "result_file_sha256": "7a2d22dbce94da5704837e93510e9825dae62047aff212326b016cba853994d2",
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-50mbps/timed-candidate-3.csv",
+          "csv_file_sha256": "75e637e1079df7341d9c4fdd6f11b558c4ca1aac719fcf914765889d9ce4f1f1",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2208735528,
+              "mean_ms": 3.68122588
+            },
+            "native_submission": {
+              "sample_count": 599,
+              "total_ns": 563263655,
+              "mean_ms": 0.9403399916527546
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 2738580332,
+              "mean_ms": 4.564300553333334
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4k-3840x2160p60-hevc-sdr-100mbps",
+      "status": "PASS",
+      "bitrate": {
+        "requested_mbps": 100.0,
+        "measured_mbps": 92.470736,
+        "measured_to_requested_ratio": 0.92470736,
+        "tolerance_pct": 20.0,
+        "coverage_passed": true
+      },
+      "stream": {
+        "width": 3840,
+        "height": 2160,
+        "fps": 60,
+        "codec": "hevc",
+        "dynamic_range": "sdr"
+      },
+      "builds": {
+        "baseline": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 7171580818,
+            "mean_ms": 3.984211565555556
+          },
+          "native_submission": {
+            "sample_count": 1798,
+            "total_ns": 1745619174,
+            "mean_ms": 0.9708671713014461
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 8904272640,
+            "mean_ms": 4.946818133333334
+          }
+        },
+        "candidate": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 7165392724,
+            "mean_ms": 3.9807737355555557
+          },
+          "native_submission": {
+            "sample_count": 1796,
+            "total_ns": 1772926368,
+            "mean_ms": 0.9871527661469932
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 8918980550,
+            "mean_ms": 4.954989194444444
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-sdr-100mbps/timed-candidate-1.json",
+          "result_file_sha256": "5cf9f84cba45934cf59b0220a0969b232f523f0d4b3541e410a53c2a5ec2bff7",
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-100mbps/timed-candidate-1.csv",
+          "csv_file_sha256": "53f237616bdb676e3222888c1b9466ca711d7d5e2c88436d2f6685355aace75e",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2374245428,
+              "mean_ms": 3.9570757133333334
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 579536792,
+              "mean_ms": 0.9658946533333334
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 2989033715,
+              "mean_ms": 4.981722858333334
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-sdr-100mbps/timed-baseline-1.json",
+          "result_file_sha256": "3055fbe10b8e63da88aa594d112a4b782ec992955ec599357b7b902d120d1abb",
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-100mbps/timed-baseline-1.csv",
+          "csv_file_sha256": "680ee231aaf2f2bb91397076efac2794750ed0404e02edb5f709e6caa903cf15",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2369431547,
+              "mean_ms": 3.9490525783333332
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 565097212,
+              "mean_ms": 0.9418286866666666
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 2928901139,
+              "mean_ms": 4.881501898333333
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-sdr-100mbps/timed-baseline-2.json",
+          "result_file_sha256": "919c833d72644556dd3cd3042e5c177dbec39da8d3254d68428c204be13264c4",
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-100mbps/timed-baseline-2.csv",
+          "csv_file_sha256": "5fb400539f0f75b85693276b72a102c291cb1cd505f558fd3fbb87766e82053f",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2395327050,
+              "mean_ms": 3.99221175
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 593615913,
+              "mean_ms": 0.989359855
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 3022299375,
+              "mean_ms": 5.037165625
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-sdr-100mbps/timed-candidate-2.json",
+          "result_file_sha256": "63903163dfee7caea24dff09f816abbc42ab8187e240adb0804ee91c3fb33105",
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-100mbps/timed-candidate-2.csv",
+          "csv_file_sha256": "1dca087d7d3c7497cb1d766a6b58c7e1cdd0eaa87274887808b21c9a0c398b9b",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2387328966,
+              "mean_ms": 3.9788816099999997
+            },
+            "native_submission": {
+              "sample_count": 598,
+              "total_ns": 590665079,
+              "mean_ms": 0.987734245819398
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 2972499630,
+              "mean_ms": 4.9541660499999995
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-sdr-100mbps/timed-candidate-3.json",
+          "result_file_sha256": "5635ce1d362c5f1068b80b38d2bc07365ca06db5eccd67758c2cc28e8c8a74e6",
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-100mbps/timed-candidate-3.csv",
+          "csv_file_sha256": "2c78c575a760bdadd3894e2e9c98828fa62c53048e36b4d62c4c333a3386a04c",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2403818330,
+              "mean_ms": 4.006363883333333
+            },
+            "native_submission": {
+              "sample_count": 598,
+              "total_ns": 602724497,
+              "mean_ms": 1.0079004966555185
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 2957447205,
+              "mean_ms": 4.9290786749999995
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-sdr-100mbps/timed-baseline-3.json",
+          "result_file_sha256": "80b6b7f11413a335aa160bbbef78c0edec96eeaa943a27ea828c59f63ec9f449",
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-100mbps/timed-baseline-3.csv",
+          "csv_file_sha256": "9562e1f3494a711a7d468ade6057b31a722f824245a817659951851ce631775d",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2406822221,
+              "mean_ms": 4.011370368333333
+            },
+            "native_submission": {
+              "sample_count": 598,
+              "total_ns": 586906049,
+              "mean_ms": 0.9814482424749164
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 2953072126,
+              "mean_ms": 4.921786876666667
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4k-3840x2160p60-hevc-sdr-250mbps",
+      "status": "PASS",
+      "bitrate": {
+        "requested_mbps": 250.0,
+        "measured_mbps": 214.384208,
+        "measured_to_requested_ratio": 0.857536832,
+        "tolerance_pct": 20.0,
+        "coverage_passed": true
+      },
+      "stream": {
+        "width": 3840,
+        "height": 2160,
+        "fps": 60,
+        "codec": "hevc",
+        "dynamic_range": "sdr"
+      },
+      "builds": {
+        "baseline": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 10698511561,
+            "mean_ms": 5.943617533888888
+          },
+          "native_submission": {
+            "sample_count": 1800,
+            "total_ns": 2160899425,
+            "mean_ms": 1.2004996805555554
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 12839665438,
+            "mean_ms": 7.133147465555555
+          }
+        },
+        "candidate": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 10628416382,
+            "mean_ms": 5.904675767777778
+          },
+          "native_submission": {
+            "sample_count": 1799,
+            "total_ns": 2108280242,
+            "mean_ms": 1.1719178665925514
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 12655334392,
+            "mean_ms": 7.0307413288888885
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-sdr-250mbps/timed-baseline-1.json",
+          "result_file_sha256": "057139b6d298da721ae011eb4241db8c455573d9ad7811d271a5a720bc94fdaa",
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-250mbps/timed-baseline-1.csv",
+          "csv_file_sha256": "c17fa5e62af6bccca76cf300241a1825e648b72402995c4410018ad3cedb44a0",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 3573395585,
+              "mean_ms": 5.955659308333334
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 716702405,
+              "mean_ms": 1.1945040083333334
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4296277020,
+              "mean_ms": 7.1604617
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-sdr-250mbps/timed-candidate-1.json",
+          "result_file_sha256": "791c0156fdd8721090d199d80c636551f24b30bcaf8c1daf51b87bc41e637adb",
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-250mbps/timed-candidate-1.csv",
+          "csv_file_sha256": "e2be9f33be20a97d46adcf2fa4ae99624132cbd2e54e859c984f3e5eb15e3ea3",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 3522005471,
+              "mean_ms": 5.870009118333333
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 695870713,
+              "mean_ms": 1.1597845216666667
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4187599796,
+              "mean_ms": 6.979332993333333
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-sdr-250mbps/timed-candidate-2.json",
+          "result_file_sha256": "0c0833ca0fb812dd8fe4f4a2f82f366a54f47501bfea6c788470a4c7d0c86c2f",
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-250mbps/timed-candidate-2.csv",
+          "csv_file_sha256": "1bd36c95530f2ee84eabd72edc7e4fb4e0a4e19d2e90866963607f25ed13b529",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 3572413303,
+              "mean_ms": 5.954022171666667
+            },
+            "native_submission": {
+              "sample_count": 599,
+              "total_ns": 720103280,
+              "mean_ms": 1.2021757595993323
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4253135507,
+              "mean_ms": 7.088559178333334
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-sdr-250mbps/timed-baseline-2.json",
+          "result_file_sha256": "596ef3a9468fe2ca3e199a00c8ac61fd6fe41aec4e4999f714a8d161ba66d839",
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-250mbps/timed-baseline-2.csv",
+          "csv_file_sha256": "7811927de92faa7c2c14f924fbd10492515df7740d4bbd5561b30d010203cb81",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 3560992814,
+              "mean_ms": 5.934988023333333
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 718335364,
+              "mean_ms": 1.1972256066666667
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4287455695,
+              "mean_ms": 7.1457594916666665
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-sdr-250mbps/timed-baseline-3.json",
+          "result_file_sha256": "fde32da59ac62fd83511bc8b0060f2239887229f3a14be86f86da83772ce38d9",
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-250mbps/timed-baseline-3.csv",
+          "csv_file_sha256": "73b58a785f036fd667d6b202bf9e321104183d0409642ebbb2350907b54db116",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 3564123162,
+              "mean_ms": 5.94020527
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 725861656,
+              "mean_ms": 1.2097694266666668
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4255932723,
+              "mean_ms": 7.093221205
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-sdr-250mbps/timed-candidate-3.json",
+          "result_file_sha256": "33570ed85a15f6851eec4b906d74b12a69cb7cbcc370cd203558f2077bbb93be",
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-250mbps/timed-candidate-3.csv",
+          "csv_file_sha256": "4348c55466701a466268094f7b762099adcbe040931d34e2b2de957d9a7dd7d2",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 3533997608,
+              "mean_ms": 5.889996013333334
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 692306249,
+              "mean_ms": 1.1538437483333333
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4214599089,
+              "mean_ms": 7.024331815
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4k-3840x2160p60-hevc-sdr-350mbps",
+      "status": "PASS",
+      "bitrate": {
+        "requested_mbps": 350.0,
+        "measured_mbps": 296.92328,
+        "measured_to_requested_ratio": 0.8483522285714286,
+        "tolerance_pct": 20.0,
+        "coverage_passed": true
+      },
+      "stream": {
+        "width": 3840,
+        "height": 2160,
+        "fps": 60,
+        "codec": "hevc",
+        "dynamic_range": "sdr"
+      },
+      "builds": {
+        "baseline": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 12668059551,
+            "mean_ms": 7.037810861666666
+          },
+          "native_submission": {
+            "sample_count": 1799,
+            "total_ns": 2101821855,
+            "mean_ms": 1.1683278793774319
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 14975579663,
+            "mean_ms": 8.319766479444445
+          }
+        },
+        "candidate": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 12855374145,
+            "mean_ms": 7.141874525
+          },
+          "native_submission": {
+            "sample_count": 1799,
+            "total_ns": 2270433303,
+            "mean_ms": 1.2620529755419676
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 15118167838,
+            "mean_ms": 8.398982132222223
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-sdr-350mbps/timed-candidate-1.json",
+          "result_file_sha256": "d08207c1ec51b42f0998611fe4f00d0d93a5259429b4864135f933b8cc317383",
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-350mbps/timed-candidate-1.csv",
+          "csv_file_sha256": "6dec4edd5646e5bae90f6c9aabec192c3c63f7cf4116632b00794c1aae80dc2d",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 4297557926,
+              "mean_ms": 7.162596543333333
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 767487299,
+              "mean_ms": 1.2791454983333332
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 5075291928,
+              "mean_ms": 8.45881988
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-sdr-350mbps/timed-baseline-1.json",
+          "result_file_sha256": "ac0504c19e42849efb47e81dc4684ab086bb6d8b1362490c8c370cd69032ce1e",
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-350mbps/timed-baseline-1.csv",
+          "csv_file_sha256": "aac2004321837d1e993c4b0da394e48a8cffc72501a94d0fafbbfc13312bb7d3",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 4115954413,
+              "mean_ms": 6.859924021666666
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 622359408,
+              "mean_ms": 1.03726568
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4877012618,
+              "mean_ms": 8.128354363333333
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-sdr-350mbps/timed-baseline-2.json",
+          "result_file_sha256": "8e9887d574590e2c6df26a0ece2f6e1b222bb1285fb5e0b2c44cefa0fb05cc33",
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-350mbps/timed-baseline-2.csv",
+          "csv_file_sha256": "f60c48db7a497dbdcb0c3453dc8d225494d608a543527beeaa44176ff1567f81",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 4265390879,
+              "mean_ms": 7.108984798333333
+            },
+            "native_submission": {
+              "sample_count": 599,
+              "total_ns": 729600163,
+              "mean_ms": 1.2180303222036728
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 5045385869,
+              "mean_ms": 8.408976448333334
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-sdr-350mbps/timed-candidate-2.json",
+          "result_file_sha256": "d404415470bed37e03614fd7d536f721054ea56aabb79de107d318eb78e2ef92",
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-350mbps/timed-candidate-2.csv",
+          "csv_file_sha256": "4c0a15fbb31a9aa763b7dbf42c528d66c313cbc4a3a9efb6a5320bc99b970137",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 4270517048,
+              "mean_ms": 7.117528413333333
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 745128789,
+              "mean_ms": 1.2418813149999999
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4985382499,
+              "mean_ms": 8.308970831666667
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-sdr-350mbps/timed-candidate-3.json",
+          "result_file_sha256": "fc91c86ec0faec45ca851238901bafea0de8aae9c330e94d70e6c902d3e89034",
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-350mbps/timed-candidate-3.csv",
+          "csv_file_sha256": "a7f272c1d7cb91b15c8e169a947905f5ced6819573014df880d05abf4a72f773",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 4287299171,
+              "mean_ms": 7.145498618333333
+            },
+            "native_submission": {
+              "sample_count": 599,
+              "total_ns": 757817215,
+              "mean_ms": 1.2651372537562604
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 5057493411,
+              "mean_ms": 8.429155685000001
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-sdr-350mbps/timed-baseline-3.json",
+          "result_file_sha256": "80cc15efd316fc06990d1dfcbeeb3d046498487e91b1887ed40568af98788728",
+          "csv_file": "runs/4k-3840x2160p60-hevc-sdr-350mbps/timed-baseline-3.csv",
+          "csv_file_sha256": "54cc5a274adfb38ec2fdcc1106c48bb75b53db8f6739d8e36252c1cd11d93b25",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 4286714259,
+              "mean_ms": 7.144523765
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 749862284,
+              "mean_ms": 1.2497704733333335
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 5053181176,
+              "mean_ms": 8.421968626666667
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4k-3840x2160p60-hevc-hdr10-50mbps",
+      "status": "INCONCLUSIVE",
+      "bitrate": {
+        "requested_mbps": 50.0,
+        "measured_mbps": 83.905288,
+        "measured_to_requested_ratio": 1.67810576,
+        "tolerance_pct": 20.0,
+        "coverage_passed": false
+      },
+      "stream": {
+        "width": 3840,
+        "height": 2160,
+        "fps": 60,
+        "codec": "hevc",
+        "dynamic_range": "hdr10"
+      },
+      "builds": {
+        "baseline": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 7576572983,
+            "mean_ms": 4.209207212777778
+          },
+          "native_submission": {
+            "sample_count": 1793,
+            "total_ns": 1825663726,
+            "mean_ms": 1.0182173597322923
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 9609371604,
+            "mean_ms": 5.3385397800000005
+          }
+        },
+        "candidate": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 7568537287,
+            "mean_ms": 4.204742937222222
+          },
+          "native_submission": {
+            "sample_count": 1793,
+            "total_ns": 1793879362,
+            "mean_ms": 1.0004904417177913
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 9511477603,
+            "mean_ms": 5.284154223888889
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-hdr10-50mbps/timed-baseline-1.json",
+          "result_file_sha256": "d2026608e79a7172b763ef353203435d90fceecddf368ee6e9bbb30fd7f02782",
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-50mbps/timed-baseline-1.csv",
+          "csv_file_sha256": "13633e9e86109dd5cb1213fe37cea9f9c53e73ec5c564924ab4d9a700091bb7f",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2524080283,
+              "mean_ms": 4.206800471666667
+            },
+            "native_submission": {
+              "sample_count": 596,
+              "total_ns": 606407500,
+              "mean_ms": 1.0174622483221476
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 3186875058,
+              "mean_ms": 5.31145843
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-hdr10-50mbps/timed-candidate-1.json",
+          "result_file_sha256": "550a5ce26c960dcc67dd9811eb96be6c1844a028967538f8ca8d22ce6b6ace92",
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-50mbps/timed-candidate-1.csv",
+          "csv_file_sha256": "6673a821ea153786489626075abbb90cd7f1d397b298b1ae88a95dbb7bb3c36b",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2545770193,
+              "mean_ms": 4.242950321666666
+            },
+            "native_submission": {
+              "sample_count": 596,
+              "total_ns": 620142278,
+              "mean_ms": 1.040507177852349
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 3219852668,
+              "mean_ms": 5.366421113333334
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-hdr10-50mbps/timed-candidate-2.json",
+          "result_file_sha256": "9eb56ac1578124dc5fc01054e1612b40e82450077f09d291664bf25301c428e8",
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-50mbps/timed-candidate-2.csv",
+          "csv_file_sha256": "8657b83fe9ead8916dcba10c51faaabdf55036e6ebb87fbf068662497b4cbd66",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2530338164,
+              "mean_ms": 4.217230273333334
+            },
+            "native_submission": {
+              "sample_count": 598,
+              "total_ns": 596594207,
+              "mean_ms": 0.9976491755852842
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 3173162046,
+              "mean_ms": 5.28860341
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-hdr10-50mbps/timed-baseline-2.json",
+          "result_file_sha256": "fd03d608b4a5712f5ad8eb6b62199381fd86dd6f753b3e2b7244f7afb12215f3",
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-50mbps/timed-baseline-2.csv",
+          "csv_file_sha256": "bc4a1e94507dbb145981ef47953eec018303898af752c2ed8dba6b26ce688b64",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2505796621,
+              "mean_ms": 4.176327701666667
+            },
+            "native_submission": {
+              "sample_count": 598,
+              "total_ns": 596520613,
+              "mean_ms": 0.9975261086956522
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 3199041417,
+              "mean_ms": 5.331735695
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-hdr10-50mbps/timed-baseline-3.json",
+          "result_file_sha256": "e4d3583c0bc6ccf7c8dd6f58d35842af6965f536c9285bbffd1568036703bf97",
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-50mbps/timed-baseline-3.csv",
+          "csv_file_sha256": "ca1c57bd70e5204572507abd583348adfc62eacf49bce693ff8765345a41c5eb",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2546696079,
+              "mean_ms": 4.244493465
+            },
+            "native_submission": {
+              "sample_count": 599,
+              "total_ns": 622735613,
+              "mean_ms": 1.0396253973288814
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 3223455129,
+              "mean_ms": 5.372425215
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-hdr10-50mbps/timed-candidate-3.json",
+          "result_file_sha256": "c4c0e77ce852ad51ee54547f8172204d30ef3e5ce08f0aabe33a068991cd2b17",
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-50mbps/timed-candidate-3.csv",
+          "csv_file_sha256": "c5dcd4e72866886d8e87dfbc95aee8d6233fb9112ab4834d82ffd4e9ce40db98",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2492428930,
+              "mean_ms": 4.154048216666666
+            },
+            "native_submission": {
+              "sample_count": 599,
+              "total_ns": 577142877,
+              "mean_ms": 0.9635106460767947
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 3118462889,
+              "mean_ms": 5.197438148333333
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4k-3840x2160p60-hevc-hdr10-100mbps",
+      "status": "PASS",
+      "bitrate": {
+        "requested_mbps": 100.0,
+        "measured_mbps": 91.76814,
+        "measured_to_requested_ratio": 0.9176814,
+        "tolerance_pct": 20.0,
+        "coverage_passed": true
+      },
+      "stream": {
+        "width": 3840,
+        "height": 2160,
+        "fps": 60,
+        "codec": "hevc",
+        "dynamic_range": "hdr10"
+      },
+      "builds": {
+        "baseline": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 7301467212,
+            "mean_ms": 4.056370673333333
+          },
+          "native_submission": {
+            "sample_count": 1798,
+            "total_ns": 1871721426,
+            "mean_ms": 1.0410019054505006
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 8959939432,
+            "mean_ms": 4.977744128888889
+          }
+        },
+        "candidate": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 7350946374,
+            "mean_ms": 4.083859096666667
+          },
+          "native_submission": {
+            "sample_count": 1795,
+            "total_ns": 1878437771,
+            "mean_ms": 1.0464834378830083
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 9067339215,
+            "mean_ms": 5.037410674999999
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-hdr10-100mbps/timed-candidate-1.json",
+          "result_file_sha256": "3abc030bba1e6f21a352105df1857937557ff6550ac4a1e0c08ce4f897a9fed2",
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-100mbps/timed-candidate-1.csv",
+          "csv_file_sha256": "cc977d1c8a4a0a64e26c3caabf9010f8c2ccb15b2206b95764f8ebe864da33ed",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2442586531,
+              "mean_ms": 4.070977551666667
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 622295163,
+              "mean_ms": 1.037158605
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 3020811966,
+              "mean_ms": 5.0346866100000005
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-hdr10-100mbps/timed-baseline-1.json",
+          "result_file_sha256": "3017a52670b2be558c40126d8ce07d88441fb5e48dc5d877e5bb56707eab98c5",
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-100mbps/timed-baseline-1.csv",
+          "csv_file_sha256": "40ff39c4bd00275337364dad21493372dcf59db836e0832c373ac5981298c3f9",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2415815950,
+              "mean_ms": 4.026359916666666
+            },
+            "native_submission": {
+              "sample_count": 599,
+              "total_ns": 617055208,
+              "mean_ms": 1.0301422504173623
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 2960866803,
+              "mean_ms": 4.934778005
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-hdr10-100mbps/timed-baseline-2.json",
+          "result_file_sha256": "3df2e158601bc223c290e06c5b131e6e99364d6b823653e9245d1dd453a4135f",
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-100mbps/timed-baseline-2.csv",
+          "csv_file_sha256": "e45a259c8685318c59cdcfcffb6de4eca752990762eb8c6f4c888c1beec8b2f1",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2457110662,
+              "mean_ms": 4.095184436666666
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 632976422,
+              "mean_ms": 1.0549607033333335
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 3024373754,
+              "mean_ms": 5.040622923333333
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-hdr10-100mbps/timed-candidate-2.json",
+          "result_file_sha256": "80873c7963eefee87c401127a67590f40543442a7eb100e36e176abd040c5105",
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-100mbps/timed-candidate-2.csv",
+          "csv_file_sha256": "8cdc8258aa0d88c2139a3df8d8308529c12b2c067d45d91002110057e53d138e",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2461894879,
+              "mean_ms": 4.1031581316666665
+            },
+            "native_submission": {
+              "sample_count": 599,
+              "total_ns": 631117099,
+              "mean_ms": 1.0536178614357263
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 3023487722,
+              "mean_ms": 5.039146203333333
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-hdr10-100mbps/timed-candidate-3.json",
+          "result_file_sha256": "c79e7fbbe2b4fb9056cd3ccb1c6b1d98e5699efa3ef936568a9f987173de3b1c",
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-100mbps/timed-candidate-3.csv",
+          "csv_file_sha256": "ee28516c5bd35bc47eb9cb273dfb132a2dc3f47d105a0c031ca182e568e2a59d",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2446464964,
+              "mean_ms": 4.0774416066666666
+            },
+            "native_submission": {
+              "sample_count": 596,
+              "total_ns": 625025509,
+              "mean_ms": 1.048700518456376
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 3023039527,
+              "mean_ms": 5.0383992116666665
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-hdr10-100mbps/timed-baseline-3.json",
+          "result_file_sha256": "9d19dd8b70fccc2cf68b9306662f82fe33edafb7bcc7c9b3ed0f0925e148934d",
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-100mbps/timed-baseline-3.csv",
+          "csv_file_sha256": "7a6cb050329ce54f990421e8fee1678b784da4fd3dbb40880a85adf7394891a4",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 2428540600,
+              "mean_ms": 4.047567666666667
+            },
+            "native_submission": {
+              "sample_count": 599,
+              "total_ns": 621689796,
+              "mean_ms": 1.0378794590984974
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 2974698875,
+              "mean_ms": 4.957831458333333
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4k-3840x2160p60-hevc-hdr10-250mbps",
+      "status": "PASS",
+      "bitrate": {
+        "requested_mbps": 250.0,
+        "measured_mbps": 214.239504,
+        "measured_to_requested_ratio": 0.856958016,
+        "tolerance_pct": 20.0,
+        "coverage_passed": true
+      },
+      "stream": {
+        "width": 3840,
+        "height": 2160,
+        "fps": 60,
+        "codec": "hevc",
+        "dynamic_range": "hdr10"
+      },
+      "builds": {
+        "baseline": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 10849676139,
+            "mean_ms": 6.027597855000001
+          },
+          "native_submission": {
+            "sample_count": 1799,
+            "total_ns": 2233998582,
+            "mean_ms": 1.241800212340189
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 13258154979,
+            "mean_ms": 7.365641655
+          }
+        },
+        "candidate": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 10767773322,
+            "mean_ms": 5.98209629
+          },
+          "native_submission": {
+            "sample_count": 1798,
+            "total_ns": 2201815763,
+            "mean_ms": 1.2245916368186873
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 13140507482,
+            "mean_ms": 7.3002819344444445
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-hdr10-250mbps/timed-baseline-1.json",
+          "result_file_sha256": "fae30289c72e94886ce4dd38b59726150885f59035bb3567b08fad21ec5e7e84",
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-250mbps/timed-baseline-1.csv",
+          "csv_file_sha256": "f83ac535252981e137ecaab552165f9ad42662da445f26951742752abfb2bad2",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 3625243599,
+              "mean_ms": 6.042072665
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 755784229,
+              "mean_ms": 1.2596403816666666
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4326390852,
+              "mean_ms": 7.21065142
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-hdr10-250mbps/timed-candidate-1.json",
+          "result_file_sha256": "134687406193772cab65f259062e099851687df7c976cb3a5d2587b2f70b043c",
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-250mbps/timed-candidate-1.csv",
+          "csv_file_sha256": "bb567937fa4ece584b03cdfbd58b75670b830bce6228d8b2b81a4decdd3f3852",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 3609056088,
+              "mean_ms": 6.015093480000001
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 751893871,
+              "mean_ms": 1.2531564516666667
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4313677925,
+              "mean_ms": 7.189463208333333
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-hdr10-250mbps/timed-candidate-2.json",
+          "result_file_sha256": "2c3210933c604fb4309f0e76abf1a6c9056c5c684237d1b726d99d7b5190a07e",
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-250mbps/timed-candidate-2.csv",
+          "csv_file_sha256": "2cd50e6f630183aa4f146a1b7ae7376f7e512deec2c9fbf8efa39f5c9174e26a",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 3568223287,
+              "mean_ms": 5.947038811666666
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 717412279,
+              "mean_ms": 1.1956871316666666
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4395036379,
+              "mean_ms": 7.325060631666667
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-hdr10-250mbps/timed-baseline-2.json",
+          "result_file_sha256": "12e0ac9af24d8b7147f123673577b8d922be73304d35fc6b5357845a87c11a2a",
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-250mbps/timed-baseline-2.csv",
+          "csv_file_sha256": "4c76117112e6d8d23f0b9d394e1554f24f5787c908674c7658d7dfc5c89e7db0",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 3621219406,
+              "mean_ms": 6.035365676666666
+            },
+            "native_submission": {
+              "sample_count": 599,
+              "total_ns": 741777009,
+              "mean_ms": 1.2383589465776292
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4521751646,
+              "mean_ms": 7.536252743333333
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-hdr10-250mbps/timed-baseline-3.json",
+          "result_file_sha256": "a74497e1d960607ff28f8a2c89ed1e344b1fb17e00bacbc0ebefc4ded45538f7",
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-250mbps/timed-baseline-3.csv",
+          "csv_file_sha256": "f263da8e76506feb0c95d398b3d36a0d255caa4a3f6f5f409c022960206db197",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 3603213134,
+              "mean_ms": 6.005355223333334
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 736437344,
+              "mean_ms": 1.2273955733333333
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4410012481,
+              "mean_ms": 7.350020801666667
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-hdr10-250mbps/timed-candidate-3.json",
+          "result_file_sha256": "01a933546cc1db7f7eb73ff19f598fa53ae9bf9676777ad64e43c39f40e0367b",
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-250mbps/timed-candidate-3.csv",
+          "csv_file_sha256": "80b349468f93ea2abab9b9d46018127fc4e4acfef195ea7aa28bc396e3460baa",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 3590493947,
+              "mean_ms": 5.984156578333333
+            },
+            "native_submission": {
+              "sample_count": 598,
+              "total_ns": 732509613,
+              "mean_ms": 1.2249324632107024
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4431793178,
+              "mean_ms": 7.386321963333333
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4k-3840x2160p60-hevc-hdr10-350mbps",
+      "status": "PASS",
+      "bitrate": {
+        "requested_mbps": 350.0,
+        "measured_mbps": 296.411328,
+        "measured_to_requested_ratio": 0.8468895085714286,
+        "tolerance_pct": 20.0,
+        "coverage_passed": true
+      },
+      "stream": {
+        "width": 3840,
+        "height": 2160,
+        "fps": 60,
+        "codec": "hevc",
+        "dynamic_range": "hdr10"
+      },
+      "builds": {
+        "baseline": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 12982160970,
+            "mean_ms": 7.21231165
+          },
+          "native_submission": {
+            "sample_count": 1800,
+            "total_ns": 2297608866,
+            "mean_ms": 1.2764493700000001
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 15332653860,
+            "mean_ms": 8.518141033333333
+          }
+        },
+        "candidate": {
+          "trials": 3,
+          "native_vt": {
+            "sample_count": 1800,
+            "total_ns": 12896366538,
+            "mean_ms": 7.164648076666667
+          },
+          "native_submission": {
+            "sample_count": 1800,
+            "total_ns": 2247571526,
+            "mean_ms": 1.2486508477777778
+          },
+          "public_queue_proxy": {
+            "sample_count": 1800,
+            "total_ns": 15144119803,
+            "mean_ms": 8.413399890555555
+          }
+        }
+      },
+      "runs": [
+        {
+          "setting": "candidate",
+          "repetition": 1,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-hdr10-350mbps/timed-candidate-1.json",
+          "result_file_sha256": "0ffebc8205ed23261c53e9f5d9fcd87c8e4e344a6664b3f67e5d993ce85f9ad8",
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-350mbps/timed-candidate-1.csv",
+          "csv_file_sha256": "c8f363456fae6c2c24ce08d75fba97d3ba3832bf8dc44e9657783d47a67cd871",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 4186230875,
+              "mean_ms": 6.977051458333333
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 675929076,
+              "mean_ms": 1.12654846
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 4925912623,
+              "mean_ms": 8.209854371666667
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 1,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-hdr10-350mbps/timed-baseline-1.json",
+          "result_file_sha256": "29d5c0812cbaf1add16ef5cdd6df970a47cf4a6aa61e0ed307760e123595140a",
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-350mbps/timed-baseline-1.csv",
+          "csv_file_sha256": "88cf29d4a63841c1550a88d4689a37b63ef14ab746be4eb1d5227cf3df98f4b0",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 4275873653,
+              "mean_ms": 7.126456088333333
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 725732503,
+              "mean_ms": 1.2095541716666667
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 5057134553,
+              "mean_ms": 8.428557588333334
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 2,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-hdr10-350mbps/timed-baseline-2.json",
+          "result_file_sha256": "e65801be71118777ba0fbd238d0b22f088e2b02146c66c02e62c1949948afdc2",
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-350mbps/timed-baseline-2.csv",
+          "csv_file_sha256": "e5e044c60ed05cd674e2364309843ea21b13db9d586e70f14aed7a744a1e05bc",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 4350694542,
+              "mean_ms": 7.25115757
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 786535202,
+              "mean_ms": 1.3108920033333333
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 5136449999,
+              "mean_ms": 8.560749998333334
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 2,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-hdr10-350mbps/timed-candidate-2.json",
+          "result_file_sha256": "c1a7f1f000ae262abc805f58d3d7ab4d601f00657af6f53a869de42076762fef",
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-350mbps/timed-candidate-2.csv",
+          "csv_file_sha256": "03f9e7e9fb824714ff858cf16fc85f9d54e5e37ddfd4cca8426c9ebf4d7f31cb",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 4359794603,
+              "mean_ms": 7.266324338333333
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 785257717,
+              "mean_ms": 1.3087628616666667
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 5121500927,
+              "mean_ms": 8.535834878333334
+            }
+          }
+        },
+        {
+          "setting": "candidate",
+          "repetition": 3,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-hdr10-350mbps/timed-candidate-3.json",
+          "result_file_sha256": "7dd08cfaac044f49d842fe188b3705736d9ddd5f525d06ff4d8b1ea13728884f",
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-350mbps/timed-candidate-3.csv",
+          "csv_file_sha256": "bf6940f6507df8461956e8b31e4a82d8e3840bc1a1f2a07f9e796acc2296df8c",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 4350341060,
+              "mean_ms": 7.250568433333334
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 786384733,
+              "mean_ms": 1.3106412216666667
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 5096706253,
+              "mean_ms": 8.494510421666666
+            }
+          }
+        },
+        {
+          "setting": "baseline",
+          "repetition": 3,
+          "passed": true,
+          "result_file": "runs/4k-3840x2160p60-hevc-hdr10-350mbps/timed-baseline-3.json",
+          "result_file_sha256": "b58408e421c650dac98fafb097caeeaeec6f0dab5df87d0ffc974b27f9a03498",
+          "csv_file": "runs/4k-3840x2160p60-hevc-hdr10-350mbps/timed-baseline-3.csv",
+          "csv_file_sha256": "d6c8c773560e2a69d99b0668b743ea994ec7a8a08f243004e12d5f4d188c6227",
+          "means": {
+            "native_vt": {
+              "sample_count": 600,
+              "total_ns": 4355592775,
+              "mean_ms": 7.259321291666667
+            },
+            "native_submission": {
+              "sample_count": 600,
+              "total_ns": 785341161,
+              "mean_ms": 1.308901935
+            },
+            "public_queue_proxy": {
+              "sample_count": 600,
+              "total_ns": 5139069308,
+              "mean_ms": 8.565115513333334
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "report_sha256": "219d8b6ed4702aff832732762adf0895259b8c4abf5e0db0956d18ee6be09071"
+}

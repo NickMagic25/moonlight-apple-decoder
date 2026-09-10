@@ -1,0 +1,99 @@
+{
+  "audit_status": "PASS",
+  "dataset_status": "FAIL",
+  "plan_sha256": "d00359525eac60b0d09f0e7d040a95ffb9a5c97848ce9166c2b10897a14b5527",
+  "analysis_sha256": "293148150d337547e10f679d7aaf9babac864f5b0580c34427fa912a56ae69b0",
+  "full_plan_sha256": "e40d440e225bdc47387fe1c5715e228dc113f66f8e4cba5604c6b73e8bc1455e",
+  "pixel_checks_audited": 4,
+  "pixel_checks_passed": 4,
+  "total_samples": 7133184000,
+  "total_outputs": 960,
+  "maximum_code_error": 0,
+  "native_json_csv_log_hashes_verified": 84,
+  "native_timed_counts": {
+    "PASS": 13,
+    "FAIL": 11
+  },
+  "timed_totals": {
+    "offered": 115200,
+    "displayed_outputs": 114580,
+    "scheduler_drops": 605,
+    "failed_or_cancelled_or_dropped": 15
+  },
+  "latency_gates_exceeded": [],
+  "case_status_counts": {
+    "REGRESSION": 1,
+    "BASELINE_FAILURE": 1
+  },
+  "source_profile": "two realtime HEVC fixtures, same source manifests, compressed payload identities, and software-reference pixel hashes as full run",
+  "checks": [
+    {
+      "case": "ultrawide-3440x1440p240-hevc-hdr10-50mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "maximum_code_error": 0
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-hdr10-50mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "maximum_code_error": 0
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-hdr10-250mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "maximum_code_error": 0
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-hdr10-250mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "maximum_code_error": 0
+    }
+  ],
+  "cases": [
+    {
+      "case": "ultrawide-3440x1440p240-hevc-hdr10-50mbps",
+      "status": "REGRESSION",
+      "native_timed_counts": {
+        "baseline/PASS": 6,
+        "candidate/PASS": 5,
+        "candidate/FAIL": 1
+      },
+      "bitrate": {
+        "requested_mbps": 50.0,
+        "measured_mbps": 50.946848,
+        "measured_to_requested_ratio": 1.01893696,
+        "tolerance_pct": 20.0,
+        "coverage_passed": true
+      }
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-hdr10-250mbps",
+      "status": "BASELINE_FAILURE",
+      "native_timed_counts": {
+        "candidate/PASS": 2,
+        "baseline/FAIL": 6,
+        "candidate/FAIL": 4
+      },
+      "bitrate": {
+        "requested_mbps": 250.0,
+        "measured_mbps": 213.563224,
+        "measured_to_requested_ratio": 0.854252896,
+        "tolerance_pct": 20.0,
+        "coverage_passed": true
+      }
+    }
+  ],
+  "errors": [],
+  "scope": "Bounded read-only audit; compressed payload bytes not rehashed. HDR output checks execute inside native correctness mode and are implied by PASS; native JSON additionally records depth and fallback HDR-validity flags."
+}

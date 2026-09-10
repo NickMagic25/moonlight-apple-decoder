@@ -90,20 +90,25 @@ AppleVideoDecoder::~AppleVideoDecoder() {
     if (m_OverlayRegistered) Session::get()->getOverlayManager().setOverlayRenderer(nullptr);
     delete m_Renderer;
     if (!m_TestOnly && metrics.accepted) {
-        char mean[64] = "unavailable", handoffMean[64] = "unavailable";
+        char mean[64] = "unavailable", submissionMean[64] = "unavailable", handoffMean[64] = "unavailable";
+        const uint64_t decodeSamples = m_DecodeSamples.load();
+        const uint64_t submissionSamples = m_SubmissionSamples.load();
         if (m_HandoffSamples) SDL_snprintf(handoffMean, sizeof(handoffMean), "%.3f", double(m_HandoffNs.load()) / double(m_HandoffSamples.load()) / 1000);
-        if (m_DecodeSamples) SDL_snprintf(mean, sizeof(mean), "%.3f", double(m_DecodeNs.load()) / double(m_DecodeSamples.load()) / 1000);
+        if (decodeSamples) SDL_snprintf(mean, sizeof(mean), "%.3f", double(m_DecodeNs.load()) / double(decodeSamples) / 1000);
+        if (submissionSamples) SDL_snprintf(submissionMean, sizeof(submissionMean), "%.3f", double(m_SubmissionNs.load()) / double(submissionSamples) / 1000);
         SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
             "Native final: submitted=%llu completed=%llu displayed=%llu no-display=%llu failures=%llu "
             "handoff=%llu handoff-dropped=%llu pacer-dropped=%u rendered=%u "
-            "pacer-us=%llu render-call-us=%llu VT-submit-to-callback-mean-us=%s callback-to-pacer-mean-us=%s; presentation unavailable",
+            "pacer-us=%llu render-call-us=%llu VT-submit-to-callback-mean-us=%s callback-to-pacer-mean-us=%s "
+            "VT-submit-to-return-mean-us=%s VT-submit-to-return-samples=%llu VT-submit-to-callback-samples=%llu; presentation unavailable",
             (unsigned long long)metrics.accepted, (unsigned long long)metrics.completed,
             (unsigned long long)metrics.displayed, (unsigned long long)metrics.no_display,
             (unsigned long long)metrics.failed, (unsigned long long)m_HandoffFrames.load(),
             (unsigned long long)m_HandoffDrops.load(), m_PacerStats.pacerDroppedFrames,
             m_PacerStats.renderedFrames, (unsigned long long)m_PacerStats.totalPacerTimeUs,
             (unsigned long long)m_PacerStats.totalRenderTimeUs,
-            mean, handoffMean);
+            mean, handoffMean, submissionMean, (unsigned long long)submissionSamples,
+            (unsigned long long)decodeSamples);
     }
 }
 
@@ -261,11 +266,19 @@ void AppleVideoDecoder::receive(const mav_completion& completion) {
     }
     if (completion.status != MAV_COMPLETION_OUTPUT || !completion.pixel_buffer) return;
     if (m_Stopping) { ++m_HandoffDrops; return; }
-    if ((completion.trace.valid & (MAV_TRACE_CALLBACK | MAV_TRACE_VT_SUBMIT)) ==
-        (MAV_TRACE_CALLBACK | MAV_TRACE_VT_SUBMIT) && !completion.show_existing_frame &&
-        completion.internal_samples == 1 && completion.trace.callback_ns >= completion.trace.vt_submit_ns) {
-        m_DecodeNs += completion.trace.callback_ns - completion.trace.vt_submit_ns;
-        ++m_DecodeSamples;
+    if (!completion.show_existing_frame && completion.internal_samples == 1) {
+        if ((completion.trace.valid & (MAV_TRACE_CALLBACK | MAV_TRACE_VT_SUBMIT)) ==
+            (MAV_TRACE_CALLBACK | MAV_TRACE_VT_SUBMIT) && completion.trace.callback_ns >= completion.trace.vt_submit_ns) {
+            m_DecodeNs += completion.trace.callback_ns - completion.trace.vt_submit_ns;
+            ++m_DecodeSamples;
+        }
+        // A completion may precede the submission call's return. Only use an
+        // observed return timestamp, independently of callback timing samples.
+        if ((completion.trace.valid & (MAV_TRACE_VT_SUBMIT | MAV_TRACE_VT_RETURN)) ==
+            (MAV_TRACE_VT_SUBMIT | MAV_TRACE_VT_RETURN) && completion.trace.vt_return_ns >= completion.trace.vt_submit_ns) {
+            m_SubmissionNs += completion.trace.vt_return_ns - completion.trace.vt_submit_ns;
+            ++m_SubmissionSamples;
+        }
     }
     std::unique_lock<std::mutex> lock(m_OutputMutex, std::try_to_lock);
     if (!lock.owns_lock()) {
@@ -482,13 +495,18 @@ void AppleVideoDecoder::updateOverlay() {
     mav_metrics metrics{}; metrics.struct_size = sizeof(metrics); metrics.version = MAV_ABI_VERSION;
     mav_decoder_get_metrics(m_Decoder, &metrics);
     char text[1024];
-    char mean[64] = "unavailable";
-    if (m_DecodeSamples) SDL_snprintf(mean, sizeof(mean), "%.3f ms", double(m_DecodeNs.load()) / double(m_DecodeSamples.load()) / 1000000);
+    char mean[64] = "unavailable", submissionMean[64] = "unavailable";
+    const uint64_t decodeSamples = m_DecodeSamples.load();
+    const uint64_t submissionSamples = m_SubmissionSamples.load();
+    if (decodeSamples) SDL_snprintf(mean, sizeof(mean), "%.3f ms", double(m_DecodeNs.load()) / double(decodeSamples) / 1000000);
+    if (submissionSamples) SDL_snprintf(submissionMean, sizeof(submissionMean), "%.3f ms", double(m_SubmissionNs.load()) / double(submissionSamples) / 1000000);
     SDL_snprintf(text, sizeof(text),
         "Native VideoToolbox %s %d-bit / Metal\nReceived: %llu  Decoded: %llu  Network loss: %llu\n"
         "In flight: %llu/%u  Backpressure: %llu  Recovery: %llu\n"
         "Common-c queue: %d (sampled peak %u/15)\nAdmission age: %llu us (peak %llu us)\n"
-        "Display handoff drops: %llu  Decode errors: %llu\nVT submit-to-callback mean: %s\nPresentation latency: unavailable",
+        "Display handoff drops: %llu  Decode errors: %llu\n"
+        "VT submission mean (submit -> return): %s (%llu samples)\n"
+        "Frame-ready mean (VT submit -> callback): %s (%llu samples)\nPresentation latency: unavailable",
         codecFor(m_Params.videoFormat) == MAV_CODEC_AV1 ? "AV1" : "HEVC",
         m_Params.videoFormat & VIDEO_FORMAT_MASK_10BIT ? 10 : 8,
         (unsigned long long)m_Received, (unsigned long long)metrics.displayed,
@@ -496,7 +514,8 @@ void AppleVideoDecoder::updateOverlay() {
         (unsigned long long)metrics.would_block, (unsigned long long)metrics.recoveries,
         LiGetPendingVideoFrames(), m_PeakCommonQueue, (unsigned long long)m_LastAdmissionAgeUs,
         (unsigned long long)m_PeakAdmissionAgeUs, (unsigned long long)m_HandoffDrops.load(),
-        (unsigned long long)metrics.failed, mean);
+        (unsigned long long)metrics.failed, submissionMean, (unsigned long long)submissionSamples,
+        mean, (unsigned long long)decodeSamples);
     overlay.updateOverlayText(Overlay::OverlayDebug, text);
 }
 

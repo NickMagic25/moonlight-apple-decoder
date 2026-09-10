@@ -9,7 +9,10 @@ dependency. Native H.264 is not implemented.
 ## Build
 
 Prerequisites: Apple SDK with the public AV1 declarations (Xcode 15+), CMake
-3.20+, C++17 compiler; Swift 5.9+ for SwiftPM. This work was built with SDK 26.5.
+3.23+, and a compiler supporting C++23 for both C++ and Objective-C++.
+SwiftPM requires Swift 6.3+ and compiles Swift sources in Swift 6 language mode;
+its `.cxx2b` setting selects C++23. The upgrade was validated with Xcode 26.6,
+Apple Clang 21, Swift 6.3.3, and SDK 26.5.
 The core supports macOS 11+, iOS/iPadOS 17+, tvOS 17+; AV1 hardware sessions are
 runtime gated (macOS 14+/iOS/tvOS 17+ plus actual hardware support). These are
 library targets, not a change to a consumer application's deployment target.
@@ -34,6 +37,13 @@ The Swift target imports the C Clang module; Swift C++ interoperability is not
 required. See [Swift ownership smoke](examples/swift/main.swift) and the full
 ownership/concurrency contract in the public header.
 
+See [C++23 and Swift 6.3 validation](docs/toolchain-upgrade.md) for the upgrade's
+regression coverage and consumer compatibility checks.
+The [resolution/frame-rate matrix](docs/toolchain-matrix.md) covers 1080p60/120,
+3440x1440p120/240, and 4K60/120, including the AV1 startup-budget limitation and
+its C++17 comparison. The [performance opportunities review](docs/toolchain-performance-opportunities.md)
+outlines further experiments enabled by the newer toolchains.
+
 Portable parser and mock lifecycle tests also build on Linux. Linux tests and
 simulator builds never establish VideoToolbox hardware performance.
 
@@ -52,6 +62,23 @@ See [fixture workflow](docs/fixtures.md), [benchmarks](docs/benchmarks.md), and
 results, and limits. Encoders run before replay, never during timing. Strict
 coverage fails when a required codec/variant is unavailable. Hardware-required
 session creation and actual hardware output are checked separately.
+
+The [YAML testing framework](docs/testing-framework.md) configures resolution,
+frame rate, codec, dynamic range, bitrate in Mbps, and decoder settings for local
+and CI runs. The [bitrate matrix](benchmarks/bitrate-matrix.yaml) covers all six
+resolution/frame-rate modes with 50, 100, 250, and 350 Mbps targets for AV1/HEVC
+and SDR/HDR10 (96 cases). Requested targets and measured encoded rates are
+reported separately. It compares two builds using identical fixtures and
+alternating run order. Explicit-bitrate noise fixtures require full-frame
+comparison against an independent software reference before timing; the optional
+FFmpeg helper is a testing dependency only. Each comparison writes
+human-readable `report.md`, machine-readable
+`results.json`, and JUnit results alongside the raw measurements.
+The [96-case Mbps validation](docs/bitrate-matrix-validation.md) preserves both
+reports, measured bitrate coverage, and any delivery failures.
+The [full paired toolchain comparison](docs/toolchain-paired-comparison.md)
+records all requested modes, the queue-32 startup control, and balanced
+confirmation of the initial latency flags.
 
 [Latency optimization investigation](docs/optimization-investigation.md) compares
 paced and saturated decode and ranks the next experiments toward the 1 ms goal.

@@ -3,6 +3,7 @@
 #import <IOSurface/IOSurface.h>
 #include "moonlight_apple_video/decoder.h"
 #include "fixture_support.hpp"
+#include "replay_startup.h"
 #include <sys/sysctl.h>
 #include <unistd.h>
 #include <mutex>
@@ -14,6 +15,7 @@
 #include <iostream>
 #include <cmath>
 #include <memory>
+#include <array>
 #include <sys/resource.h>
 #if MAV_VT_EXPERIMENTS
 #include "vt_experiment_output.hpp"
@@ -39,6 +41,15 @@ struct ReplayActivity {
 };
 #endif
 struct Record {mav_completion c{};uint64_t entry=0;CVPixelBufferRef retained=nullptr;};
+enum class SchedulerDropReason { arrivalDeadline, capacityDeadline, awaitingRandomAccess, injectedDrop };
+static constexpr std::array<const char*,4> schedulerDropNames{
+    "arrival_deadline", "capacity_deadline", "awaiting_random_access", "injected_drop"
+};
+struct SchedulerEvent {
+    uint64_t frameId, offeredIndex;
+    SchedulerDropReason reason;
+    uint64_t observedNs, scheduledArrivalNs, deadlineNs;
+};
 struct Sink {std::mutex lock;std::vector<Record> records;bool correctness=false;uint64_t overflow=0,retained=0,retainedPeak=0;std::condition_variable ready;bool finished=false;std::string validationError;CVPixelBufferRef ownershipProbe=nullptr;
 #if MAV_VT_EXPERIMENTS
     vt_experiment::RetainedOutputs heldOutputs;
@@ -115,16 +126,22 @@ static mav_color manifestFallback(const Manifest& manifest){
     return result;
 }
 int main(int argc,char**argv){@autoreleasepool{mav_decoder*decoder=nullptr;Sink sink;CVMetalTextureCacheRef cache=nullptr;std::thread consumer;ReferenceStats referenceStats;try{
+    // Capability probing must not load a fixture or initialize Apple devices.
+    for(int i=1;i<argc;++i)if(std::string(argv[i])=="--capabilities"){
+        std::cout<<"{\"startup_policy\":\"fixed-initial-deadline-v1\",\"max_startup_grace_ms\":10000}\n";
+        return 0;
+    }
 #if MAV_VT_EXPERIMENTS
     ReplayActivity activity;
     sink.heldOutputs.configureFromEnvironment();
 #endif
-    std::map<std::string,std::string>o;for(int i=1;i<argc;++i){std::string k=argv[i];if(k=="--help"){std::cout<<"mav-replay --fixture manifest.json --output results/run --mode correctness|paced|throughput|fault [--inflight 2 --fps 120 --loops 1 --warmup 12 --power -1 --queue-depth 16 --seed 7 --jitter-us 0 --drop-every 0 --corrupt-every 0 --reset-every 0 --consumer-delay-ms 0 --loop-mode reset|continuous] [--spin-us 0..1000]\n";return 0;}if(i+1>=argc)throw std::runtime_error("option missing value");o[k]=argv[++i];}
+    std::map<std::string,std::string>o;for(int i=1;i<argc;++i){std::string k=argv[i];if(k=="--help"){std::cout<<"mav-replay --fixture manifest.json --output results/run --mode correctness|paced|throughput|fault [--inflight 2 --fps 120 --loops 1 --warmup 12 --power -1 --queue-depth 16 --seed 7 --jitter-us 0 --drop-every 0 --corrupt-every 0 --reset-every 0 --consumer-delay-ms 0 --loop-mode reset|continuous] [--spin-us 0..1000] [--startup-grace-ms 0..10000]\n       mav-replay --capabilities\n";return 0;}if(i+1>=argc)throw std::runtime_error("option missing value");o[k]=argv[++i];}
     auto val=[&](std::string k,std::string d){return o.count(k)?o[k]:d;};if(!o.count("--fixture"))throw std::runtime_error("--fixture required");auto m=load(o["--fixture"]);std::string mode=val("--mode","correctness"),out=val("--output","results/replay");
     if(mode!="correctness"&&mode!="paced"&&mode!="throughput"&&mode!="fault")throw std::runtime_error("invalid mode");sink.correctness=mode=="correctness"||mode=="fault";
     std::string loopMode=val("--loop-mode","reset");if(loopMode!="reset"&&loopMode!="continuous")throw std::runtime_error("loop-mode must be reset or continuous");
     uint64_t spinUs=std::stoull(val("--spin-us","0"));if(spinUs>1000)throw std::runtime_error("spin-us must be 0..1000");
     uint64_t spinNs=spinUs*1000,spinTotal=0;
+    const uint64_t startupGraceMs=replay::parseStartupGraceMs(val("--startup-grace-ms","0"));
     size_t loops=std::stoull(val("--loops","1")),warmup=std::stoull(val("--warmup","0"));if(!loops||loops>10000||loops*m.units.size()>1000000)throw std::runtime_error("too many submissions");
     size_t total=loops*m.units.size(),queue=std::stoull(val("--queue-depth","16"));sink.records.reserve(total);
     double fps=std::stod(val("--fps",std::to_string(double(m.fps_num)/m.fps_den)));if(fps<=0||fps>10000||queue<1||queue>4096)throw std::runtime_error("invalid rate/queue depth");
@@ -138,6 +155,9 @@ int main(int argc,char**argv){@autoreleasepool{mav_decoder*decoder=nullptr;Sink 
     auto status=mav_decoder_create(&cfg,&decoder);if(status!=MAV_OK)throw std::runtime_error("BLOCKED create: "+std::string(mav_result_string(status)));
     rusage cpuStart{};getrusage(RUSAGE_SELF,&cpuStart);uint64_t cpuWindowStart=mav_monotonic_time_ns();
     uint64_t start=mav_monotonic_time_ns()+(paced?20000000:0),offered=0,submitted=0,rejected=0,backpressure=0,drops=0,resets=0,expectedOutputs=0;bool needRandom=false;std::vector<double>schedulerLateness;std::map<uint64_t,uint32_t>expected;
+    const replay::InitialDeadline admissionPolicy(start,interval,queue,startupGraceMs);
+    std::array<uint64_t,4> schedulerDropCounts{};
+    std::vector<SchedulerEvent> schedulerEvents;schedulerEvents.reserve(total);
     int64_t mediaStart=m.units.front().pts,mediaEnd=mediaStart; uint64_t idStride=0; for(auto&a:m.units){if(a.pts_valid)mediaEnd=std::max(mediaEnd,a.pts+a.duration);idStride=std::max(idStride,a.id+1);}if(__int128(mediaEnd)-mediaStart>INT64_MAX)throw std::runtime_error("media duration overflow");int64_t mediaDuration=mediaEnd-mediaStart;if(mediaDuration<=0)throw std::runtime_error("fixture loop has no positive media duration"); auto scaled=[&](int64_t value,size_t loop){__int128 v=(__int128(value)+__int128(loop)*mediaDuration)*m.timebase_num;if(v<INT64_MIN||v>INT64_MAX)throw std::runtime_error("media timestamp overflow");return int64_t(v);};
     if(__int128(idStride)*loops>UINT64_MAX)throw std::runtime_error("loop frame IDs overflow");
     for(size_t i=0;i<total;++i){auto&a=m.units[i%m.units.size()];if(a.discontinuity){if(mav_decoder_reset(decoder)!=MAV_OK)throw std::runtime_error("fixture discontinuity reset failed");++resets;needRandom=true;}if(loopMode=="reset"&&i&&i%m.units.size()==0){if(mav_decoder_drain(decoder)!=MAV_OK)throw std::runtime_error("loop drain failed");if(mav_decoder_reset(decoder)!=MAV_OK)throw std::runtime_error("loop reset failed");++resets;}
@@ -146,16 +166,37 @@ int main(int argc,char**argv){@autoreleasepool{mav_decoder*decoder=nullptr;Sink 
             if(spinNs&&arrival-now<=spinNs){auto begin=now;do{now=mav_monotonic_time_ns();}while(now<arrival);spinTotal+=now-begin;break;}
             std::this_thread::sleep_for(std::chrono::nanoseconds(std::min(arrival-now-spinNs,uint64_t(1000000))));}
         ++offered;uint64_t attempt=mav_monotonic_time_ns();schedulerLateness.push_back(double(attempt>arrival?attempt-arrival:0));
-        bool discard=(dropEvery&&i&&i%dropEvery==0)||(paced&&attempt>arrival+interval*queue);
-        if(discard){++drops;needRandom=true;mav_decoder_reset(decoder);++resets;continue;}
+        const uint64_t frameId=a.id+(i/m.units.size())*idStride;
+        const uint64_t admissionDeadline=admissionPolicy.deadline(arrival);
+        auto recordDrop=[&](SchedulerDropReason reason,uint64_t observed){
+            ++drops;++schedulerDropCounts[static_cast<size_t>(reason)];
+            schedulerEvents.push_back({frameId,i,reason,observed,arrival,admissionDeadline});
+        };
+        const bool injectedDrop=dropEvery&&i&&i%dropEvery==0;
+        if(injectedDrop||(paced&&attempt>admissionDeadline)){
+            recordDrop(injectedDrop?SchedulerDropReason::injectedDrop:SchedulerDropReason::arrivalDeadline,attempt);
+            needRandom=true;mav_decoder_reset(decoder);++resets;continue;
+        }
         if(resetEvery&&i&&i%resetEvery==0){mav_decoder_reset(decoder);++resets;needRandom=true;}
-        if(needRandom&&!a.random){++drops;continue;}if(a.random)needRandom=false;
+        if(needRandom&&!a.random){recordDrop(SchedulerDropReason::awaitingRandomAccess,mav_monotonic_time_ns());continue;}if(a.random)needRandom=false;
         mav_access_unit u;mav_access_unit_default(&u,cfg.codec);mav_span span{m.payload.data()+a.offset,size_t(a.size)};std::vector<uint8_t>corrupt;
         if(corruptEvery&&i&&i%corruptEvery==0){corrupt.assign(span.data,span.data+span.size);corrupt[0]=0xff;span.data=corrupt.data();}
-        u.spans=&span;u.span_count=1;u.frame_id=a.id+(i/m.units.size())*idStride;u.caller_context=reinterpret_cast<void*>(uintptr_t(i)+1);u.pts={scaled(a.pts,i/m.units.size()),int32_t(m.timebase_den),a.pts_valid};u.dts={scaled(a.dts,i/m.units.size()),int32_t(m.timebase_den),a.dts_valid};u.duration={scaled(a.duration,0),int32_t(m.timebase_den),1};u.flags=a.random?MAV_INPUT_RANDOM_ACCESS:0;u.scheduled_arrival_ns=arrival;
+        u.spans=&span;u.span_count=1;u.frame_id=frameId;u.caller_context=reinterpret_cast<void*>(uintptr_t(i)+1);u.pts={scaled(a.pts,i/m.units.size()),int32_t(m.timebase_den),a.pts_valid};u.dts={scaled(a.dts,i/m.units.size()),int32_t(m.timebase_den),a.dts_valid};u.duration={scaled(a.duration,0),int32_t(m.timebase_den),1};u.flags=a.random?MAV_INPUT_RANDOM_ACCESS:0;u.scheduled_arrival_ns=arrival;
         if(mode=="correctness"){std::unique_lock<std::mutex>lock(sink.lock);sink.ready.wait(lock,[&]{return sink.retained<16;});}
-        auto deadline=mav_monotonic_time_ns()+10000000000ull;
-        do {status=mav_decoder_submit_copy(decoder,&u);if(status==MAV_WOULD_BLOCK){++backpressure;if(mav_monotonic_time_ns()>deadline)throw std::runtime_error("capacity stalled for 10 seconds");mav_decoder_wait_for_capacity(decoder,1000000);if(paced&&mav_monotonic_time_ns()>arrival+interval*queue){++drops;needRandom=true;mav_decoder_reset(decoder);++resets;break;}}}while(status==MAV_WOULD_BLOCK);
+        auto capacityStallDeadline=mav_monotonic_time_ns()+10000000000ull;
+        do {
+            status=mav_decoder_submit_copy(decoder,&u);
+            if(status==MAV_WOULD_BLOCK){
+                ++backpressure;
+                if(mav_monotonic_time_ns()>capacityStallDeadline)throw std::runtime_error("capacity stalled for 10 seconds");
+                mav_decoder_wait_for_capacity(decoder,1000000);
+                const uint64_t observed=mav_monotonic_time_ns();
+                if(paced&&observed>admissionDeadline){
+                    recordDrop(SchedulerDropReason::capacityDeadline,observed);
+                    needRandom=true;mav_decoder_reset(decoder);++resets;break;
+                }
+            }
+        }while(status==MAV_WOULD_BLOCK);
         if(status==MAV_OK){++submitted;expected[u.frame_id]=a.displays;expectedOutputs+=a.displays;}else if(status!=MAV_WOULD_BLOCK){++rejected;if(mode!="fault")throw std::runtime_error("submit "+std::to_string(i)+": "+mav_result_string(status));needRandom=true;mav_decoder_reset(decoder);++resets;}
     }
     status=mav_decoder_drain(decoder);if(status!=MAV_OK)throw std::runtime_error("drain failed");uint64_t end=mav_monotonic_time_ns();rusage cpuEnd{};getrusage(RUSAGE_SELF,&cpuEnd);uint64_t cpuWindowEnd=mav_monotonic_time_ns();mav_metrics metrics{};metrics.struct_size=sizeof(metrics);metrics.version=MAV_ABI_VERSION;mav_decoder_get_metrics(decoder,&metrics);
@@ -185,6 +226,40 @@ int main(int argc,char**argv){@autoreleasepool{mav_decoder*decoder=nullptr;Sink 
     auto microseconds=[](timeval t){return double(t.tv_sec)*1e6+t.tv_usec;};
     double cpuSeconds=(microseconds(cpuEnd.ru_utime)+microseconds(cpuEnd.ru_stime)-microseconds(cpuStart.ru_utime)-microseconds(cpuStart.ru_stime))/1e6;
     NSMutableDictionary* annotated=[result mutableCopy];annotated[@"experiment_spin_us"]=@(spinUs);annotated[@"experiment_busy_wait_wall_ns"]=@(spinTotal);
+    annotated[@"startup_policy"]=@"fixed-initial-deadline-v1";
+    annotated[@"startup_grace_ms"]=@(startupGraceMs);
+    annotated[@"queue_depth"]=@(queue);
+    annotated[@"scheduled_start_ns"]=@(start);
+    id firstOutput=NSNull.null,initialSetup=NSNull.null;
+    const Record* firstAdmitted=nullptr;
+    uint64_t earliestOutput=UINT64_MAX;
+    for(const auto& record:sink.records){
+        if(record.c.status==MAV_COMPLETION_OUTPUT&&record.entry>=start)
+            earliestOutput=std::min(earliestOutput,record.entry);
+        if(!firstAdmitted||reinterpret_cast<uintptr_t>(record.c.caller_context)<reinterpret_cast<uintptr_t>(firstAdmitted->c.caller_context))
+            firstAdmitted=&record;
+    }
+    if(earliestOutput!=UINT64_MAX)firstOutput=@(earliestOutput-start);
+    // A cancelled first submission can still expose the session setup delay.
+    // Never substitute a later recovered generation for an unavailable trace.
+    if(firstAdmitted){
+        const auto& trace=firstAdmitted->c.trace;
+        if((trace.valid&(MAV_TRACE_PREPARATION|MAV_TRACE_VT_SUBMIT))==(MAV_TRACE_PREPARATION|MAV_TRACE_VT_SUBMIT)
+           &&trace.preparation_end_ns&&trace.vt_submit_ns>=trace.preparation_end_ns)
+            initialSetup=@(trace.vt_submit_ns-trace.preparation_end_ns);
+    }
+    annotated[@"startup_first_output_ns"]=firstOutput;
+    annotated[@"initial_setup_ns"]=initialSetup;
+    NSMutableDictionary* dropCounts=[NSMutableDictionary dictionary];
+    for(size_t i=0;i<schedulerDropNames.size();++i)dropCounts[ns(schedulerDropNames[i])]=@(schedulerDropCounts[i]);
+    annotated[@"scheduler_drop_counts"]=dropCounts;
+    NSMutableArray* dropEvents=[NSMutableArray arrayWithCapacity:schedulerEvents.size()];
+    for(const auto& event:schedulerEvents){
+        [dropEvents addObject:@{@"frame_id":@(event.frameId),@"offered_index":@(event.offeredIndex),
+            @"reason":ns(schedulerDropNames[static_cast<size_t>(event.reason)]),@"observed_ns":@(event.observedNs),
+            @"scheduled_arrival_ns":@(event.scheduledArrivalNs),@"deadline_ns":@(event.deadlineNs)}];
+    }
+    annotated[@"scheduler_events"]=dropEvents;
     double cpuWindowSeconds=double(cpuWindowEnd-cpuWindowStart)/1e9;annotated[@"experiment_process_cpu_seconds"]=@(cpuSeconds);annotated[@"experiment_cpu_window_seconds"]=@(cpuWindowSeconds);annotated[@"experiment_cpu_percent_one_core"]=@(100*cpuSeconds/cpuWindowSeconds);
     annotated[@"experiment_pacing_semantics"]=@"Original absolute arrival deadlines; sleep until bounded final window then poll the monotonic clock; includes busy-wait CPU cost";result=annotated;
 #if MAV_VT_EXPERIMENTS

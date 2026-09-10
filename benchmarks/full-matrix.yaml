@@ -1,0 +1,32 @@
+# Six client modes, each with AV1/HEVC and SDR8/HDR10: 24 configurations.
+# null bitrate preserves the existing fixture encoder policy. Results report
+# measured bitrate; null never claims a requested target bitrate.
+schema_version: 1
+defaults:
+  codec: [av1, hevc]
+  dynamic_range: [sdr, hdr10]
+  bitrate_mbps: null
+  gop: 60
+  decoder:
+    inflight: 2
+    queue_depth: 16
+    power: -1
+run:
+  seconds: 10
+  repetitions: 3
+  warmup_frames: 120
+  timeout_seconds: 180
+thresholds:
+  decoded_fps_ratio: 0.99
+  latency_relative_pct: 5.0
+  latency_absolute_ms: 0.1
+cases:
+  - name: 1080p
+    resolution: 1920x1080
+    fps: [60, 120]
+  - name: ultrawide
+    resolution: 3440x1440
+    fps: [120, 240]
+  - name: 4k
+    resolution: 3840x2160
+    fps: [60, 120]

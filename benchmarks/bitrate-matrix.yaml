@@ -1,0 +1,33 @@
+# Six client modes x AV1/HEVC x SDR8/HDR10 x four target bitrates: 96 cases.
+# Bitrates are decimal megabits per second (Mbps); measured bitrate is reported
+# separately because an encoder target does not guarantee the achieved rate.
+schema_version: 1
+defaults:
+  codec: [av1, hevc]
+  dynamic_range: [sdr, hdr10]
+  bitrate_mbps: [50, 100, 250, 350]
+  gop: 60
+  decoder:
+    inflight: 2
+    queue_depth: 16
+    power: -1
+run:
+  seconds: 10
+  repetitions: 3
+  warmup_frames: 120
+  timeout_seconds: 180
+thresholds:
+  bitrate_tolerance_pct: 20.0
+  decoded_fps_ratio: 0.99
+  latency_relative_pct: 5.0
+  latency_absolute_ms: 0.1
+cases:
+  - name: 1080p
+    resolution: 1920x1080
+    fps: [60, 120]
+  - name: ultrawide
+    resolution: 3440x1440
+    fps: [120, 240]
+  - name: 4k
+    resolution: 3840x2160
+    fps: [60, 120]

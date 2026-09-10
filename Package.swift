@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.3
 import PackageDescription
 let package = Package(
     name: "MoonlightAppleVideo",
@@ -13,4 +13,7 @@ let package = Package(
                 cxxSettings: [.headerSearchPath("src")],
                 linkerSettings: [.linkedFramework("VideoToolbox"), .linkedFramework("CoreMedia"), .linkedFramework("CoreVideo"), .linkedFramework("CoreFoundation"), .linkedFramework("IOSurface")]),
         .executableTarget(name: "OwnershipSmoke", dependencies: ["MoonlightAppleVideo"], path: "examples/swift")
-    ], cxxLanguageStandard: .cxx17)
+    ],
+    swiftLanguageModes: [.v6],
+    // SwiftPM names the C++23 standard using its draft spelling.
+    cxxLanguageStandard: .cxx2b)

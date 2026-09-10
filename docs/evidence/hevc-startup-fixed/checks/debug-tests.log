@@ -1,0 +1,18 @@
+Internal ctest changing into directory: /Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/build-startup-debug
+Test project /Users/nmajkic/git/moonlight-dev/moonlight-apple-decoder/build-startup-debug
+    Start 1: fixture-options
+1/6 Test #1: fixture-options ..................   Passed    0.18 sec
+    Start 2: replay-startup
+2/6 Test #2: replay-startup ...................   Passed    0.15 sec
+    Start 3: bitstream
+3/6 Test #3: bitstream ........................   Passed    0.48 sec
+    Start 4: abi-c
+4/6 Test #4: abi-c ............................   Passed    0.19 sec
+    Start 5: adapter-timing
+5/6 Test #5: adapter-timing ...................   Passed    0.15 sec
+    Start 6: lifecycle
+6/6 Test #6: lifecycle ........................   Passed    0.41 sec
+
+100% tests passed, 0 tests failed out of 6
+
+Total Test time (real) =   1.57 sec

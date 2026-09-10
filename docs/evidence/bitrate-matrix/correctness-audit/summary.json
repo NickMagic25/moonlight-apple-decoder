@@ -1,0 +1,2459 @@
+{
+  "audit_status": "PASS",
+  "dataset_status": "FAIL",
+  "plan_sha256": "e40d440e225bdc47387fe1c5715e228dc113f66f8e4cba5604c6b73e8bc1455e",
+  "analysis_sha256": "83051d25e546583a32f2212f1bd624925f401384d758fa40ecb713e73f1b3682",
+  "checks_audited": 192,
+  "checks_passed": 192,
+  "software_reference_samples_total": 205037568000,
+  "decoded_outputs_total": 26880,
+  "maximum_observed_code_error": 0,
+  "hdr_checks": 96,
+  "native_and_csv_and_log_hashes_verified": 576,
+  "source_manifests_verified": 96,
+  "software_decoder_counts": {
+    "libdav1d": 48,
+    "hevc": 48
+  },
+  "source_encoding_profile_counts": {
+    "av1_realtime": 48,
+    "hevc_realtime": 47,
+    "hevc_offline": 1
+  },
+  "phase_counts": {
+    "correctness": 192,
+    "timed": 576
+  },
+  "case_status_counts": {
+    "PASS": 50,
+    "INCONCLUSIVE": 24,
+    "BASELINE_FAILURE": 21,
+    "REGRESSION": 1
+  },
+  "bitrate_coverage_counts": {
+    "PASS": 58,
+    "OUTSIDE_TOLERANCE": 38
+  },
+  "timed_derived_outcomes": {
+    "baseline/passed": 227,
+    "candidate/passed": 227,
+    "baseline/failed": 61,
+    "candidate/failed": 61
+  },
+  "timed_native_outcomes": {
+    "baseline/PASS": 227,
+    "candidate/PASS": 227,
+    "baseline/FAIL": 61,
+    "candidate/FAIL": 61
+  },
+  "errors": [],
+  "checks": [
+    {
+      "case": "1080p-1920x1080p60-av1-sdr-50mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p60-av1-sdr-50mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p60-av1-sdr-100mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p60-av1-sdr-100mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p60-av1-sdr-250mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p60-av1-sdr-250mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p60-av1-sdr-350mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p60-av1-sdr-350mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p60-av1-hdr10-50mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p60-av1-hdr10-50mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p60-av1-hdr10-100mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p60-av1-hdr10-100mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p60-av1-hdr10-250mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p60-av1-hdr10-250mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p60-av1-hdr10-350mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p60-av1-hdr10-350mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p60-hevc-sdr-50mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p60-hevc-sdr-50mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p60-hevc-sdr-100mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p60-hevc-sdr-100mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p60-hevc-sdr-250mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p60-hevc-sdr-250mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p60-hevc-sdr-350mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p60-hevc-sdr-350mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p60-hevc-hdr10-50mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p60-hevc-hdr10-50mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p60-hevc-hdr10-100mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p60-hevc-hdr10-100mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p60-hevc-hdr10-250mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p60-hevc-hdr10-250mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p60-hevc-hdr10-350mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p60-hevc-hdr10-350mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p120-av1-sdr-50mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p120-av1-sdr-50mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p120-av1-sdr-100mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p120-av1-sdr-100mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p120-av1-sdr-250mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p120-av1-sdr-250mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p120-av1-sdr-350mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p120-av1-sdr-350mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p120-av1-hdr10-50mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p120-av1-hdr10-50mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p120-av1-hdr10-100mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p120-av1-hdr10-100mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p120-av1-hdr10-250mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p120-av1-hdr10-250mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p120-av1-hdr10-350mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p120-av1-hdr10-350mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p120-hevc-sdr-50mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p120-hevc-sdr-50mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p120-hevc-sdr-100mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p120-hevc-sdr-100mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p120-hevc-sdr-250mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p120-hevc-sdr-250mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p120-hevc-sdr-350mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p120-hevc-sdr-350mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "1080p-1920x1080p120-hevc-hdr10-50mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p120-hevc-hdr10-50mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p120-hevc-hdr10-100mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p120-hevc-hdr10-100mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p120-hevc-hdr10-250mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p120-hevc-hdr10-250mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p120-hevc-hdr10-350mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "1080p-1920x1080p120-hevc-hdr10-350mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 373248000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p120-av1-sdr-50mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p120-av1-sdr-50mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p120-av1-sdr-100mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p120-av1-sdr-100mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p120-av1-sdr-250mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p120-av1-sdr-250mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p120-av1-sdr-350mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p120-av1-sdr-350mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p120-av1-hdr10-50mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p120-av1-hdr10-50mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p120-av1-hdr10-100mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p120-av1-hdr10-100mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p120-av1-hdr10-250mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p120-av1-hdr10-250mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p120-av1-hdr10-350mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p120-av1-hdr10-350mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p120-hevc-sdr-50mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p120-hevc-sdr-50mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p120-hevc-sdr-100mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p120-hevc-sdr-100mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p120-hevc-sdr-250mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p120-hevc-sdr-250mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p120-hevc-sdr-350mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p120-hevc-sdr-350mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p120-hevc-hdr10-50mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p120-hevc-hdr10-50mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p120-hevc-hdr10-100mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p120-hevc-hdr10-100mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p120-hevc-hdr10-250mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p120-hevc-hdr10-250mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p120-hevc-hdr10-350mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p120-hevc-hdr10-350mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 891648000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p240-av1-sdr-50mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p240-av1-sdr-50mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p240-av1-sdr-100mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p240-av1-sdr-100mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p240-av1-sdr-250mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p240-av1-sdr-250mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p240-av1-sdr-350mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p240-av1-sdr-350mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p240-av1-hdr10-50mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p240-av1-hdr10-50mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p240-av1-hdr10-100mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p240-av1-hdr10-100mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p240-av1-hdr10-250mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p240-av1-hdr10-250mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p240-av1-hdr10-350mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p240-av1-hdr10-350mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-sdr-50mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-sdr-50mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-sdr-100mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-sdr-100mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-sdr-250mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-sdr-250mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-sdr-350mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-sdr-350mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-hdr10-50mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-hdr10-50mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-hdr10-100mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-hdr10-100mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-hdr10-250mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-hdr10-250mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-hdr10-350mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-hdr10-350mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1783296000,
+      "outputs": 240,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p60-av1-sdr-50mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p60-av1-sdr-50mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p60-av1-sdr-100mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p60-av1-sdr-100mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p60-av1-sdr-250mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p60-av1-sdr-250mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p60-av1-sdr-350mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p60-av1-sdr-350mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p60-av1-hdr10-50mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p60-av1-hdr10-50mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p60-av1-hdr10-100mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p60-av1-hdr10-100mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p60-av1-hdr10-250mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p60-av1-hdr10-250mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p60-av1-hdr10-350mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p60-av1-hdr10-350mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p60-hevc-sdr-50mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p60-hevc-sdr-50mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p60-hevc-sdr-100mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p60-hevc-sdr-100mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p60-hevc-sdr-250mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p60-hevc-sdr-250mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p60-hevc-sdr-350mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p60-hevc-sdr-350mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p60-hevc-hdr10-50mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p60-hevc-hdr10-50mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p60-hevc-hdr10-100mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p60-hevc-hdr10-100mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p60-hevc-hdr10-250mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p60-hevc-hdr10-250mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p60-hevc-hdr10-350mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p60-hevc-hdr10-350mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p120-av1-sdr-50mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p120-av1-sdr-50mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p120-av1-sdr-100mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p120-av1-sdr-100mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p120-av1-sdr-250mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p120-av1-sdr-250mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p120-av1-sdr-350mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p120-av1-sdr-350mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p120-av1-hdr10-50mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p120-av1-hdr10-50mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p120-av1-hdr10-100mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p120-av1-hdr10-100mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p120-av1-hdr10-250mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p120-av1-hdr10-250mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p120-av1-hdr10-350mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p120-av1-hdr10-350mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p120-hevc-sdr-50mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p120-hevc-sdr-50mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p120-hevc-sdr-100mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p120-hevc-sdr-100mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p120-hevc-sdr-250mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p120-hevc-sdr-250mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p120-hevc-sdr-350mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p120-hevc-sdr-350mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 2
+    },
+    {
+      "case": "4k-3840x2160p120-hevc-hdr10-50mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p120-hevc-hdr10-50mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p120-hevc-hdr10-100mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p120-hevc-hdr10-100mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p120-hevc-hdr10-250mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p120-hevc-hdr10-250mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p120-hevc-hdr10-350mbps",
+      "setting": "baseline",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    },
+    {
+      "case": "4k-3840x2160p120-hevc-hdr10-350mbps",
+      "setting": "candidate",
+      "passed": true,
+      "samples": 1492992000,
+      "outputs": 120,
+      "max_error": 0,
+      "tolerance": 8
+    }
+  ],
+  "bitrate_cases": [
+    {
+      "case": "1080p-1920x1080p60-av1-sdr-50mbps",
+      "requested_mbps": 50.0,
+      "measured_mbps": 57.203508,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p60-av1-sdr-100mbps",
+      "requested_mbps": 100.0,
+      "measured_mbps": 106.490948,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p60-av1-sdr-250mbps",
+      "requested_mbps": 250.0,
+      "measured_mbps": 252.061376,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p60-av1-sdr-350mbps",
+      "requested_mbps": 350.0,
+      "measured_mbps": 341.409964,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p60-av1-hdr10-50mbps",
+      "requested_mbps": 50.0,
+      "measured_mbps": 55.688788,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p60-av1-hdr10-100mbps",
+      "requested_mbps": 100.0,
+      "measured_mbps": 105.017288,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p60-av1-hdr10-250mbps",
+      "requested_mbps": 250.0,
+      "measured_mbps": 251.853824,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p60-av1-hdr10-350mbps",
+      "requested_mbps": 350.0,
+      "measured_mbps": 336.219044,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p60-hevc-sdr-50mbps",
+      "requested_mbps": 50.0,
+      "measured_mbps": 46.75988,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p60-hevc-sdr-100mbps",
+      "requested_mbps": 100.0,
+      "measured_mbps": 85.815592,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p60-hevc-sdr-250mbps",
+      "requested_mbps": 250.0,
+      "measured_mbps": 210.97538,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p60-hevc-sdr-350mbps",
+      "requested_mbps": 350.0,
+      "measured_mbps": 292.959576,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p60-hevc-hdr10-50mbps",
+      "requested_mbps": 50.0,
+      "measured_mbps": 46.775436,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p60-hevc-hdr10-100mbps",
+      "requested_mbps": 100.0,
+      "measured_mbps": 86.170568,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p60-hevc-hdr10-250mbps",
+      "requested_mbps": 250.0,
+      "measured_mbps": 211.013112,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p60-hevc-hdr10-350mbps",
+      "requested_mbps": 350.0,
+      "measured_mbps": 293.593488,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p120-av1-sdr-50mbps",
+      "requested_mbps": 50.0,
+      "measured_mbps": 86.448488,
+      "coverage_passed": false,
+      "case_status": "INCONCLUSIVE"
+    },
+    {
+      "case": "1080p-1920x1080p120-av1-sdr-100mbps",
+      "requested_mbps": 100.0,
+      "measured_mbps": 119.33324,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p120-av1-sdr-250mbps",
+      "requested_mbps": 250.0,
+      "measured_mbps": 261.790888,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p120-av1-sdr-350mbps",
+      "requested_mbps": 350.0,
+      "measured_mbps": 360.072504,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p120-av1-hdr10-50mbps",
+      "requested_mbps": 50.0,
+      "measured_mbps": 73.130392,
+      "coverage_passed": false,
+      "case_status": "INCONCLUSIVE"
+    },
+    {
+      "case": "1080p-1920x1080p120-av1-hdr10-100mbps",
+      "requested_mbps": 100.0,
+      "measured_mbps": 122.611576,
+      "coverage_passed": false,
+      "case_status": "INCONCLUSIVE"
+    },
+    {
+      "case": "1080p-1920x1080p120-av1-hdr10-250mbps",
+      "requested_mbps": 250.0,
+      "measured_mbps": 260.39348,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p120-av1-hdr10-350mbps",
+      "requested_mbps": 350.0,
+      "measured_mbps": 360.355592,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p120-hevc-sdr-50mbps",
+      "requested_mbps": 50.0,
+      "measured_mbps": 62.49436,
+      "coverage_passed": false,
+      "case_status": "INCONCLUSIVE"
+    },
+    {
+      "case": "1080p-1920x1080p120-hevc-sdr-100mbps",
+      "requested_mbps": 100.0,
+      "measured_mbps": 101.64312,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p120-hevc-sdr-250mbps",
+      "requested_mbps": 250.0,
+      "measured_mbps": 221.925128,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p120-hevc-sdr-350mbps",
+      "requested_mbps": 350.0,
+      "measured_mbps": 304.844592,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p120-hevc-hdr10-50mbps",
+      "requested_mbps": 50.0,
+      "measured_mbps": 59.055304,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p120-hevc-hdr10-100mbps",
+      "requested_mbps": 100.0,
+      "measured_mbps": 99.018272,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p120-hevc-hdr10-250mbps",
+      "requested_mbps": 250.0,
+      "measured_mbps": 219.167048,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "1080p-1920x1080p120-hevc-hdr10-350mbps",
+      "requested_mbps": 350.0,
+      "measured_mbps": 303.667952,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "ultrawide-3440x1440p120-av1-sdr-50mbps",
+      "requested_mbps": 50.0,
+      "measured_mbps": 141.911448,
+      "coverage_passed": false,
+      "case_status": "INCONCLUSIVE"
+    },
+    {
+      "case": "ultrawide-3440x1440p120-av1-sdr-100mbps",
+      "requested_mbps": 100.0,
+      "measured_mbps": 185.743736,
+      "coverage_passed": false,
+      "case_status": "INCONCLUSIVE"
+    },
+    {
+      "case": "ultrawide-3440x1440p120-av1-sdr-250mbps",
+      "requested_mbps": 250.0,
+      "measured_mbps": 297.393992,
+      "coverage_passed": true,
+      "case_status": "BASELINE_FAILURE"
+    },
+    {
+      "case": "ultrawide-3440x1440p120-av1-sdr-350mbps",
+      "requested_mbps": 350.0,
+      "measured_mbps": 388.370832,
+      "coverage_passed": true,
+      "case_status": "BASELINE_FAILURE"
+    },
+    {
+      "case": "ultrawide-3440x1440p120-av1-hdr10-50mbps",
+      "requested_mbps": 50.0,
+      "measured_mbps": 142.055704,
+      "coverage_passed": false,
+      "case_status": "INCONCLUSIVE"
+    },
+    {
+      "case": "ultrawide-3440x1440p120-av1-hdr10-100mbps",
+      "requested_mbps": 100.0,
+      "measured_mbps": 170.712936,
+      "coverage_passed": false,
+      "case_status": "INCONCLUSIVE"
+    },
+    {
+      "case": "ultrawide-3440x1440p120-av1-hdr10-250mbps",
+      "requested_mbps": 250.0,
+      "measured_mbps": 283.130528,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "ultrawide-3440x1440p120-av1-hdr10-350mbps",
+      "requested_mbps": 350.0,
+      "measured_mbps": 385.13824,
+      "coverage_passed": true,
+      "case_status": "BASELINE_FAILURE"
+    },
+    {
+      "case": "ultrawide-3440x1440p120-hevc-sdr-50mbps",
+      "requested_mbps": 50.0,
+      "measured_mbps": 70.255336,
+      "coverage_passed": false,
+      "case_status": "INCONCLUSIVE"
+    },
+    {
+      "case": "ultrawide-3440x1440p120-hevc-sdr-100mbps",
+      "requested_mbps": 100.0,
+      "measured_mbps": 98.189144,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "ultrawide-3440x1440p120-hevc-sdr-250mbps",
+      "requested_mbps": 250.0,
+      "measured_mbps": 225.307448,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "ultrawide-3440x1440p120-hevc-sdr-350mbps",
+      "requested_mbps": 350.0,
+      "measured_mbps": 305.88624,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "ultrawide-3440x1440p120-hevc-hdr10-50mbps",
+      "requested_mbps": 50.0,
+      "measured_mbps": 64.799776,
+      "coverage_passed": false,
+      "case_status": "INCONCLUSIVE"
+    },
+    {
+      "case": "ultrawide-3440x1440p120-hevc-hdr10-100mbps",
+      "requested_mbps": 100.0,
+      "measured_mbps": 94.186096,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "ultrawide-3440x1440p120-hevc-hdr10-250mbps",
+      "requested_mbps": 250.0,
+      "measured_mbps": 222.388024,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "ultrawide-3440x1440p120-hevc-hdr10-350mbps",
+      "requested_mbps": 350.0,
+      "measured_mbps": 304.475624,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "ultrawide-3440x1440p240-av1-sdr-50mbps",
+      "requested_mbps": 50.0,
+      "measured_mbps": 225.205312,
+      "coverage_passed": false,
+      "case_status": "BASELINE_FAILURE"
+    },
+    {
+      "case": "ultrawide-3440x1440p240-av1-sdr-100mbps",
+      "requested_mbps": 100.0,
+      "measured_mbps": 239.685368,
+      "coverage_passed": false,
+      "case_status": "BASELINE_FAILURE"
+    },
+    {
+      "case": "ultrawide-3440x1440p240-av1-sdr-250mbps",
+      "requested_mbps": 250.0,
+      "measured_mbps": 377.88736,
+      "coverage_passed": false,
+      "case_status": "BASELINE_FAILURE"
+    },
+    {
+      "case": "ultrawide-3440x1440p240-av1-sdr-350mbps",
+      "requested_mbps": 350.0,
+      "measured_mbps": 440.118592,
+      "coverage_passed": false,
+      "case_status": "BASELINE_FAILURE"
+    },
+    {
+      "case": "ultrawide-3440x1440p240-av1-hdr10-50mbps",
+      "requested_mbps": 50.0,
+      "measured_mbps": 205.581952,
+      "coverage_passed": false,
+      "case_status": "BASELINE_FAILURE"
+    },
+    {
+      "case": "ultrawide-3440x1440p240-av1-hdr10-100mbps",
+      "requested_mbps": 100.0,
+      "measured_mbps": 260.701072,
+      "coverage_passed": false,
+      "case_status": "BASELINE_FAILURE"
+    },
+    {
+      "case": "ultrawide-3440x1440p240-av1-hdr10-250mbps",
+      "requested_mbps": 250.0,
+      "measured_mbps": 369.541176,
+      "coverage_passed": false,
+      "case_status": "BASELINE_FAILURE"
+    },
+    {
+      "case": "ultrawide-3440x1440p240-av1-hdr10-350mbps",
+      "requested_mbps": 350.0,
+      "measured_mbps": 479.101336,
+      "coverage_passed": false,
+      "case_status": "BASELINE_FAILURE"
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-sdr-50mbps",
+      "requested_mbps": 50.0,
+      "measured_mbps": 55.488088,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-sdr-100mbps",
+      "requested_mbps": 100.0,
+      "measured_mbps": 95.373816,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-sdr-250mbps",
+      "requested_mbps": 250.0,
+      "measured_mbps": 213.95852,
+      "coverage_passed": true,
+      "case_status": "BASELINE_FAILURE"
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-sdr-350mbps",
+      "requested_mbps": 350.0,
+      "measured_mbps": 297.694952,
+      "coverage_passed": true,
+      "case_status": "BASELINE_FAILURE"
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-hdr10-50mbps",
+      "requested_mbps": 50.0,
+      "measured_mbps": 50.946848,
+      "coverage_passed": true,
+      "case_status": "BASELINE_FAILURE"
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-hdr10-100mbps",
+      "requested_mbps": 100.0,
+      "measured_mbps": 92.181096,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-hdr10-250mbps",
+      "requested_mbps": 250.0,
+      "measured_mbps": 213.563224,
+      "coverage_passed": true,
+      "case_status": "REGRESSION"
+    },
+    {
+      "case": "ultrawide-3440x1440p240-hevc-hdr10-350mbps",
+      "requested_mbps": 350.0,
+      "measured_mbps": 297.753136,
+      "coverage_passed": true,
+      "case_status": "BASELINE_FAILURE"
+    },
+    {
+      "case": "4k-3840x2160p60-av1-sdr-50mbps",
+      "requested_mbps": 50.0,
+      "measured_mbps": 131.635872,
+      "coverage_passed": false,
+      "case_status": "INCONCLUSIVE"
+    },
+    {
+      "case": "4k-3840x2160p60-av1-sdr-100mbps",
+      "requested_mbps": 100.0,
+      "measured_mbps": 167.609968,
+      "coverage_passed": false,
+      "case_status": "INCONCLUSIVE"
+    },
+    {
+      "case": "4k-3840x2160p60-av1-sdr-250mbps",
+      "requested_mbps": 250.0,
+      "measured_mbps": 276.9659,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "4k-3840x2160p60-av1-sdr-350mbps",
+      "requested_mbps": 350.0,
+      "measured_mbps": 655.946496,
+      "coverage_passed": false,
+      "case_status": "BASELINE_FAILURE"
+    },
+    {
+      "case": "4k-3840x2160p60-av1-hdr10-50mbps",
+      "requested_mbps": 50.0,
+      "measured_mbps": 122.846032,
+      "coverage_passed": false,
+      "case_status": "INCONCLUSIVE"
+    },
+    {
+      "case": "4k-3840x2160p60-av1-hdr10-100mbps",
+      "requested_mbps": 100.0,
+      "measured_mbps": 133.382176,
+      "coverage_passed": false,
+      "case_status": "INCONCLUSIVE"
+    },
+    {
+      "case": "4k-3840x2160p60-av1-hdr10-250mbps",
+      "requested_mbps": 250.0,
+      "measured_mbps": 274.817568,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "4k-3840x2160p60-av1-hdr10-350mbps",
+      "requested_mbps": 350.0,
+      "measured_mbps": 642.297676,
+      "coverage_passed": false,
+      "case_status": "BASELINE_FAILURE"
+    },
+    {
+      "case": "4k-3840x2160p60-hevc-sdr-50mbps",
+      "requested_mbps": 50.0,
+      "measured_mbps": 60.819572,
+      "coverage_passed": false,
+      "case_status": "INCONCLUSIVE"
+    },
+    {
+      "case": "4k-3840x2160p60-hevc-sdr-100mbps",
+      "requested_mbps": 100.0,
+      "measured_mbps": 92.470736,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "4k-3840x2160p60-hevc-sdr-250mbps",
+      "requested_mbps": 250.0,
+      "measured_mbps": 214.384208,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "4k-3840x2160p60-hevc-sdr-350mbps",
+      "requested_mbps": 350.0,
+      "measured_mbps": 296.92328,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "4k-3840x2160p60-hevc-hdr10-50mbps",
+      "requested_mbps": 50.0,
+      "measured_mbps": 83.905288,
+      "coverage_passed": false,
+      "case_status": "INCONCLUSIVE"
+    },
+    {
+      "case": "4k-3840x2160p60-hevc-hdr10-100mbps",
+      "requested_mbps": 100.0,
+      "measured_mbps": 91.76814,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "4k-3840x2160p60-hevc-hdr10-250mbps",
+      "requested_mbps": 250.0,
+      "measured_mbps": 214.239504,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "4k-3840x2160p60-hevc-hdr10-350mbps",
+      "requested_mbps": 350.0,
+      "measured_mbps": 296.411328,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "4k-3840x2160p120-av1-sdr-50mbps",
+      "requested_mbps": 50.0,
+      "measured_mbps": 218.2762,
+      "coverage_passed": false,
+      "case_status": "INCONCLUSIVE"
+    },
+    {
+      "case": "4k-3840x2160p120-av1-sdr-100mbps",
+      "requested_mbps": 100.0,
+      "measured_mbps": 263.271744,
+      "coverage_passed": false,
+      "case_status": "INCONCLUSIVE"
+    },
+    {
+      "case": "4k-3840x2160p120-av1-sdr-250mbps",
+      "requested_mbps": 250.0,
+      "measured_mbps": 358.596864,
+      "coverage_passed": false,
+      "case_status": "BASELINE_FAILURE"
+    },
+    {
+      "case": "4k-3840x2160p120-av1-sdr-350mbps",
+      "requested_mbps": 350.0,
+      "measured_mbps": 433.243424,
+      "coverage_passed": false,
+      "case_status": "BASELINE_FAILURE"
+    },
+    {
+      "case": "4k-3840x2160p120-av1-hdr10-50mbps",
+      "requested_mbps": 50.0,
+      "measured_mbps": 177.539312,
+      "coverage_passed": false,
+      "case_status": "INCONCLUSIVE"
+    },
+    {
+      "case": "4k-3840x2160p120-av1-hdr10-100mbps",
+      "requested_mbps": 100.0,
+      "measured_mbps": 245.692064,
+      "coverage_passed": false,
+      "case_status": "INCONCLUSIVE"
+    },
+    {
+      "case": "4k-3840x2160p120-av1-hdr10-250mbps",
+      "requested_mbps": 250.0,
+      "measured_mbps": 342.189408,
+      "coverage_passed": false,
+      "case_status": "BASELINE_FAILURE"
+    },
+    {
+      "case": "4k-3840x2160p120-av1-hdr10-350mbps",
+      "requested_mbps": 350.0,
+      "measured_mbps": 436.030552,
+      "coverage_passed": false,
+      "case_status": "BASELINE_FAILURE"
+    },
+    {
+      "case": "4k-3840x2160p120-hevc-sdr-50mbps",
+      "requested_mbps": 50.0,
+      "measured_mbps": 82.29812,
+      "coverage_passed": false,
+      "case_status": "INCONCLUSIVE"
+    },
+    {
+      "case": "4k-3840x2160p120-hevc-sdr-100mbps",
+      "requested_mbps": 100.0,
+      "measured_mbps": 122.563248,
+      "coverage_passed": false,
+      "case_status": "INCONCLUSIVE"
+    },
+    {
+      "case": "4k-3840x2160p120-hevc-sdr-250mbps",
+      "requested_mbps": 250.0,
+      "measured_mbps": 238.909032,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "4k-3840x2160p120-hevc-sdr-350mbps",
+      "requested_mbps": 350.0,
+      "measured_mbps": 323.482016,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "4k-3840x2160p120-hevc-hdr10-50mbps",
+      "requested_mbps": 50.0,
+      "measured_mbps": 82.86584,
+      "coverage_passed": false,
+      "case_status": "INCONCLUSIVE"
+    },
+    {
+      "case": "4k-3840x2160p120-hevc-hdr10-100mbps",
+      "requested_mbps": 100.0,
+      "measured_mbps": 122.444136,
+      "coverage_passed": false,
+      "case_status": "INCONCLUSIVE"
+    },
+    {
+      "case": "4k-3840x2160p120-hevc-hdr10-250mbps",
+      "requested_mbps": 250.0,
+      "measured_mbps": 237.735488,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    },
+    {
+      "case": "4k-3840x2160p120-hevc-hdr10-350mbps",
+      "requested_mbps": 350.0,
+      "measured_mbps": 316.322896,
+      "coverage_passed": true,
+      "case_status": "PASS"
+    }
+  ],
+  "scope_notes": [
+    "Compressed payload hashes were compared across provenance but payload bytes were not rehashed in this bounded audit; the root analyzer already validated them.",
+    "HDR metadata checks execute inside the native correctness sink; JSON records depth, fallback metadata flags and PASS, with no separate per-frame HDR-output flag.",
+    "No hardware tests or timing runs were executed by this audit."
+  ]
+}

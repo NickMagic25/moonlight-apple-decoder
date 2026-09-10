@@ -5,11 +5,13 @@ Run correctness first, then use Release tools with no simultaneous encoding, bui
 ```sh
 ./scripts/benchmark.sh --preset 1080p120-av1 --inflight 1,2,3
 ./scripts/benchmark.sh --preset 1080p120-hevc --inflight 1,2,3
+./scripts/benchmark.sh --preset 1080p60-hevc
+./scripts/benchmark.sh --preset 3440x1440p120-av1
 ./scripts/benchmark.sh --preset 3440x1440p240-av1-10bit-hdr
 ./scripts/benchmark.sh --preset 3440x1440p240-hevc-main10-hdr
 ```
 
-The preset set includes AV1/HEVC SDR8 and HDR10 at 1080p120, 1440p120/240, 3440x1440p240, and 4k60/120. `--seconds` defaults to 10 and `--repetitions` to 3; `--warmup` excludes the first 120 submissions from steady-state distributions. `--power -1` selects the system default and `--power 0` requests disabled power efficiency. `--inflight 1,2,3` changes one variable at a time. `--chroma 444` explicitly reports BLOCKED because the mandatory renderer-compatible path is 4:2:0; it does not substitute another format. Long overload/thermal runs can use `--seconds 120` after short correctness and performance gates.
+The preset set includes AV1/HEVC SDR8 and HDR10 at 1080p60/120, 1440p120/240, 3440x1440p120/240, and 4k60/120. `--seconds` defaults to 10 and `--repetitions` to 3; `--warmup` excludes the first 120 submissions from steady-state distributions. `--power -1` selects the system default and `--power 0` requests disabled power efficiency. `--inflight 1,2,3` changes one variable at a time. `--chroma 444` explicitly reports BLOCKED because the mandatory renderer-compatible path is 4:2:0; it does not substitute another format. Long overload/thermal runs can use `--seconds 120` after short correctness and performance gates.
 
 Each requested configuration is hardware-decoded and validated before timed runs. Results go to `results/benchmarks/PRESET/` with one CSV and JSON per repetition/in-flight/power setting, plus `summary.json`. Failures retain requested preset and reasons; overrun/drop measurements are never silently promoted to a successful high-rate result. Saved fixture hashes identify exact compressed bytes. The benchmark script selects `--loop-mode continuous` for both native and FFmpeg runs. Repeated fixtures keep one warmed decoder session: each loop begins with the same genuine random-access access unit, media timestamps and IDs are rebased, and absolute arrival deadlines continue across loops. No drain/reset is inserted at an ordinary continuous-loop boundary. Explicit fixture discontinuities and real decode recovery still reset state. The standalone replay default remains `--loop-mode reset`, which drains/resets at each loop boundary for lifecycle correctness tests; `loop_mode` is recorded in results.
 
@@ -18,6 +20,18 @@ Each requested configuration is hardware-decoded and validated before timed runs
 The timed callback records a cheap completion record and timestamp, retaining no pixel buffer and performing no image checks. Statistics are computed after drain. `vt_submit_to_callback_ns` is measured immediately before `VTDecompressionSessionDecodeFrame` to output callback entry, including work within the call. It is API-visible VideoToolbox latency, not isolated hardware-engine time. Only newly decoded single-sample displayed outputs contribute to that distribution; no-display completions, existing-frame displays, and multi-sample submissions remain separately counted. All steady frame-latency distributions consistently exclude warmup and the first displayed output in each decoder generation, including preparation, queue wait, submission duration, complete-AU-to-output and client handoff. Native cold VT intervals remain in their separate cold-generation distribution, and both tools retain cold records in CSV. Continuous runs normally have one startup generation; reset runs have a cold generation for every loop. Offered/admitted/displayed totals include all frames, and scheduler-lateness explicitly covers all offered arrivals, including warmup, cold starts and losses. CSV includes raw timestamps and validity bits. JSON reports count, mean, median, p95, p99, min/max, preparation, submission-call duration, queue wait, complete-AU-to-output, callback-to-client handoff, scheduler lateness, counts, copy accounting, peak outstanding depth, settings/status/readback, hardware validation, codec/depth/chroma, fixture hash, OS/model, thermal state, warmup, and duration. Renderer/presentation and unavailable power-state measurements are `null`.
 
 The headless harness does not establish display refresh or presentation rate. The 1 ms median objective is measured per configuration; it is not a universal hardware guarantee. Count offered, admitted, and output frames and check sustained rate and backlog before evaluating latency percentiles.
+
+`PASS` establishes hardware decoding, expected output accounting, and absence of
+decode failures or scheduler drops. It does not enforce a minimum measured FPS or
+a per-frame latency deadline. Report `decoded_fps` against `requested_fps` for
+every repetition, with any rate tolerance stated explicitly; `run_seconds`
+includes the final decoder drain. Also report resets, scheduler lateness and queue
+wait (including their tails), plus caller-visible `public_complete_au_to_output_ns`
+from the summarizer. Compare caller-visible latency with the frame interval:
+16.667 ms at 60 fps, 8.333 ms at 120 fps, or 4.167 ms at 240 fps. These intervals
+are useful latency budgets, but they are not display measurements or an automatic
+pass criterion. A healthy average rate can still hide latency spikes. Preserve
+each repetition's accounting and percentiles rather than pooling away an outlier.
 
 ## Optional FFmpeg VideoToolbox comparison
 

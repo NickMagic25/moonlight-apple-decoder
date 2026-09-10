@@ -1,0 +1,36 @@
+# Fixed followup for the three clean latency flags in the 2026-09-09 full
+# toolchain matrix. Longer trials and six pairs balance which build runs first.
+# Keep these results separate from the original measurements, including flags.
+schema_version: 1
+defaults:
+  bitrate_mbps: null
+  gop: 60
+  decoder:
+    inflight: 2
+    queue_depth: 16
+    power: -1
+run:
+  seconds: 20
+  repetitions: 6
+  warmup_frames: 120
+  timeout_seconds: 180
+thresholds:
+  decoded_fps_ratio: 0.99
+  latency_relative_pct: 5.0
+  latency_absolute_ms: 0.1
+cases:
+  - name: 1080p
+    resolution: 1920x1080
+    fps: 60
+    codec: hevc
+    dynamic_range: hdr10
+  - name: 1080p
+    resolution: 1920x1080
+    fps: 120
+    codec: av1
+    dynamic_range: sdr
+  - name: 4k
+    resolution: 3840x2160
+    fps: 120
+    codec: av1
+    dynamic_range: hdr10

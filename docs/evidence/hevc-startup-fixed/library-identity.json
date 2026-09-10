@@ -1,0 +1,112 @@
+[
+  {
+    "setting": "baseline",
+    "original_library": "/private/tmp/moonlight-cpp17-baseline.GRCplv/build/libmoonlight-apple-video.a",
+    "current_library": "/private/tmp/moonlight-startup-cpp17.mjic8rkm/build/libmoonlight-apple-video.a",
+    "original_sha256": "c21d361c1b3cac25b276df4e8687d5b1a887ba329339102ebafe182afd2c6bf6",
+    "current_sha256": "820d25d7c4fb1ec63f313622252205da1deebd3af1f7bbb26356dc2371a07797",
+    "identical": false,
+    "object_members_identical": {
+      "__.SYMDEF": true,
+      "decoder.cpp.o": true,
+      "clock.cpp.o": true,
+      "bitstream.cpp.o": true,
+      "backend_vt.mm.o": true,
+      "format.mm.o": true,
+      "sample.mm.o": true
+    },
+    "object_members": {
+      "__.SYMDEF": {
+        "original_sha256": "2acb6fbfb6eb8e1c18b11319478f41c958e498cb774788d9c070d503291927c2",
+        "current_sha256": "2acb6fbfb6eb8e1c18b11319478f41c958e498cb774788d9c070d503291927c2",
+        "identical": true
+      },
+      "decoder.cpp.o": {
+        "original_sha256": "8b8cf6fd7ffce1213459653dd382d911dcbb9ae90d68b733ad82ff8aa40b2cad",
+        "current_sha256": "8b8cf6fd7ffce1213459653dd382d911dcbb9ae90d68b733ad82ff8aa40b2cad",
+        "identical": true
+      },
+      "clock.cpp.o": {
+        "original_sha256": "3693609e09f40c01dd9304813aea80a3d97a860bf546c4293821adc5dfeacb85",
+        "current_sha256": "3693609e09f40c01dd9304813aea80a3d97a860bf546c4293821adc5dfeacb85",
+        "identical": true
+      },
+      "bitstream.cpp.o": {
+        "original_sha256": "31b3d82929e69f06303cf89f6369422565c2b7905f00614d8e56a9d139d4ba3d",
+        "current_sha256": "31b3d82929e69f06303cf89f6369422565c2b7905f00614d8e56a9d139d4ba3d",
+        "identical": true
+      },
+      "backend_vt.mm.o": {
+        "original_sha256": "f0002c6eafd4df6ce428b4974d25208a1d077e260a58175a07fd43c51f836097",
+        "current_sha256": "f0002c6eafd4df6ce428b4974d25208a1d077e260a58175a07fd43c51f836097",
+        "identical": true
+      },
+      "format.mm.o": {
+        "original_sha256": "2a62323cb550f5eebc30e342402f25c74b0d964f170edfabf97f9db497629ee8",
+        "current_sha256": "2a62323cb550f5eebc30e342402f25c74b0d964f170edfabf97f9db497629ee8",
+        "identical": true
+      },
+      "sample.mm.o": {
+        "original_sha256": "da9c9d3d6a71fc576c53007ca07b26a066a596be0a7872827db7335bb2b6205e",
+        "current_sha256": "da9c9d3d6a71fc576c53007ca07b26a066a596be0a7872827db7335bb2b6205e",
+        "identical": true
+      }
+    },
+    "note": "Archive containers differ, but every embedded object member and symbol table is byte-identical to the corresponding pre-fix build."
+  },
+  {
+    "setting": "candidate",
+    "original_library": "build-upgrade-release/libmoonlight-apple-video.a",
+    "current_library": "build-startup-release/libmoonlight-apple-video.a",
+    "original_sha256": "71d868241ce0a3a40a8bd205c61b3193386c690ddc085d53e70a80b3f0661cb4",
+    "current_sha256": "9f201d7e04b4853dca72292f1b250e5a35ea0d5114c5496a03b4e343410f7b95",
+    "identical": false,
+    "object_members_identical": {
+      "__.SYMDEF": true,
+      "decoder.cpp.o": true,
+      "clock.cpp.o": true,
+      "bitstream.cpp.o": true,
+      "backend_vt.mm.o": true,
+      "format.mm.o": true,
+      "sample.mm.o": true
+    },
+    "object_members": {
+      "__.SYMDEF": {
+        "original_sha256": "86bed7d85c8323b9f4963e43863c42009dc425ba0628ed52d0c6ceb8551d63b1",
+        "current_sha256": "86bed7d85c8323b9f4963e43863c42009dc425ba0628ed52d0c6ceb8551d63b1",
+        "identical": true
+      },
+      "decoder.cpp.o": {
+        "original_sha256": "124987086dceb8d521aded7dd9a8e7069814c2e93d15ad665acdf9fac68c0c26",
+        "current_sha256": "124987086dceb8d521aded7dd9a8e7069814c2e93d15ad665acdf9fac68c0c26",
+        "identical": true
+      },
+      "clock.cpp.o": {
+        "original_sha256": "3693609e09f40c01dd9304813aea80a3d97a860bf546c4293821adc5dfeacb85",
+        "current_sha256": "3693609e09f40c01dd9304813aea80a3d97a860bf546c4293821adc5dfeacb85",
+        "identical": true
+      },
+      "bitstream.cpp.o": {
+        "original_sha256": "1467eb4f394658539586ca8a9e8272a4a794b5f01808caec17cf129439f405a0",
+        "current_sha256": "1467eb4f394658539586ca8a9e8272a4a794b5f01808caec17cf129439f405a0",
+        "identical": true
+      },
+      "backend_vt.mm.o": {
+        "original_sha256": "a08e572430bbecf34c7fbeb8025e9e730f9978b478de84cfa296a2756a597107",
+        "current_sha256": "a08e572430bbecf34c7fbeb8025e9e730f9978b478de84cfa296a2756a597107",
+        "identical": true
+      },
+      "format.mm.o": {
+        "original_sha256": "2a62323cb550f5eebc30e342402f25c74b0d964f170edfabf97f9db497629ee8",
+        "current_sha256": "2a62323cb550f5eebc30e342402f25c74b0d964f170edfabf97f9db497629ee8",
+        "identical": true
+      },
+      "sample.mm.o": {
+        "original_sha256": "da9c9d3d6a71fc576c53007ca07b26a066a596be0a7872827db7335bb2b6205e",
+        "current_sha256": "da9c9d3d6a71fc576c53007ca07b26a066a596be0a7872827db7335bb2b6205e",
+        "identical": true
+      }
+    },
+    "note": "Archive containers differ, but every embedded object member and symbol table is byte-identical to the corresponding pre-fix build."
+  }
+]
