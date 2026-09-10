@@ -198,6 +198,7 @@ class ConfigTests(unittest.TestCase):
             "inflight": [True, 0, 4], "queue_depth": [True, 0, 4097],
             "power": [True, 1, -2, 0.0], "consumer_delay_ms": [-1, 10001],
             "jitter_us": [-1, 1000001], "seed": [True, -1, 4294967296],
+            "startup_grace_ms": [True, -1, 10001, 1.5, "250", float("nan")],
         }.items():
             for value in values:
                 with self.subTest(field=field, value=value):
@@ -227,6 +228,7 @@ class ConfigTests(unittest.TestCase):
             "latency_relative_pct": [True, -1, 1001, 10 ** 1000, float("inf")],
             "latency_absolute_ms": [True, -1, 1001, float("-inf")],
             "bitrate_tolerance_pct": [True, -1, 100.001, "20", float("nan"), float("inf"), 10 ** 1000],
+            "first_output_max_ms": [True, 0, -1, 60000.1, "250", float("nan"), float("inf"), 10 ** 1000],
         }.items():
             for value in values:
                 with self.subTest(field=field, value=value):
@@ -236,6 +238,19 @@ class ConfigTests(unittest.TestCase):
         data = copy.deepcopy(BASE)
         data["thresholds"] = {"latency_relative_pct": 0, "latency_absolute_ms": 0}
         self.assertEqual(self.load(data)["thresholds"]["latency_relative_pct"], 0.0)
+
+    def test_startup_policy_is_opt_in_and_sla_is_independent(self):
+        loaded = self.load(BASE)
+        self.assertEqual(loaded["cases"][0]["decoder"]["startup_grace_ms"], 0)
+        self.assertIsNone(loaded["thresholds"]["first_output_max_ms"])
+        for grace, limit in ((0, None), (0, 0.001), (250, 250), (10000, 60000)):
+            with self.subTest(grace=grace, limit=limit):
+                data = copy.deepcopy(BASE)
+                data["defaults"]["decoder"] = {"startup_grace_ms": grace}
+                data["thresholds"] = {"first_output_max_ms": limit}
+                loaded = self.load(data)
+                self.assertEqual(loaded["cases"][0]["decoder"]["startup_grace_ms"], grace)
+                self.assertEqual(loaded["thresholds"]["first_output_max_ms"], limit)
 
     def test_bitrate_tolerance_default_and_inclusive_numeric_bounds(self):
         self.assertEqual(self.load(BASE)["thresholds"]["bitrate_tolerance_pct"], 20.0)

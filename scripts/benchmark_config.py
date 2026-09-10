@@ -29,7 +29,7 @@ STREAM_KEYS = {
 }
 DECODER_DEFAULTS = {
     "inflight": 2, "queue_depth": 16, "power": -1,
-    "consumer_delay_ms": 0, "jitter_us": 0, "seed": 7,
+    "consumer_delay_ms": 0, "jitter_us": 0, "seed": 7, "startup_grace_ms": 0,
 }
 RUN_DEFAULTS = {
     "seconds": 10, "repetitions": 3, "warmup_frames": 120,
@@ -38,6 +38,7 @@ RUN_DEFAULTS = {
 THRESHOLD_DEFAULTS = {
     "decoded_fps_ratio": 0.99, "latency_relative_pct": 5.0,
     "latency_absolute_ms": 0.1, "bitrate_tolerance_pct": 20.0,
+    "first_output_max_ms": None,
 }
 
 
@@ -130,6 +131,7 @@ def _decoder(value, location):
     for key, bounds in {
         "inflight": (1, 3), "queue_depth": (1, 4096),
         "consumer_delay_ms": (0, 10000), "jitter_us": (0, 1000000),
+        "startup_grace_ms": (0, 10000),
         "seed": (0, 4294967295),
     }.items():
         normalized[key] = _integer(normalized[key], location + "." + key, *bounds)
@@ -217,6 +219,11 @@ def load_config(path):
     for key, bounds in {"decoded_fps_ratio": (0.01, 1.0), "latency_relative_pct": (0.0, 1000.0),
                         "latency_absolute_ms": (0.0, 1000.0), "bitrate_tolerance_pct": (0.0, 100.0)}.items():
         thresholds[key] = _number(thresholds[key], "thresholds." + key, *bounds)
+    if thresholds["first_output_max_ms"] is not None:
+        thresholds["first_output_max_ms"] = _number(
+            thresholds["first_output_max_ms"], "thresholds.first_output_max_ms", 0, 60000)
+        if thresholds["first_output_max_ms"] == 0:
+            raise ConfigError("thresholds.first_output_max_ms must be positive or null to disable")
     case_inputs = document.get("cases")
     if not isinstance(case_inputs, list) or not 1 <= len(case_inputs) <= MAX_CASES:
         raise ConfigError("cases must be a nonempty list with at most {} entries".format(MAX_CASES))

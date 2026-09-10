@@ -118,6 +118,39 @@ jobs:
             pmset -g batt
           } > results/hardware-build/provenance.log
           "$AOMENC" --help > results/hardware-build/aomenc-help.txt
+      - name: Match replay harness for startup-aware comparisons
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json, os, pathlib, shutil, sys
+          sys.path.insert(0, str(pathlib.Path("scripts").resolve()))
+          from benchmark_config import load_config
+          config = load_config(os.environ["CONFIGURATION"])
+          required = (config["thresholds"].get("first_output_max_ms") is not None or
+                      any(case["decoder"].get("startup_grace_ms", 0) for case in config["cases"]))
+          if not required:
+              raise SystemExit(0)
+          root = pathlib.Path.cwd()
+          baseline = root / ".local/ci-baseline"
+          evidence = root / "results/hardware-build/replay-harness"
+          evidence.mkdir()
+          manifest = {"baseline_revision": os.environ["BASELINE_SHA"],
+                      "harness_revision": os.environ["GITHUB_SHA"],
+                      "note": "Only offline replay sources are overlaid; baseline decoder sources and language mode are preserved.",
+                      "files": {}}
+          for name in ("replay.mm", "fixture_support.hpp", "replay_startup.h"):
+              source, target = root / "tools" / name, baseline / "tools" / name
+              if target.is_symlink():
+                  raise SystemExit("baseline replay path must not be a symlink")
+              before = hashlib.sha256(target.read_bytes()).hexdigest() if target.exists() else None
+              shutil.copyfile(source, target)
+              shutil.copyfile(source, evidence / name)
+              manifest["files"]["tools/" + name] = {
+                  "original_baseline_sha256": before,
+                  "comparison_sha256": hashlib.sha256(target.read_bytes()).hexdigest()}
+          (evidence / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+          PY
       - name: Configure and build baseline
         shell: bash
         run: |

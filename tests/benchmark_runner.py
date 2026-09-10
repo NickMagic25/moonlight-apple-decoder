@@ -116,6 +116,155 @@ class RunnerTests(unittest.TestCase):
                 self.assertFalse(result["passed"])
                 self.assertTrue(any(key in error for error in result["errors"]))
 
+    def startup_trace(self):
+        rows = trace_rows()
+        # Native pacing truncates each frame interval before multiplication.
+        for row in rows:
+            for key in row:
+                if key.endswith('_ns'):
+                    row[key] -= row['frame_id']
+        return rows
+
+    def startup_native(self, rows=None, phase='timed'):
+        rows = self.startup_trace() if rows is None else rows
+        native = native_result(self.case, phase, rows)
+        initial = min(rows, key=lambda row: row['frame_id']) if rows else None
+        outputs = [row for row in rows if row['status'] == 0 and row['displayed_outputs'] == 1]
+        native.update(startup_policy=RUNNER.STARTUP_POLICY,
+            startup_grace_ms=self.case['decoder']['startup_grace_ms'] if phase == 'timed' else 0,
+            queue_depth=self.case['decoder']['queue_depth'], scheduled_start_ns=1000000000,
+            startup_first_output_ns=min((row['sink_entry_ns'] for row in outputs), default=1000000000) - 1000000000
+                if outputs else None,
+            initial_setup_ns=initial['vt_submit_ns'] - initial['preparation_end_ns']
+                if initial and initial['trace_valid'] & 3 == 3 else None,
+            scheduler_drop_counts=dict.fromkeys(RUNNER.DROP_REASONS, 0), scheduler_events=[])
+        return native
+
+    def test_startup_grace_maps_only_to_timed_phase_and_keeps_legacy_zero(self):
+        for grace in (0, 250):
+            self.case['decoder']['startup_grace_ms'] = grace
+            for phase in ('timed', 'correctness'):
+                command, _ = RUNNER.replay_command('/replay', '/fixture', '/out', self.case,
+                                                   dict(seconds=1, warmup_frames=0), phase)
+                if grace and phase == 'timed':
+                    self.assertEqual(command[-2:], ['--startup-grace-ms', '250'])
+                else:
+                    self.assertNotIn('--startup-grace-ms', command)
+
+    def test_startup_policy_and_first_output_are_verified_against_csv(self):
+        self.case['decoder']['startup_grace_ms'] = 250
+        self.thresholds['first_output_max_ms'] = 250
+        rows = self.startup_trace()
+        for phase in ('timed', 'correctness'):
+            checked = self.inspect(self.evidence(self.startup_native(rows, phase), rows, phase=phase))
+            self.assertTrue(checked['passed'], checked['errors'])
+            self.assertEqual(checked['startup']['initial_setup_ns'], 80000)
+            self.assertEqual(checked['first_output_ms'], 1.22)
+            self.assertEqual(checked['first_output_origin'], 'initial scheduled start')
+            self.assertEqual(checked['startup']['startup_grace_ms'], 250 if phase == 'timed' else 0)
+            if phase == 'timed':
+                self.assertTrue(checked['startup']['first_output_sla_passed'])
+            else:
+                self.assertNotIn('first_output_sla_passed', checked['startup'])
+
+    def test_startup_policy_rejects_old_binary_silently_ignoring_flag(self):
+        self.case['decoder']['startup_grace_ms'] = 250
+        checked = self.inspect(self.evidence())
+        self.assertFalse(checked['passed'])
+        self.assertTrue(any('startup_policy' in error for error in checked['errors']))
+        record = self.evidence()
+        del record['command'][-2:]
+        self.assertTrue(any('planned startup grace' in error for error in self.inspect(record)['errors']))
+
+    def test_startup_sla_requires_capture_even_without_grace(self):
+        self.thresholds['first_output_max_ms'] = 250
+        self.assertFalse(self.inspect(self.evidence())['passed'])
+        rows = self.startup_trace()
+        self.assertTrue(self.inspect(self.evidence(self.startup_native(rows), rows))['passed'])
+
+    def test_clean_decode_still_fails_separate_startup_sla(self):
+        self.case['decoder']['startup_grace_ms'] = 250
+        self.thresholds['first_output_max_ms'] = 1
+        rows = self.startup_trace()
+        checked = self.inspect(self.evidence(self.startup_native(rows), rows))
+        self.assertFalse(checked['passed'])
+        self.assertEqual(checked['native']['scheduler_drops'], 0)
+        self.assertFalse(checked['startup']['first_output_sla_passed'])
+        self.assertTrue(any('startup SLA' in error for error in checked['errors']))
+        self.thresholds['first_output_max_ms'] = 1.22
+        self.assertTrue(self.inspect(self.evidence(self.startup_native(rows), rows))['passed'])
+
+    def test_startup_diagnostics_reject_false_echo_and_timing_claims(self):
+        self.case['decoder']['startup_grace_ms'] = 250
+        rows = self.startup_trace()
+        for key, value in (('startup_policy', 'rebased'), ('startup_grace_ms', 0),
+                           ('startup_grace_ms', True), ('queue_depth', 32),
+                           ('scheduled_start_ns', 1000000001), ('startup_first_output_ns', 0),
+                           ('startup_first_output_ns', None), ('initial_setup_ns', 0),
+                           ('scheduler_drop_counts', dict.fromkeys(RUNNER.DROP_REASONS, 1)),
+                           ('scheduler_events', [{}])):
+            with self.subTest(key=key, value=value):
+                native = self.startup_native(rows)
+                native[key] = value
+                self.assertFalse(self.inspect(self.evidence(native, rows))['passed'])
+        for key in ('startup_policy', 'startup_grace_ms', 'queue_depth', 'scheduled_start_ns',
+                    'startup_first_output_ns', 'initial_setup_ns', 'scheduler_drop_counts', 'scheduler_events'):
+            with self.subTest(missing=key):
+                native = self.startup_native(rows)
+                del native[key]
+                self.assertFalse(self.inspect(self.evidence(native, rows))['passed'])
+
+    def test_startup_drop_events_remain_failures_and_validate_fixed_deadlines(self):
+        self.case['decoder']['startup_grace_ms'] = 250
+        rows = self.startup_trace()[:2]
+        native = self.startup_native(rows)
+        native.update(status='FAIL', submitted=2, completed=2, displayed_outputs=2,
+                      scheduler_drops=1, resets=1)
+        native['scheduler_drop_counts']['arrival_deadline'] = 1
+        arrival = 1000000000 + 2 * int(1e9 / self.case['fps'])
+        deadline = max(arrival + int(1e9 / self.case['fps']) * 16, 1250000000)
+        event = dict(frame_id=2, offered_index=2, reason='arrival_deadline',
+                     observed_ns=deadline + 1, scheduled_arrival_ns=arrival, deadline_ns=deadline)
+        native['scheduler_events'] = [event]
+        checked = self.inspect(self.evidence(native, rows))
+        self.assertFalse(checked['passed'])
+        self.assertEqual(checked['startup']['scheduler_drop_counts']['arrival_deadline'], 1)
+        self.assertTrue(any('scheduler_drops=1' in error for error in checked['errors']))
+        for mutation in ({'offered_index': 1}, {'frame_id': 1}, {'deadline_ns': deadline + 1},
+                         {'observed_ns': deadline}, {'reason': 'injected_drop'},
+                         {'scheduled_arrival_ns': arrival + 1}):
+            with self.subTest(mutation=mutation):
+                invalid = copy.deepcopy(native)
+                invalid['scheduler_events'][0].update(mutation)
+                checked = self.inspect(self.evidence(invalid, rows))
+                self.assertTrue(any('invalid evidence' in error for error in checked['errors']))
+
+    def test_first_output_uses_original_start_after_initial_loss(self):
+        rows = self.startup_trace()[1:]
+        native = self.startup_native(rows)
+        native.update(submitted=2, completed=2, displayed_outputs=2, scheduler_drops=1)
+        native['scheduler_drop_counts']['arrival_deadline'] = 1
+        deadline = 1000000000 + int(1e9 / self.case['fps']) * 16
+        native['scheduler_events'] = [dict(frame_id=0, offered_index=0, reason='arrival_deadline',
+            observed_ns=deadline + 1, scheduled_arrival_ns=1000000000, deadline_ns=deadline)]
+        checked = RUNNER.startup_diagnostics(native, rows, self.case,
+                                            dict(phase='timed', expected_offered=3), 0)
+        self.assertEqual(checked['first_output_ns'], rows[0]['sink_entry_ns'] - 1000000000)
+        self.assertGreater(checked['first_output_ns'], rows[0]['sink_entry_ns'] - rows[0]['scheduled_arrival_ns'])
+
+    def test_initial_setup_uses_cancelled_first_submission_without_substituting_later_row(self):
+        rows = self.startup_trace()
+        rows[0].update(status=3, displayed_outputs=0)
+        native = self.startup_native(rows)
+        checked = RUNNER.startup_diagnostics(native, rows, self.case,
+                                            dict(phase='timed', expected_offered=3), 0)
+        self.assertEqual(checked['initial_setup_ns'], 80000)
+        rows[0]['trace_valid'] &= ~2
+        native['initial_setup_ns'] = None
+        checked = RUNNER.startup_diagnostics(native, rows, self.case,
+                                            dict(phase='timed', expected_offered=3), 0)
+        self.assertIsNone(checked['initial_setup_ns'])
+
     def reference_case(self, dynamic_range='sdr'):
         self.case['dynamic_range'] = dynamic_range
         self.case['fixture_info']['generator'] = dict(
@@ -666,10 +815,12 @@ class RunnerTests(unittest.TestCase):
         self.assertFalse(case['bitrate']['coverage_passed'])
 
     def main_mocked(self, identical=False, fail_correctness=False, reference=False,
-                    fail_reference=False, fail_invoke=False):
+                    fail_reference=False, fail_invoke=False, startup_grace=0, first_output_max_ms=None):
         config_path = self.out / "input.yaml"
         config_path.write_text(yaml.safe_dump(dict(schema_version=1,
-            defaults=dict(resolution="320x180", fps=60, codec="av1", dynamic_range="sdr", frames=3),
+            defaults=dict(resolution="320x180", fps=60, codec="av1", dynamic_range="sdr", frames=3,
+                          decoder=dict(startup_grace_ms=startup_grace)),
+            thresholds=dict(first_output_max_ms=first_output_max_ms),
             run=dict(seconds=1, repetitions=3, warmup_frames=0),
             cases=[dict(name="first"), dict(name="second")])))
         results = self.out / "results"
@@ -719,6 +870,54 @@ class RunnerTests(unittest.TestCase):
             code = RUNNER.main(["--config", str(config_path), "--candidate-build", "/candidate",
                                 "--baseline-build", "/baseline", "--results-dir", str(results)])
         return code, observed, analyzed[-1]
+
+    def test_unsupported_startup_policy_stops_before_any_fixture_or_decode_work(self):
+        for grace, limit in ((250, None), (0, 250)):
+            with self.subTest(grace=grace, limit=limit):
+                previous = self.out / 'results'
+                if previous.exists():
+                    import shutil
+                    shutil.rmtree(previous)
+                with mock.patch.object(RUNNER, 'require_startup_capabilities',
+                                       side_effect=ValueError('unsupported startup policy')) as preflight:
+                    code, observed, plan = self.main_mocked(startup_grace=grace, first_output_max_ms=limit)
+                self.assertEqual(code, 1)
+                self.assertEqual(observed, [])
+                self.assertTrue(all('fixture_info' not in case for case in plan['cases']))
+                self.assertEqual(plan['state'], 'ERROR')
+                self.assertIn('unsupported startup policy', plan['error'])
+                preflight.assert_called_once()
+
+    def test_startup_preflight_checks_both_builds_and_preserves_capability_evidence(self):
+        def capabilities(build, setting, out, grace):
+            build['startup_capabilities'] = dict(startup_policy=RUNNER.STARTUP_POLICY, max_startup_grace_ms=10000)
+        with mock.patch.object(RUNNER, 'require_startup_capabilities', side_effect=capabilities) as preflight:
+            code, observed, plan = self.main_mocked(startup_grace=250)
+        self.assertEqual(code, 0)
+        self.assertEqual([call.args[1] for call in preflight.call_args_list], ['baseline', 'candidate'])
+        self.assertTrue(all('startup_capabilities' in build for build in plan['builds'].values()))
+        build = dict(binary='/synthetic/replay')
+        output = json.dumps(dict(startup_policy=RUNNER.STARTUP_POLICY, max_startup_grace_ms=10000))
+        with mock.patch.object(RUNNER.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0, output, '')) as execute:
+            RUNNER.require_startup_capabilities(build, 'candidate', self.out, 250)
+        execute.assert_called_once_with(['/synthetic/replay', '--capabilities'], capture_output=True,
+                                        text=True, timeout=10, cwd=self.out / 'candidate-startup-capability-probe')
+        probe = build['startup_capability_probe']
+        self.assertEqual(probe['stdout_sha256'], RUNNER.sha(self.out / probe['stdout_file']))
+        self.assertEqual(build['startup_capabilities']['startup_policy'], RUNNER.STARTUP_POLICY)
+
+    def test_startup_preflight_rejects_bad_json_missing_policy_and_timeout(self):
+        for stdout, code in (('not json', 0), ('{}', 0),
+                             (json.dumps(dict(startup_policy=RUNNER.STARTUP_POLICY, max_startup_grace_ms=1)), 0),
+                             (json.dumps(dict(startup_policy=RUNNER.STARTUP_POLICY, max_startup_grace_ms=True)), 0),
+                             (json.dumps(dict(startup_policy=RUNNER.STARTUP_POLICY, max_startup_grace_ms=10000)), 1)):
+            with self.subTest(stdout=stdout, code=code):
+                with mock.patch.object(RUNNER.subprocess, 'run', return_value=subprocess.CompletedProcess([], code, stdout, '')):
+                    with self.assertRaises(ValueError):
+                        RUNNER.require_startup_capabilities(dict(binary='/synthetic'), 'candidate', self.out, 250)
+        with mock.patch.object(RUNNER.subprocess, 'run', side_effect=subprocess.TimeoutExpired(['/synthetic'], 10)):
+            with self.assertRaisesRegex(ValueError, 'preflight failed'):
+                RUNNER.require_startup_capabilities(dict(binary='/synthetic'), 'candidate', self.out, 250)
 
     def test_all_correctness_gates_precede_alternating_case_and_pair_order(self):
         code, observed, plan = self.main_mocked()

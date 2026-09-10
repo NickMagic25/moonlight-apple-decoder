@@ -290,6 +290,11 @@ def replay_command(binary, manifest, prefix, case, run, phase):
                       ('power', '--power'), ('consumer_delay_ms', '--consumer-delay-ms'),
                       ('jitter_us', '--jitter-us'), ('seed', '--seed')]:
         command += [flag, str(decoder[key])]
+    # A nonzero grace is opt-in; legacy binaries/configurations keep the original
+    # scheduler. inspect_run requires a policy echo so an old parser cannot
+    # silently ignore this flag. Correctness remains unpaced with zero grace.
+    if phase == 'timed' and decoder.get('startup_grace_ms', 0):
+        command += ['--startup-grace-ms', str(decoder['startup_grace_ms'])]
     return command, loops * case['frames']
 
 
@@ -344,6 +349,144 @@ def positive_number(value):
         return False
 
 
+STARTUP_POLICY = 'fixed-initial-deadline-v1'
+DROP_REASONS = ('arrival_deadline', 'capacity_deadline', 'awaiting_random_access', 'injected_drop')
+
+
+def require_startup_capabilities(build, setting, out, required_grace):
+    """Fail before expensive fixture preparation if either replay is too old."""
+    command = [build['binary'], '--capabilities']
+    working = out / (setting + '-startup-capability-probe')
+    working.mkdir(exist_ok=True)
+    # Old replay parsers may write results/replay.json when rejecting an
+    # unknown flag. Keep that failure artifact away from existing user runs.
+    probe = dict(command=command, timeout_seconds=10, working_directory=working.name)
+    build['startup_capability_probe'] = probe
+    try:
+        process = subprocess.run(command, capture_output=True, text=True, timeout=10, cwd=working)
+    except (OSError, subprocess.TimeoutExpired) as error:
+        probe['error'] = str(error)
+        raise ValueError(setting + ' startup capability preflight failed: ' + str(error)) from error
+    probe['exit_code'] = process.returncode
+    for field, content in (('stdout', process.stdout), ('stderr', process.stderr)):
+        path = out / (setting + '-startup-capabilities.' + ('json' if field == 'stdout' else 'log'))
+        path.write_text(content, encoding='utf-8')
+        probe[field + '_file'] = path.name
+        probe[field + '_sha256'] = sha(path)
+    try:
+        capabilities = read_json(out / probe['stdout_file'])
+    except (ValueError, UnicodeError) as error:
+        raise ValueError(setting + ' startup capability preflight returned invalid JSON') from error
+    if (process.returncode != 0 or not isinstance(capabilities, dict)
+            or capabilities.get('startup_policy') != STARTUP_POLICY
+            or type(capabilities.get('max_startup_grace_ms')) is not int
+            or not required_grace <= capabilities['max_startup_grace_ms'] <= 10000):
+        raise ValueError(setting + ' replay does not support the requested startup policy')
+    build['startup_capabilities'] = capabilities
+
+
+def startup_diagnostics(result, rows, case, record, grace):
+    """Verify startup diagnostics against raw completions and dropped offers.
+
+    The initial scheduled start never follows the first admitted/successful
+    frame. Consequently losing the beginning of a stream cannot improve its
+    first-output measurement. Legacy results bypass this function entirely.
+    """
+    def integer(value, name, minimum=0):
+        if type(value) is not int or value < minimum:
+            raise ValueError('invalid startup diagnostic: ' + name)
+        return value
+    if result.get('startup_policy') != STARTUP_POLICY:
+        raise ValueError('missing or unsupported startup_policy echo')
+    for key, expected in (('startup_grace_ms', grace), ('queue_depth', case['decoder']['queue_depth'])):
+        if integer(result.get(key), key) != expected:
+            raise ValueError('result ' + key + ' differs from plan')
+    start = integer(result.get('scheduled_start_ns'), 'scheduled_start_ns', 1)
+    interval = int(1e9 / case['fps'])
+    queue_budget = interval * case['decoder']['queue_depth']
+    initial_deadline = start + grace * 1000000
+    paced = record['phase'] == 'timed'
+    jitter = case['decoder']['jitter_us'] * 1000
+
+    def arrival_matches(index, arrival):
+        integer(arrival, 'scheduled_arrival_ns', 1)
+        if arrival < start:
+            raise ValueError('scheduled arrival precedes initial scheduled start')
+        if paced:
+            nominal = start + index * interval
+            if not max(start, nominal - jitter) <= arrival <= max(start, nominal + jitter):
+                raise ValueError('scheduled arrival differs from fixed initial timeline')
+
+    for row in rows:
+        arrival_matches(row['frame_id'], row['scheduled_arrival_ns'])
+    outputs = [row for row in rows if row['status'] == 0 and row['displayed_outputs'] == 1]
+    first_output = min((row['sink_entry_ns'] for row in outputs), default=None)
+    first_output = first_output - start if first_output is not None else None
+    if first_output is not None and first_output < 0:
+        raise ValueError('first output precedes initial scheduled start')
+    initial = min(rows, key=lambda row: row['frame_id']) if rows else None
+    setup = (initial['vt_submit_ns'] - initial['preparation_end_ns']
+             if initial and initial['trace_valid'] & 3 == 3
+             and 0 < initial['preparation_end_ns'] <= initial['vt_submit_ns'] else None)
+    for key, derived in (('startup_first_output_ns', first_output), ('initial_setup_ns', setup)):
+        if key not in result:
+            raise ValueError('missing startup diagnostic: ' + key)
+        value = result[key]
+        if value is not None:
+            integer(value, key)
+        if value != derived:
+            raise ValueError('native ' + key + ' differs from raw CSV')
+
+    counts = result.get('scheduler_drop_counts')
+    if not isinstance(counts, dict) or set(counts) != set(DROP_REASONS):
+        raise ValueError('missing or invalid scheduler_drop_counts')
+    for key, value in counts.items():
+        integer(value, 'scheduler_drop_counts.' + key)
+    events = result.get('scheduler_events')
+    if not isinstance(events, list) or sum(counts.values()) != result['scheduler_drops'] or len(events) != result['scheduler_drops']:
+        raise ValueError('scheduler event/count accounting mismatch')
+    observed_counts = dict.fromkeys(DROP_REASONS, 0)
+    submitted = {row['frame_id'] for row in rows}
+    dropped = set()
+    previous_index = -1
+    for event in events:
+        if not isinstance(event, dict) or event.get('reason') not in observed_counts:
+            raise ValueError('invalid scheduler event reason')
+        index = integer(event.get('offered_index'), 'offered_index')
+        frame_id = integer(event.get('frame_id'), 'frame_id')
+        if (index != frame_id or not previous_index < index < record['expected_offered']
+                or frame_id in submitted or frame_id in dropped):
+            raise ValueError('scheduler event frame identity mismatch')
+        previous_index = index
+        dropped.add(frame_id)
+        arrival = integer(event.get('scheduled_arrival_ns'), 'scheduled_arrival_ns', 1)
+        arrival_matches(index, arrival)
+        observed = integer(event.get('observed_ns'), 'observed_ns', 1)
+        deadline = integer(event.get('deadline_ns'), 'deadline_ns', 1)
+        expected_deadline = max(arrival + queue_budget, initial_deadline) if paced else arrival + queue_budget
+        if deadline != expected_deadline:
+            raise ValueError('scheduler event deadline differs from fixed initial policy')
+        if observed < arrival:
+            raise ValueError('scheduler event precedes scheduled arrival')
+        if event['reason'] in ('arrival_deadline', 'capacity_deadline') and observed <= deadline:
+            raise ValueError('scheduler deadline drop occurred before its deadline')
+        if event['reason'] == 'awaiting_random_access' and observed > deadline:
+            raise ValueError('scheduler keyframe wait hides an arrival deadline drop')
+        if event['reason'] == 'awaiting_random_access' and index % case['frames'] % case['gop'] == 0:
+            raise ValueError('scheduler discarded random-access frame while awaiting random access')
+        if event['reason'] == 'injected_drop':
+            raise ValueError('unplanned injected scheduler drop')
+        observed_counts[event['reason']] += 1
+    if observed_counts != counts:
+        raise ValueError('scheduler drop reasons differ from recorded events')
+    if len(submitted | dropped) + result['rejected'] != record['expected_offered']:
+        raise ValueError('scheduler event/CSV identities do not cover offered frames')
+    return dict(policy=STARTUP_POLICY, startup_grace_ms=grace,
+                queue_budget_ms=queue_budget / 1e6, scheduled_start_ns=start,
+                first_output_ns=first_output, initial_setup_ns=setup,
+                scheduler_drop_counts=observed_counts)
+
+
 def inspect_run(record, case, out, thresholds):
     item = dict(record)
     errors = []
@@ -358,6 +501,12 @@ def inspect_run(record, case, out, thresholds):
         planned_warmup = int(argument('--warmup'))
         planned_loops = int(argument('--loops'))
         planned_loop_mode = argument('--loop-mode')
+        expected_grace = case['decoder'].get('startup_grace_ms', 0) if record['phase'] == 'timed' else 0
+        planned_grace = int(argument('--startup-grace-ms')) if '--startup-grace-ms' in command else 0
+        if planned_grace != expected_grace or not 0 <= planned_grace <= 10000:
+            raise ValueError('planned startup grace differs from configuration')
+        if int(argument('--queue-depth')) != case['decoder']['queue_depth']:
+            raise ValueError('planned queue depth differs from configuration')
         if (planned_warmup < 0 or planned_loops < 1 or planned_loop_mode != 'continuous'
                 or planned_loops * case['frames'] != record['expected_offered']):
             raise ValueError('planned warmup/loop settings are inconsistent')
@@ -427,6 +576,22 @@ def inspect_run(record, case, out, thresholds):
         outputs = [row for row in rows if row['status'] == 0 and row['displayed_outputs'] == 1]
         item['first_output_ms'] = ((min(r['sink_entry_ns'] for r in outputs) -
                                     min(r['scheduled_arrival_ns'] for r in rows)) / 1e6) if outputs else None
+        item['first_output_origin'] = 'earliest admitted scheduled arrival (legacy estimate)'
+        startup_fields = {'startup_policy', 'startup_grace_ms', 'scheduled_start_ns',
+                          'startup_first_output_ns', 'initial_setup_ns',
+                          'scheduler_drop_counts', 'scheduler_events'}
+        first_output_limit = thresholds.get('first_output_max_ms') if record['phase'] == 'timed' else None
+        if planned_grace or first_output_limit is not None or startup_fields.intersection(result):
+            startup = startup_diagnostics(result, rows, case, record, planned_grace)
+            item['startup'] = startup
+            item['first_output_ms'] = startup['first_output_ns'] / 1e6 if startup['first_output_ns'] is not None else None
+            item['first_output_origin'] = 'initial scheduled start'
+            if first_output_limit is not None:
+                startup['first_output_max_ms'] = first_output_limit
+                startup['first_output_sla_passed'] = (item['first_output_ms'] is not None
+                                                      and item['first_output_ms'] <= first_output_limit)
+                if not startup['first_output_sla_passed']:
+                    errors.append('first output exceeds configured startup SLA or no output was delivered')
         if record['phase'] == 'correctness':
             for key in ('correctness_sink', 'iosurface_metal_verified', 'retained_after_destroy_verified'):
                 if result.get(key) is not True:
@@ -776,6 +941,17 @@ def report_markdown(result, path):
                   f"Measured bitrate: {number(case['bitrate']['measured_mbps'])} Mbps."
                   + (f" Encoder target: {number(case['bitrate']['requested_mbps'])} Mbps; "
                      f"measured/target: {ratio * 100:.1f}%." if ratio is not None else ''), '']
+        grace = settings.get('decoder', {}).get('startup_grace_ms', 0)
+        budget = int(1e9 / settings['fps']) * settings.get('decoder', {}).get('queue_depth', 16) / 1e6
+        first_output_limit = result['thresholds'].get('first_output_max_ms')
+        lines += [f"Startup admission grace: {grace} ms from the fixed initial scheduled start; "
+                  f"normal queue lateness budget: {number(budget)} ms. "
+                  'The effective deadline is the later of scheduled arrival plus that budget and the initial grace deadline. '
+                  'The grace never restarts after resets or loops. '
+                  + (f"First-output SLA: at most {number(first_output_limit)} ms from that initial start. "
+                     if first_output_limit is not None else 'First-output SLA: disabled. ')
+                  + 'Every lost/cancelled frame and reset still fails delivery gates. '
+                  'Legacy first-output values use the earliest admitted arrival when the original scheduled start was not captured.', '']
         if case['issues']:
             lines += case['issues'] + ['']
         for run in case['runs']:
@@ -783,16 +959,23 @@ def report_markdown(result, path):
                 lines += [f"- {run['phase']} / {run['setting']} / {run['repetition']}: " + '; '.join(run['errors'])]
         if any(run['errors'] for run in case['runs']):
             lines.append('')
-        lines += ['| Build / run | Outputs / offered | FPS | Drops / failed | First output ms | VT submission mean ms (samples) | Frame-ready mean ms (samples) | Queue-inclusive proxy ms |',
-                  '|---|---:|---:|---:|---:|---:|---:|---:|']
+        lines += ['| Build / run | Outputs / offered | FPS | Drops / failed | First output ms | Initial setup ms | First-output SLA | Drop causes: arrival / capacity / keyframe wait / injected | VT submission mean ms (samples) | Frame-ready mean ms (samples) | Queue-inclusive proxy ms |',
+                  '|---|---:|---:|---:|---:|---:|---|---:|---:|---:|---:|']
         for run in case['runs']:
             if run['phase'] != 'timed':
                 continue
             native = run.get('native', {})
             means = run.get('derived', {}).get('moonlight_decode_time', {})
+            startup = run.get('startup', {})
+            setup_ns = startup.get('initial_setup_ns')
+            sla_passed = startup.get('first_output_sla_passed')
+            sla = 'PASS' if sla_passed is True else 'FAIL' if sla_passed is False else '—'
+            causes = startup.get('scheduler_drop_counts', {})
+            causes_text = ' / '.join(str(causes.get(reason, '—')) for reason in DROP_REASONS)
             lines.append(f"| {run['setting']} / {run['repetition']} | {native.get('displayed_outputs', '—')} / {native.get('offered', '—')} | "
                          f"{number(native.get('decoded_fps'))} | {native.get('scheduler_drops', '—')} / "
                          f"{native.get('failed_or_cancelled_or_dropped', '—')} | {number(run.get('first_output_ms'))} | "
+                         f"{number(setup_ns / 1e6 if setup_ns is not None else None)} | {sla} | {causes_text} | "
                          f"{mean_samples(means.get('native_submission'))} | "
                          f"{mean_samples(means.get('native_vt'))} | "
                          f"{number(means.get('public_queue_proxy', {}).get('mean_ms'))} |")
@@ -867,6 +1050,11 @@ def main(argv=None):
                         'CMAKE_OBJCXX_FLAGS_RELEASE', 'CMAKE_OSX_ARCHITECTURES'):
                 if left['cmake_cache'].get(key) != right['cmake_cache'].get(key):
                     raise ValueError('comparison build flags differ: ' + key)
+        maximum_grace = max(case['decoder'].get('startup_grace_ms', 0) for case in plan['cases'])
+        if maximum_grace or config['thresholds'].get('first_output_max_ms') is not None:
+            for setting, build in plan['builds'].items():
+                require_startup_capabilities(build, setting, out, maximum_grace)
+                write_json(out / 'plan.json', plan)
         fixture_build = pathlib.Path(args.fixture_build or args.candidate_build).resolve()
         reference_tool = pathlib.Path(args.reference_tool).resolve() if args.reference_tool else fixture_build / 'mav-reference-decode'
         if (not args.prepare_only and any(case['bitrate_mbps'] is not None for case in plan['cases'])

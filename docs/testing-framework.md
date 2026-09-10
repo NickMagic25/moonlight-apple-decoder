@@ -33,6 +33,7 @@ The supplied configurations are:
 | File | Coverage |
 | --- | --- |
 | [`benchmarks/bitrate-matrix.yaml`](../benchmarks/bitrate-matrix.yaml) | All six resolution/frame-rate modes, AV1/HEVC, SDR/HDR10, and 50/100/250/350 Mbps encoder targets; 96 cases |
+| [`benchmarks/hevc-startup.yaml`](../benchmarks/hevc-startup.yaml) | HEVC 3440×1440p240 and 4K60, SDR/HDR10, 50/100/250/350 Mbps; a 250 ms startup allowance and separate 250 ms first-output limit |
 | [`benchmarks/full-matrix.yaml`](../benchmarks/full-matrix.yaml) | 1080p60/120, 3440×1440p120/240, and 4K60/120; AV1/HEVC and SDR/HDR10; 24 cases |
 | [`benchmarks/full-matrix-q32.yaml`](../benchmarks/full-matrix-q32.yaml) | The two AV1 3440×1440p240 cases with additional startup arrival-age headroom |
 | [`benchmarks/smoke.yaml`](../benchmarks/smoke.yaml) | Small AV1/HEVC streams that exercise an explicit encoder bitrate target |
@@ -99,9 +100,11 @@ Content-sensitive changes need additional representative-content validation.
 | `frames` | Number of encoded access units in the fixture before looping |
 | `decoder.inflight` | Maximum admitted, unresolved access units |
 | `decoder.queue_depth` | Maximum scheduled-arrival age, expressed in frame intervals; it is not a render queue |
+| `decoder.startup_grace_ms` | Optional initial admission allowance in milliseconds (`0` through `10000`, default `0`); never restarts after a reset or fixture loop |
 | `decoder.power` | VideoToolbox power-efficiency hint: `-1` leaves the system default, `0` requests the non-power-efficient preference |
 | `decoder.consumer_delay_ms` | Retention delay in the correctness sink; paced timing does not simulate a delayed renderer |
 | `decoder.jitter_us` and `seed` | Reproducible synthetic arrival jitter and its seed |
+| `thresholds.first_output_max_ms` | Optional limit on time from the original scheduled stream start to the first successful output; `null` disables this separate startup gate |
 
 Use numeric YAML values, for example `bitrate_mbps: 50` or
 `bitrate_mbps: 50.125`; values with unit suffixes are not accepted. One Mbps is
@@ -164,6 +167,19 @@ Build Release tools with the same compiler, SDK, deployment target, optimization
 flags, and experimental settings for both revisions. Build and encode before
 running timed work; do not run another benchmark or a compiler on the device
 at the same time. Keep the Mac on AC power with a stable thermal state.
+
+For a comparison using startup grace or the first-output gate, both replay
+executables must support `fixed-initial-deadline-v1`. The runner checks
+`mav-replay --capabilities` before preparing fixtures and verifies the policy
+and settings again in every result. An older executable cannot silently ignore
+the new option. To compare an older decoder revision, use an isolated baseline
+checkout and copy the candidate's `tools/replay.mm`, `tools/fixture_support.hpp`,
+and `tools/replay_startup.h` into its `tools/` directory before building. Record
+the original and replacement file hashes and retain those source files with
+the evidence. Preserve the baseline's production sources and C++ standard;
+the comparison should use the same replay implementation on both sides.
+The physical CI workflow performs this harness overlay and records its hashes
+when the selected configuration requests either startup feature.
 
 For an explicit-bitrate comparison, first provide an existing FFmpeg development
 prefix containing `include/` and `lib/`, with software decoders for both AV1 and
@@ -291,6 +307,59 @@ The report separates these questions:
 Warmup excludes early frames from steady-state latency statistics. It does not
 erase startup loss, change total output accounting, or make a failed run pass.
 Cold-start timing and sustained decode latency answer different questions.
+
+### Startup admission and first-output checks
+
+The strict arrival-age policy remains the default. At 240 fps, `queue_depth: 16`
+allows only 66.7 ms of backlog; at 60 fps it allows 266.7 ms. The first actual
+VideoToolbox session is initialized during the first frame submission. A cold
+setup delay can therefore exhaust the high-rate allowance before the decoder
+has cleared its initial backlog. A deadline reset cancels pending work and
+skips dependent frames until a random-access frame, even if VideoToolbox did
+not report a decode error. This was the mechanism behind the preserved
+[focused HEVC startup failures](evidence/hevc-focused-rerun-20260909/loss-audit.md).
+
+Use the [HEVC startup preset](../benchmarks/hevc-startup.yaml), or opt in explicitly:
+
+```yaml
+defaults:
+  decoder:
+    queue_depth: 16
+    startup_grace_ms: 250
+thresholds:
+  first_output_max_ms: 250
+```
+
+For both initial admission and capacity retries, the paced replay uses:
+
+```text
+deadline = max(scheduled_frame_arrival + queue_depth × frame_interval,
+               original_stream_start + startup_grace_ms)
+```
+
+The deadline floor expires relative to the original stream start. It is not
+extended by receiving the first output, decoder resets, keyframes, or loops.
+It does not shift arrival timestamps or relax the steady-state queue limit.
+All offered frames, cancellations, scheduler drops, resets, and throughput
+remain in the original accounting. `warmup_frames` affects latency statistics
+only and does not control the grace period. This setting changes the harness's
+startup admission policy; it does not reduce hardware decode time or change
+the Moonlight client's queue behavior.
+
+`first_output_max_ms` independently checks startup reliability. It measures
+from the native `scheduled_start_ns`, including any initial skipped arrivals,
+to the first successful output. The admission grace is not itself an output
+deadline, so these are separate settings. The reports include the first-output
+time, the first submission's post-parser setup interval, the startup settings,
+and scheduler drops separated into arrival-deadline expiry, capacity-deadline
+expiry, dependent-frame skips, and injected drops. The setup interval includes
+session configuration and sample preparation; it is not an isolated timer for
+`VTDecompressionSessionCreate`.
+
+Keep strict and startup-aware results in separate directories. A passing run
+with grace does not overwrite a strict startup failure or establish that the
+same frames would be lost in the live app. The existing presets retain their
+strict behavior unless `startup_grace_ms` is explicitly set.
 
 The [native Apple adapter](../integration/moonlight-qt/apple_video.cpp) displays
 **Frame-ready mean (VT submit -> callback)**, rounded to three decimal milliseconds. It
