@@ -1,0 +1,105 @@
+diff --git a/app/streaming/video/ffmpeg-renderers/vt_metal.mm b/app/streaming/video/ffmpeg-renderers/vt_metal.mm
+index e4d5c8e3..72120864 100644
+--- a/app/streaming/video/ffmpeg-renderers/vt_metal.mm
++++ b/app/streaming/video/ffmpeg-renderers/vt_metal.mm
+@@ -90,6 +90,7 @@ class VTMetalRenderer : public VTBaseRenderer
+           m_NativeTraceFirstFrame(false),
+           m_NativeTraceFirstTexture(false),
+           m_NativeTraceFirstPresent(false),
++          m_NativeTraceFirstCsc(false),
+           m_NativeTraceDrawableUnavailable(0),
+           m_NativeTraceTextureFailures(0),
+           m_NativeTraceCommandFailures(0)
+@@ -225,6 +226,88 @@ class VTMetalRenderer : public VTBaseRenderer
+         }
+     }
+ 
++    bool getNativePixelBufferFormat(const AVFrame* frame, int& bitDepth, bool& fullRange) const
++    {
++        if (!m_PreferFrameHdrMetadata || frame->format != AV_PIX_FMT_VIDEOTOOLBOX || !frame->data[3]) return false;
++        switch (CVPixelBufferGetPixelFormatType((CVPixelBufferRef)frame->data[3])) {
++        case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange:
++        case kCVPixelFormatType_444YpCbCr8BiPlanarVideoRange: bitDepth = 8; fullRange = false; return true;
++        case kCVPixelFormatType_420YpCbCr8BiPlanarFullRange:
++        case kCVPixelFormatType_444YpCbCr8BiPlanarFullRange: bitDepth = 8; fullRange = true; return true;
++        case kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange:
++        case kCVPixelFormatType_444YpCbCr10BiPlanarVideoRange: bitDepth = 10; fullRange = false; return true;
++        case kCVPixelFormatType_420YpCbCr10BiPlanarFullRange:
++        case kCVPixelFormatType_444YpCbCr10BiPlanarFullRange: bitDepth = 10; fullRange = true; return true;
++        default: return false;
++        }
++    }
++
++    void getNativePremultipliedCscConstants(const AVFrame* frame, std::array<float, 9>& cscMatrix, std::array<float, 3>& offsets)
++    {
++        int bitsPerChannel;
++        bool fullRange;
++        if (!getNativePixelBufferFormat(frame, bitsPerChannel, fullRange)) {
++            getFramePremultipliedCscConstants(frame, cscMatrix, offsets);
++            return;
++        }
++        static const std::array<float, 9> k_CscMatrix_Bt601 = { 1.0f, 1.0f, 1.0f, 0.0f, -0.3441f, 1.7720f, 1.4020f, -0.7141f, 0.0f };
++        static const std::array<float, 9> k_CscMatrix_Bt709 = { 1.0f, 1.0f, 1.0f, 0.0f, -0.1873f, 1.8556f, 1.5748f, -0.4681f, 0.0f };
++        static const std::array<float, 9> k_CscMatrix_Bt2020 = { 1.0f, 1.0f, 1.0f, 0.0f, -0.1646f, 1.8814f, 1.4746f, -0.5714f, 0.0f };
++        const int channelRange = 1 << bitsPerChannel;
++        const double yMin = fullRange ? 0 : (16 << (bitsPerChannel - 8));
++        const double yMax = fullRange ? channelRange - 1 : (235 << (bitsPerChannel - 8));
++        const double uvMin = fullRange ? 0 : (16 << (bitsPerChannel - 8));
++        const double uvMax = fullRange ? channelRange - 1 : (240 << (bitsPerChannel - 8));
++        const double yScale = (channelRange - 1) / (yMax - yMin);
++        const double uvScale = (channelRange - 1) / (uvMax - uvMin);
++        offsets = { float(yMin / (channelRange - 1)), 0.5f, 0.5f };
++        switch (getFrameColorspace(frame)) {
++        case COLORSPACE_REC_709: cscMatrix = k_CscMatrix_Bt709; break;
++        case COLORSPACE_REC_2020: cscMatrix = k_CscMatrix_Bt2020; break;
++        default: cscMatrix = k_CscMatrix_Bt601; break;
++        }
++        for (int i = 0; i < 3; ++i) cscMatrix[i] *= yScale;
++        for (int i = 3; i < 9; ++i) cscMatrix[i] *= uvScale;
++        if (!m_NativeTraceFirstCsc.exchange(true)) {
++            SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
++                        "Native Metal trace: native CSC from pixel buffer depth=%d full-range=%d colorspace=%d",
++                        bitsPerChannel, fullRange, getFrameColorspace(frame));
++        }
++    }
++
++    void getNativeChromaCositingOffsets(const AVFrame* frame, std::array<float, 2>& chromaOffsets)
++    {
++        int bitDepth;
++        bool fullRange;
++        if (!getNativePixelBufferFormat(frame, bitDepth, fullRange)) {
++            getFrameChromaCositingOffsets(frame, chromaOffsets);
++            return;
++        }
++        switch (frame->chroma_location) {
++        case AVCHROMA_LOC_CENTER: chromaOffsets = { 0.0f, 0.0f }; break;
++        case AVCHROMA_LOC_TOPLEFT: chromaOffsets = { 0.5f, 0.5f }; break;
++        case AVCHROMA_LOC_TOP: chromaOffsets = { 0.0f, 0.5f }; break;
++        case AVCHROMA_LOC_BOTTOMLEFT: chromaOffsets = { 0.5f, -0.5f }; break;
++        case AVCHROMA_LOC_BOTTOM: chromaOffsets = { 0.0f, -0.5f }; break;
++        default: chromaOffsets = { 0.5f, 0.0f }; break;
++        }
++    }
++
+     void setHdrMode(bool enabled) override
+     {
+         // Native frames already contain bitstream metadata merged with valid
+@@ -295,8 +378,8 @@ class VTMetalRenderer : public VTBaseRenderer
+         std::array<float, 9> cscMatrix;
+         std::array<float, 3> yuvOffsets;
+         std::array<float, 2> chromaOffset;
+-        getFramePremultipliedCscConstants(frame, cscMatrix, yuvOffsets);
+-        getFrameChromaCositingOffsets(frame, chromaOffset);
++        getNativePremultipliedCscConstants(frame, cscMatrix, yuvOffsets);
++        getNativeChromaCositingOffsets(frame, chromaOffset);
+ 
+         paramBuffer.cscParams.matrix = simd_matrix(simd_make_half3(cscMatrix[0], cscMatrix[3], cscMatrix[6]),
+                                                    simd_make_half3(cscMatrix[1], cscMatrix[4], cscMatrix[7]),
+@@ -1069,6 +1152,7 @@ private:
+     std::atomic_bool m_NativeTraceFirstFrame;
+     std::atomic_bool m_NativeTraceFirstTexture;
+     std::atomic_bool m_NativeTraceFirstPresent;
++    std::atomic_bool m_NativeTraceFirstCsc;
+     std::atomic_uint64_t m_NativeTraceDrawableUnavailable;
+     std::atomic_uint64_t m_NativeTraceTextureFailures;
+     std::atomic_uint64_t m_NativeTraceCommandFailures;

@@ -31,15 +31,27 @@ export CMAKE=/path/to/cmake
 ./scripts/build-moonlight-qt.sh
 MOONLIGHT_APPLE_VIDEO_SMOKE=1 \
   ./build-moonlight-qt/app/Moonlight.app/Contents/MacOS/Moonlight
+
+# A separate Debug bundle with symbols and console logging on macOS
+MOONLIGHT_QT_BUILD_TYPE=Debug ./scripts/build-moonlight-qt.sh
+QT_PLUGINS="$("$QMAKE" -query QT_INSTALL_PLUGINS)"
+QT_PLUGIN_PATH="$QT_PLUGINS" QT_QPA_PLATFORM_PLUGIN_PATH="$QT_PLUGINS/platforms" \
+MOONLIGHT_APPLE_VIDEO_DECODER=native MOONLIGHT_APPLE_VIDEO_STRICT=1 \
+  ./build-moonlight-qt-debug/app/Moonlight.app/Contents/MacOS/Moonlight
 ```
 
 Overrides: `MOONLIGHT_APPLE_VIDEO_SOURCE_DIR`, `MOONLIGHT_APPLE_VIDEO_BUILD_DIR`,
 `MOONLIGHT_APPLE_VIDEO_INSTALL_DIR`, `MOONLIGHT_QT_BUILD_DIR`, and `JOBS`.
 Defaults place library build/install and app output in this repository's ignored
 `build-qt-library`, `build-qt-install`, and `build-moonlight-qt` directories.
-`MOONLIGHT_QT_DEPLOY=0` skips optional Qt bundling/signing when using the SDK directly.
-The normal helper deploys required plugin groups and ad-hoc signs the generated
-bundle. It does not publish, notarize, or install the app.
+Set `MOONLIGHT_QT_BUILD_TYPE=Debug` to use the separate `*-debug` directories;
+this builds both the decoder and Moonlight with debug symbols and makes macOS
+Moonlight logging use the console. Debug builds default to SDK-direct mode
+(`MOONLIGHT_QT_DEPLOY=0`), so they use the local Qt SDK rather than packaging
+it; set `MOONLIGHT_QT_DEPLOY=1` only when testing the deployment path. The
+default build type is `Release`, which deploys required plugin groups and ad-hoc signs the generated
+bundle, including a bundle-local Qt plugin path configuration. It does not
+publish, notarize, or install the app.
 
 The native adapter is enabled for macOS arm64-only builds. Universal/x86 and
 other platform builds retain their existing decoder code. The helper builds the
@@ -70,6 +82,11 @@ explicitly incompatible software or renderer selections. Native H.264 is not
 implemented. In-flight values 1, 2, and 3 are accepted; default is 2. The existing
 codec/HDR controls remain in use. Native initializes only the Metal renderer;
 AVSBDL/Vulkan choices remain available through the FFmpeg route.
+
+Native sessions also emit a bounded `Native Metal trace`: the first retained
+`CVPixelBuffer`, texture map, and command-buffer completion, followed by a final
+count of unavailable drawables, texture-map failures, and Metal command failures.
+This is native-adapter-only and does not log every frame at high refresh rates.
 
 Each supported native codec/bit-depth candidate must decode the consumer's
 existing 1280x720 compressed test AU in hardware and create actual Metal textures

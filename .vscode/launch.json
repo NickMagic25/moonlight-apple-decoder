@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:moonlight-apple-decoder}",
+            "name": "Debug mav-swift-smoke",
+            "target": "mav-swift-smoke",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug mav-swift-smoke"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:moonlight-apple-decoder}",
+            "name": "Release mav-swift-smoke",
+            "target": "mav-swift-smoke",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release mav-swift-smoke"
+        }
+    ]
+}

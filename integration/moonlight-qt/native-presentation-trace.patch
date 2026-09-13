@@ -1,0 +1,154 @@
+diff --git a/app/streaming/video/ffmpeg-renderers/vt_metal.mm b/app/streaming/video/ffmpeg-renderers/vt_metal.mm
+index ddf44ba2..e4d5c8e3 100644
+--- a/app/streaming/video/ffmpeg-renderers/vt_metal.mm
++++ b/app/streaming/video/ffmpeg-renderers/vt_metal.mm
+@@ -21,6 +21,8 @@
+ #import <Metal/Metal.h>
+ #import <MetalKit/MetalKit.h>
+ 
++#include <atomic>
++
+ extern "C" {
+     #include <libavutil/pixdesc.h>
+ }
+@@ -82,12 +84,28 @@ class VTMetalRenderer : public VTBaseRenderer
+           m_LastFrameWidth(-1),
+           m_LastFrameHeight(-1),
+           m_LastDrawableWidth(-1),
+-          m_LastDrawableHeight(-1)
++          m_LastDrawableHeight(-1),
++          m_NativeTraceFirstFrame(false),
++          m_NativeTraceFirstTexture(false),
++          m_NativeTraceFirstPresent(false),
++          m_NativeTraceDrawableUnavailable(0),
++          m_NativeTraceTextureFailures(0),
++          m_NativeTraceCommandFailures(0)
+     {
+     }
+ 
+     virtual ~VTMetalRenderer() override
+     { @autoreleasepool {
++        if (m_PreferFrameHdrMetadata) {
++            SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
++                        "Native Metal final: first-frame=%d first-texture=%d first-present=%d "
++                        "no-drawable=%llu texture-failures=%llu command-failures=%llu",
++                        m_NativeTraceFirstFrame.load(), m_NativeTraceFirstTexture.load(),
++                        m_NativeTraceFirstPresent.load(),
++                        static_cast<unsigned long long>(m_NativeTraceDrawableUnavailable.load()),
++                        static_cast<unsigned long long>(m_NativeTraceTextureFailures.load()),
++                        static_cast<unsigned long long>(m_NativeTraceCommandFailures.load()));
++        }
+         // Stop the display link and free associated state
+         stopDisplayLink();
+         av_frame_free(&m_LatestUnrenderedFrame);
+@@ -192,6 +210,12 @@ class VTMetalRenderer : public VTBaseRenderer
+         m_LastDrawableWidth = drawableWidth;
+         m_LastDrawableHeight = drawableHeight;
+ 
++        if (m_PreferFrameHdrMetadata) {
++            SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
++                        "Native Metal trace: video-region frame=%dx%d drawable=%dx%d",
++                        frame->width, frame->height, drawableWidth, drawableHeight);
++        }
++
+         return true;
+     }
+ 
+@@ -441,6 +465,16 @@ class VTMetalRenderer : public VTBaseRenderer
+         CVPixelBufferRef pixBuf = reinterpret_cast<CVPixelBufferRef>(frame->data[3]);
+         size_t planes = getFramePlaneCount(frame);
+ 
++        if (m_PreferFrameHdrMetadata && !m_NativeTraceFirstFrame.exchange(true)) {
++            SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
++                        "Native Metal trace: first-frame frame=%dx%d pixel-buffer=%zux%zu "
++                        "planes=%zu format=0x%08x color-range=%d colorspace=%d transfer=%d",
++                        frame->width, frame->height,
++                        CVPixelBufferGetWidth(pixBuf), CVPixelBufferGetHeight(pixBuf), planes,
++                        static_cast<unsigned>(CVPixelBufferGetPixelFormatType(pixBuf)),
++                        frame->color_range, frame->colorspace, frame->color_trc);
++        }
++
+         // Create Metal textures for the planes of the CVPixelBuffer
+         for (size_t i = 0; i < planes; i++) {
+             MTLPixelFormat fmt;
+@@ -464,6 +498,7 @@ class VTMetalRenderer : public VTBaseRenderer
+                 SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                              "Unknown pixel format: %x",
+                              CVPixelBufferGetPixelFormatType(pixBuf));
++                if (m_PreferFrameHdrMetadata) ++m_NativeTraceTextureFailures;
+                 return false;
+             }
+ 
+@@ -479,10 +514,16 @@ class VTMetalRenderer : public VTBaseRenderer
+                 SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                              "CVMetalTextureCacheCreateTextureFromImage() failed: %d",
+                              err);
++                if (m_PreferFrameHdrMetadata) ++m_NativeTraceTextureFailures;
+                 return false;
+             }
+         }
+ 
++        if (m_PreferFrameHdrMetadata && !m_NativeTraceFirstTexture.exchange(true)) {
++            SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
++                        "Native Metal trace: first-texture-map succeeded planes=%zu", planes);
++        }
++
+         return true;
+     }
+ 
+@@ -534,6 +575,7 @@ class VTMetalRenderer : public VTBaseRenderer
+         renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 0.0);
+         renderPassDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
+         auto commandBuffer = [m_CommandQueue commandBuffer];
++        commandBuffer.label = @"Moonlight native video";
+         auto renderEncoder = [commandBuffer renderCommandEncoderWithDescriptor:renderPassDescriptor];
+ 
+         // Bind textures and buffers then draw the video region
+@@ -611,6 +653,19 @@ class VTMetalRenderer : public VTBaseRenderer
+ 
+         // Wait for the command buffer to complete and free our CVMetalTextureCache references
+         [commandBuffer waitUntilCompleted];
++        if (m_PreferFrameHdrMetadata) {
++            if (commandBuffer.status != MTLCommandBufferStatusCompleted) {
++                ++m_NativeTraceCommandFailures;
++                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
++                             "Native Metal trace: command buffer failed status=%ld error=%s",
++                             static_cast<long>(commandBuffer.status),
++                             commandBuffer.error ? commandBuffer.error.localizedDescription.UTF8String : "none");
++            }
++            else if (!m_NativeTraceFirstPresent.exchange(true)) {
++                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
++                            "Native Metal trace: first command buffer completed after presentDrawable");
++            }
++        }
+     }}
+ 
+     // Caller frees frame after we return
+@@ -659,6 +714,14 @@ class VTMetalRenderer : public VTBaseRenderer
+             // Render to the next drawable right now when CAMetalDisplayLink is not in use
+             id<CAMetalDrawable> drawable = [m_MetalLayer nextDrawable];
+             if (drawable == nullptr) {
++                if (m_PreferFrameHdrMetadata) {
++                    const uint64_t count = ++m_NativeTraceDrawableUnavailable;
++                    if (count == 1 || count % 120 == 0) {
++                        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
++                                    "Native Metal trace: nextDrawable returned nil (%llu times; display-sync=%d)",
++                                    static_cast<unsigned long long>(count), m_MetalLayer.displaySyncEnabled);
++                    }
++                }
+                 return;
+             }
+ 
+@@ -1003,6 +1066,12 @@ class VTMetalRenderer : public VTBaseRenderer
+     int m_LastFrameHeight;
+     int m_LastDrawableWidth;
+     int m_LastDrawableHeight;
++    std::atomic_bool m_NativeTraceFirstFrame;
++    std::atomic_bool m_NativeTraceFirstTexture;
++    std::atomic_bool m_NativeTraceFirstPresent;
++    std::atomic_uint64_t m_NativeTraceDrawableUnavailable;
++    std::atomic_uint64_t m_NativeTraceTextureFailures;
++    std::atomic_uint64_t m_NativeTraceCommandFailures;
+ };
+ 
+ @implementation DisplayLinkDelegate {
