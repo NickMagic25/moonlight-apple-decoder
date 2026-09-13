@@ -2,8 +2,28 @@ name: Decoder tests
 
 on:
   pull_request:
+    paths:
+      - '.github/workflows/decoder-tests.yml'
+      - 'CMakeLists.txt'
+      - 'Package.swift'
+      - 'cmake/**'
+      - 'include/**'
+      - 'src/**'
+      - 'scripts/**'
+      - 'tests/**'
+      - 'benchmarks/**'
   push:
     branches: [main]
+    paths:
+      - '.github/workflows/decoder-tests.yml'
+      - 'CMakeLists.txt'
+      - 'Package.swift'
+      - 'cmake/**'
+      - 'include/**'
+      - 'src/**'
+      - 'scripts/**'
+      - 'tests/**'
+      - 'benchmarks/**'
   workflow_dispatch:
 
 permissions:
