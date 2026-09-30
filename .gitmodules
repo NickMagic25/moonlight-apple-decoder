@@ -1,0 +1,3 @@
+[submodule "pyrowave"]
+	path = Dependencies/pyrowave
+	url = https://github.com/NickMagic25/pyrowave.git

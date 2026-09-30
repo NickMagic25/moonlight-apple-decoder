@@ -9,7 +9,9 @@ namespace mav {
 struct BackendOutput {
     mav_result result=MAV_OK; int32_t status=0; bool dropped=false;
     mav_pixel_buffer image=nullptr; mav_color color{};
+    mav_gpu_frame gpu_frame=nullptr;
     uint64_t callback_ns=0; uint32_t width=0,height=0,pixel_format=0;
+    mav_decode_trace decode_trace{};
 };
 struct Work {
     std::shared_ptr<std::vector<uint8_t>> bytes;
@@ -18,6 +20,7 @@ struct Work {
     std::function<void(const BackendOutput&)> complete;
     // Written before backend call; inline callback can see submit but not return.
     std::atomic<uint64_t> submit_ns{0}, return_ns{0};
+    std::atomic<uint64_t> backend_start_ns{0}, gpu_commit_ns{0};
     std::atomic<bool> completion_claimed{false};
 };
 struct BackendInfo {
@@ -35,8 +38,13 @@ public:
     virtual mav_result drain()=0;
     virtual void invalidate()=0;
     virtual BackendInfo info() const=0;
+    // Retained GPU outputs can apply backpressure independently of submissions.
+    virtual bool has_capacity() const { return true; }
+    virtual mav_result wait_for_capacity(uint64_t) { return MAV_OK; }
 };
 std::unique_ptr<Backend> make_backend();
+std::unique_ptr<Backend> make_pyrowave_backend();
+mav_result pyrowave_capability(mav_capability&);
 mav_result backend_capability(mav_codec,mav_capability&);
 void retain_pixel(mav_pixel_buffer);
 void release_pixel(mav_pixel_buffer);

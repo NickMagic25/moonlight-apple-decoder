@@ -2,7 +2,9 @@
 
 `moonlight-apple-decoder` owns the **moonlight-apple-video** library. Moonlight Qt
 is a compatibility reference and optional consumer. The reusable core never
-includes Moonlight/common-c, FFmpeg, Qt, SDL, Metal, or presentation classes.
+includes Moonlight/common-c, FFmpeg, Qt, SDL, or presentation classes. Metal is
+used for the native PyroWave decoder's compute stages; rendering belongs to the
+consumer.
 
 `include/moonlight_apple_video/decoder.h` is the installed, size/version-tagged C
 ABI. `src/bitstream.cpp` bounds and normalizes access units, parses AV1 sequence
@@ -13,6 +15,9 @@ copy. `src/backend_vt.mm` owns VT sessions and per-sample sourceFrameRefCon obje
 `src/decoder.cpp` owns admission, generations, public completions and metrics.
 `src/clock.cpp` defines the measurement clock. Portable fake-backend tests compile
 this same decoder control flow with a different private backend implementation.
+`src/pyrowave.cpp` validates Vibepollo framing and partial-frame sideband, and
+`src/backend_pyrowave.mm` owns the pinned compute decoder and retained output
+texture pool. See [PyroWave](pyrowave.md) for its distinct three-plane contract.
 
 The default is **hardware required**, two unresolved public access units, async
 VT decode, real-time hint on, default power preference, no temporal processing,
@@ -41,9 +46,13 @@ A completion's CVPixelBuffer is borrowed. Retain it to keep it beyond callback;
 release it when the consumer finishes. Retained output survives reset/destruction.
 The core requests IOSurface and Metal-compatible YUV output, preserving 8/10-bit,
 4:2:0 and full/video range. Unsupported consumer formats are rejected explicitly.
-4:4:4, extra AV1 layers/profiles and reordered HEVC are outside the baseline and
+For AV1/HEVC, 4:4:4, extra AV1 layers/profiles and reordered HEVC are outside the baseline and
 return explicit unsupported results. Valid PTS/DTS with different ordering are
 also rejected by this low-delay API path.
+PyroWave supports both 4:2:0 and 4:4:4 through a borrowed `mav_gpu_frame` containing
+three immutable single-channel Metal textures. Retain/release that frame through
+the renderer's GPU completion; it survives decoder reset/destruction. Submission
+and presentation never map those decoded planes on the CPU.
 
 ## Concurrency and recovery
 
@@ -69,7 +78,9 @@ Reset increments generation before waiting, cancels old-generation delivery,
 invalidates reference state and requires new configuration/random access.
 Destruction closes admission and joins VT callbacks before freeing decoder state.
 Caller joins its other API users before destruction. Output-buffer lifetime is
-independent from submission capacity.
+independent from submission capacity for VT output. PyroWave additionally bounds
+live retained output leases and applies backpressure when that pool is occupied.
+Malformed PyroWave frames do not poison following independent frames.
 
 ## Metadata and timing
 
@@ -78,6 +89,9 @@ fill unspecified bitstream fields; explicit per-unit metadata then configuration
 fallback fills remaining fields. Unknown ISO color value 2 is filled per field.
 Mastering and CLL data are normalized to CoreMedia/HEVC units. HDR requires real
 10-bit codec signaling and transfer metadata; no 8-bit-to-HDR relabeling occurs.
+PyroWave's floating point syntax has no bit-depth flag and Vibepollo leaves its
+header's VUI bits unset. Negotiated bit depth plus explicit per-unit/transport and
+configuration color metadata determine its output interpretation.
 
 All latency trace timestamps use `CLOCK_UPTIME_RAW` nanoseconds on Apple.
 PTS/DTS remain in their supplied media timebase and are never client wall time.
@@ -92,6 +106,23 @@ must remain distinguishable in reports. Rendering/presentation are unavailable
 in headless replay; zero is never substituted. Capability queries are only
 codec-level candidates; `hardware_validated` requires an actual hardware output
 for the configured stream.
+
+An additive, size-tagged `mav_decode_trace` tail provides codec-neutral backend
+start, native decode-call submit/return, and (for PyroWave) Metal commit/start/end.
+The existing ABI-2 completion prefix and `mav_trace` layout remain unchanged.
+Consumers compiled against the extended header should use `mav_completion_copy`
+instead of copying an incoming completion at the new full size: it reads only the
+producer's supplied prefix and zeroes an absent tail. This metadata copy does not
+retain borrowed output storage. `mav_completion_get_decode_trace` returns
+`MAV_API_UNAVAILABLE` for an older completion without reading its absent tail.
+
+Metal GPU host timestamps are converted to decoder nanoseconds with a fresh
+bracketed `CACurrentMediaTime` reading at completion. Only finite, ordered GPU
+times inside commit-to-callback and calibration uncertainty at most one millisecond
+are published. The half bracket measures local sampling uncertainty, not physical
+scanout accuracy. All validity bits remain clear when timing is unavailable. These
+stages separate CPU preparation, backend packet assembly, upload/encoding, GPU
+queueing/execution, and CPU completion notification for the same access unit.
 
 ## Provenance
 

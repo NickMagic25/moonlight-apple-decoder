@@ -1,5 +1,6 @@
 #include "backend.hpp"
 #include "color.hpp"
+#include "pyrowave.hpp"
 #include <algorithm>
 #include <chrono>
 #include <condition_variable>
@@ -13,7 +14,7 @@ namespace { thread_local unsigned callback_depth=0; struct CallbackScope { Callb
 struct Submission {
     uint64_t serial=0; mav_completion completion{}; mav_color bitstream_color{};
     size_t remaining=0; std::vector<std::shared_ptr<Work>> work;
-    ~Submission(){if(completion.pixel_buffer) release_pixel(completion.pixel_buffer);}
+    ~Submission(){if(completion.pixel_buffer) release_pixel(completion.pixel_buffer);if(completion.gpu_frame)mav_gpu_frame_release(completion.gpu_frame);}
 };
 struct mav_decoder {
     mav_config config; Bitstream parser; std::unique_ptr<Backend> backend;
@@ -21,7 +22,7 @@ struct mav_decoder {
     std::map<uint64_t,std::shared_ptr<Submission>> pending;
     uint64_t serial=0; bool closing=false,need_random_access=true,configured=false;
     Format format; mav_color format_color{}; mav_metrics metrics{};
-    explicit mav_decoder(const mav_config& c):config(c),parser(c.codec==MAV_CODEC_AV1?Codec::AV1:Codec::HEVC),backend(make_backend()) {
+    explicit mav_decoder(const mav_config& c):config(c),parser(c.codec==MAV_CODEC_AV1?Codec::AV1:Codec::HEVC),backend(c.codec==MAV_CODEC_PYROWAVE?make_pyrowave_backend():make_backend()) {
         metrics.struct_size=sizeof(metrics); metrics.version=MAV_ABI_VERSION;metrics.generation=1;
         metrics.realtime_effective=metrics.power_efficiency_effective=metrics.thread_count_effective=-1;
     }
@@ -42,18 +43,25 @@ struct mav_decoder {
             if(c.generation!=metrics.generation||closing) {
                 if(c.status!=MAV_COMPLETION_FAILED&&c.status!=MAV_COMPLETION_DROPPED){c.status=MAV_COMPLETION_CANCELLED;c.result=MAV_OK;}
             }
-            else if(output.result!=MAV_OK) {
+            else if(config.codec==MAV_CODEC_PYROWAVE&&output.result==MAV_MALFORMED_INPUT) {
+                // Every PyroWave frame is independent. Invalid records lose this
+                // output without poisoning following accepted frames.
+                c.status=MAV_COMPLETION_DROPPED;c.result=output.result;c.backend_status=output.status;
+            } else if(output.result!=MAV_OK) {
                 c.status=MAV_COMPLETION_FAILED;c.result=output.result;c.backend_status=output.status;
                 if(!need_random_access)++metrics.generation;
                 need_random_access=true;metrics.hardware_validated=0;metrics.last_backend_status=output.status;
             } else if(output.dropped&&c.status!=MAV_COMPLETION_FAILED) {
                 c.status=MAV_COMPLETION_DROPPED;
                 // Suppress dependents already admitted under the failed generation.
-                if(!need_random_access)++metrics.generation;
-                need_random_access=true;metrics.hardware_validated=0;
-            } else if(output.image&&display&&c.status!=MAV_COMPLETION_FAILED) {
+                if(config.codec!=MAV_CODEC_PYROWAVE){
+                    if(!need_random_access)++metrics.generation;
+                    need_random_access=true;metrics.hardware_validated=0;}
+            } else if((output.image||output.gpu_frame)&&display&&c.status!=MAV_COMPLETION_FAILED) {
                 if(c.pixel_buffer) release_pixel(c.pixel_buffer);
-                c.pixel_buffer=output.image;retain_pixel(output.image);
+                c.pixel_buffer=output.image;if(output.image)retain_pixel(output.image);
+                if(c.gpu_frame)mav_gpu_frame_release(c.gpu_frame);
+                c.gpu_frame=output.gpu_frame;if(output.gpu_frame)mav_gpu_frame_retain(output.gpu_frame);
                 c.status=MAV_COMPLETION_OUTPUT;c.displayed_outputs=1;
                 c.width=output.width;c.height=output.height;c.pixel_format=output.pixel_format;
 #ifdef MAV_VT_EXPERIMENTS
@@ -64,17 +72,29 @@ struct mav_decoder {
                 if(c.hardware_accelerated) metrics.hardware_validated=1;
             }
             if(output.callback_ns) {c.trace.callback_ns=std::max(c.trace.callback_ns,output.callback_ns);c.trace.valid|=MAV_TRACE_CALLBACK;}
+            if(output.decode_trace.valid&MAV_DECODE_TRACE_GPU_EXECUTION){
+                c.decode_trace.gpu_start_ns=output.decode_trace.gpu_start_ns;
+                c.decode_trace.gpu_end_ns=output.decode_trace.gpu_end_ns;
+                c.decode_trace.gpu_clock_uncertainty_ns=output.decode_trace.gpu_clock_uncertainty_ns;
+                c.decode_trace.valid|=MAV_DECODE_TRACE_GPU_EXECUTION;
+            }
             if(--s->remaining==0) {
-                if(c.status!=MAV_COMPLETION_OUTPUT) {c.displayed_outputs=0;if(c.pixel_buffer){release_pixel(c.pixel_buffer);c.pixel_buffer=nullptr;}}
-                uint64_t first=UINT64_MAX,last_return=0; bool returns=true;uint32_t calls=0;
+                if(c.status!=MAV_COMPLETION_OUTPUT) {c.displayed_outputs=0;if(c.pixel_buffer){release_pixel(c.pixel_buffer);c.pixel_buffer=nullptr;}if(c.gpu_frame){mav_gpu_frame_release(c.gpu_frame);c.gpu_frame=nullptr;}}
+                uint64_t first=UINT64_MAX,last_return=0,first_backend=UINT64_MAX,last_commit=0; bool returns=true;uint32_t calls=0;
                 for(const auto& w:s->work) {
                     auto a=w->submit_ns.load(),b=w->return_ns.load();
+                    if(auto start=w->backend_start_ns.load())first_backend=std::min(first_backend,start);
+                    last_commit=std::max(last_commit,w->gpu_commit_ns.load());
                     if(a){first=std::min(first,a);++calls;if(!b)returns=false;}
                     last_return=std::max(last_return,b);
                 }
                 c.internal_samples=calls;
-                if(calls){c.trace.vt_submit_ns=first;c.trace.valid|=MAV_TRACE_VT_SUBMIT;}
-                if(calls&&returns){c.trace.vt_return_ns=last_return;c.trace.valid|=MAV_TRACE_VT_RETURN;}
+                if(calls&&config.codec!=MAV_CODEC_PYROWAVE){c.trace.vt_submit_ns=first;c.trace.valid|=MAV_TRACE_VT_SUBMIT;}
+                if(calls&&returns&&config.codec!=MAV_CODEC_PYROWAVE){c.trace.vt_return_ns=last_return;c.trace.valid|=MAV_TRACE_VT_RETURN;}
+                if(first_backend!=UINT64_MAX){c.decode_trace.backend_start_ns=first_backend;c.decode_trace.valid|=MAV_DECODE_TRACE_BACKEND_START;}
+                if(calls){c.decode_trace.backend_submit_ns=first;c.decode_trace.valid|=MAV_DECODE_TRACE_BACKEND_SUBMIT;}
+                if(calls&&returns){c.decode_trace.backend_return_ns=last_return;c.decode_trace.valid|=MAV_DECODE_TRACE_BACKEND_RETURN;}
+                if(last_commit){c.decode_trace.gpu_commit_ns=last_commit;c.decode_trace.valid|=MAV_DECODE_TRACE_GPU_COMMIT;}
                 c.trace.handoff_ns=mav_monotonic_time_ns();
                 ++metrics.completed;metrics.displayed+=c.displayed_outputs;
                 if(c.status==MAV_COMPLETION_NO_DISPLAY)++metrics.no_display;
@@ -111,16 +131,17 @@ mav_result submit(mav_decoder* d,const mav_access_unit* u) {
     if(!op.owns_lock())return reject(d,MAV_WOULD_BLOCK);
     if(!tag(u->struct_size,u->version,sizeof(*u))||u->codec!=d->config.codec||!u->spans||!u->span_count||u->span_count>MAV_MAX_SPANS||
         (u->flags&~(MAV_INPUT_RANDOM_ACCESS|MAV_INPUT_DISCONTINUITY))||!valid_color(u->color)||
-        u->framing!=(u->codec==MAV_CODEC_AV1?MAV_FRAMING_AV1_LOW_OVERHEAD:MAV_FRAMING_HEVC_ANNEX_B)) return reject(d,MAV_INVALID_ARGUMENT);
+        u->framing!=(u->codec==MAV_CODEC_PYROWAVE?MAV_FRAMING_PYROWAVE:u->codec==MAV_CODEC_AV1?MAV_FRAMING_AV1_LOW_OVERHEAD:MAV_FRAMING_HEVC_ANNEX_B)) return reject(d,MAV_INVALID_ARGUMENT);
     for(auto t:{u->pts,u->dts,u->duration}) if(t.valid&&t.timescale<=0)return reject(d,MAV_INVALID_ARGUMENT);
     // This initial path is explicitly decode-order==presentation-order.
     if(u->pts.valid&&u->dts.valid && (__int128)u->pts.value*u->dts.timescale!=(__int128)u->dts.value*u->pts.timescale)return reject(d,MAV_UNSUPPORTED);
     uint64_t generation;size_t outstanding;bool recovery;
     {std::lock_guard<std::mutex> l(d->state);if(d->closing)return MAV_CLOSED;outstanding=d->pending.size();generation=d->metrics.generation;recovery=d->need_random_access;}
-    if(outstanding>=d->config.max_frames_in_flight)return reject(d,MAV_WOULD_BLOCK);
+    if(outstanding>=d->config.max_frames_in_flight||!d->backend->has_capacity())return reject(d,MAV_WOULD_BLOCK);
     if((u->flags&MAV_INPUT_DISCONTINUITY)&&d->configured)return reject(d,MAV_NEED_RANDOM_ACCESS);
     auto s=std::make_shared<Submission>();auto& c=s->completion;
     c.struct_size=sizeof(c);c.version=MAV_ABI_VERSION;c.frame_id=u->frame_id;c.generation=generation;c.caller_context=u->caller_context;
+    c.decode_trace.struct_size=sizeof(c.decode_trace);c.decode_trace.version=MAV_ABI_VERSION;
     c.status=MAV_COMPLETION_NO_DISPLAY;c.pts=u->pts;c.duration=u->duration;
     c.trace.admission_ns=mav_monotonic_time_ns();c.trace.preparation_start_ns=c.trace.admission_ns;
     c.trace.scheduled_arrival_ns=u->scheduled_arrival_ns;c.trace.first_packet_ns=u->first_packet_ns;
@@ -131,7 +152,7 @@ mav_result submit(mav_decoder* d,const mav_access_unit* u) {
     auto candidate=d->parser; Prepared p;std::string error;
     // The detached parser is committed below only after complete admission.
     // Avoid a second transactional clone inside this already-isolated copy.
-    auto parsed=candidate.prepare_isolated(spans.data(),spans.size(),p,error);
+    auto parsed=u->codec==MAV_CODEC_PYROWAVE?prepare_pyrowave(spans.data(),spans.size(),d->config,*u,p,error):candidate.prepare_isolated(spans.data(),spans.size(),p,error);
     if(parsed!=ParseResult::Ok)return reject(d,parse_result(parsed));
     c.trace.preparation_end_ns=mav_monotonic_time_ns();c.trace.valid|=MAV_TRACE_PREPARATION;
     bool has_picture=!p.samples.empty();
@@ -139,7 +160,7 @@ mav_result submit(mav_decoder* d,const mav_access_unit* u) {
     {std::lock_guard<std::mutex> l(d->state);recovery=d->need_random_access;}
     if(has_picture) {
         if((d->config.width&&p.format.width!=d->config.width)||(d->config.height&&p.format.height!=d->config.height)||
-            (d->config.bit_depth&&p.format.bit_depth!=d->config.bit_depth)||p.format.chroma!=1)return reject(d,MAV_UNSUPPORTED);
+            (d->config.bit_depth&&p.format.bit_depth!=d->config.bit_depth)||(d->config.chroma_format&&p.format.chroma!=d->config.chroma_format)||(u->codec!=MAV_CODEC_PYROWAVE&&p.format.chroma!=1))return reject(d,MAV_UNSUPPORTED);
         if(recovery&&!p.random_access)return reject(d,MAV_NEED_RANDOM_ACCESS);
     }
     s->bitstream_color=parsed_color(p.format.color);
@@ -184,6 +205,7 @@ mav_result submit(mav_decoder* d,const mav_access_unit* u) {
     d->parser=std::move(candidate);
     if(s->work.empty()){BackendOutput o;d->complete(s,o,false);}
     else for(const auto& w:s->work) {
+        w->backend_start_ns.store(mav_monotonic_time_ns());
         d->backend->submit(w);
         if(w->submit_ns.load()){std::lock_guard<std::mutex> l(d->state);++d->metrics.internal_samples;}
     }
@@ -203,16 +225,37 @@ mav_result control(mav_decoder* d,int mode) {
 }
 }
 extern "C" {
+mav_result mav_completion_copy(const mav_completion* completion,mav_completion* out){
+    if(!completion||!out||!tag(out->struct_size,out->version,sizeof(*out)))return MAV_INVALID_ARGUMENT;
+    uint32_t header[2];std::memcpy(header,completion,sizeof(header));
+    if(header[1]!=MAV_ABI_VERSION||header[0]<offsetof(mav_completion,decode_trace))return MAV_INVALID_ARGUMENT;
+    // A partial optional tail is unavailable as a whole; do not copy its
+    // uninterpretable/possibly poisoned fragments into the zeroed destination.
+    const size_t bytes=header[0]<sizeof(mav_completion)?offsetof(mav_completion,decode_trace):sizeof(mav_completion);
+    mav_completion copy{};std::memcpy(&copy,completion,bytes);
+    *out=copy;return MAV_OK;
+}
+mav_result mav_completion_get_decode_trace(const mav_completion* completion,mav_decode_trace* out){
+    if(!completion||!out||!tag(out->struct_size,out->version,sizeof(*out)))return MAV_INVALID_ARGUMENT;
+    uint32_t header[2];std::memcpy(header,completion,sizeof(header));
+    if(header[1]!=MAV_ABI_VERSION||header[0]<offsetof(mav_completion,decode_trace))return MAV_INVALID_ARGUMENT;
+    if(header[0]<offsetof(mav_completion,decode_trace)+sizeof(mav_decode_trace))return MAV_API_UNAVAILABLE;
+    mav_decode_trace copy{};std::memcpy(&copy,reinterpret_cast<const uint8_t*>(completion)+offsetof(mav_completion,decode_trace),sizeof(copy));
+    if(!tag(copy.struct_size,copy.version,sizeof(copy)))return MAV_API_UNAVAILABLE;
+    *out=copy;return MAV_OK;
+}
 void mav_config_default(mav_config* c,mav_codec codec){if(!c)return;std::memset(c,0,sizeof(*c));c->struct_size=sizeof(*c);c->version=MAV_ABI_VERSION;c->codec=codec;c->max_frames_in_flight=2;c->realtime=1;c->power_efficiency=-1;}
-void mav_access_unit_default(mav_access_unit* u,mav_codec codec){if(!u)return;std::memset(u,0,sizeof(*u));u->struct_size=sizeof(*u);u->version=MAV_ABI_VERSION;u->codec=codec;u->framing=codec==MAV_CODEC_AV1?MAV_FRAMING_AV1_LOW_OVERHEAD:MAV_FRAMING_HEVC_ANNEX_B;}
+void mav_access_unit_default(mav_access_unit* u,mav_codec codec){if(!u)return;std::memset(u,0,sizeof(*u));u->struct_size=sizeof(*u);u->version=MAV_ABI_VERSION;u->codec=codec;u->framing=codec==MAV_CODEC_PYROWAVE?MAV_FRAMING_PYROWAVE:codec==MAV_CODEC_AV1?MAV_FRAMING_AV1_LOW_OVERHEAD:MAV_FRAMING_HEVC_ANNEX_B;}
 const char* mav_result_string(mav_result r){switch(r){case MAV_OK:return "OK";case MAV_WOULD_BLOCK:return "WOULD_BLOCK";case MAV_INVALID_ARGUMENT:return "INVALID_ARGUMENT";case MAV_MALFORMED_INPUT:return "MALFORMED_INPUT";case MAV_UNSUPPORTED:return "UNSUPPORTED";case MAV_NEED_RANDOM_ACCESS:return "NEED_RANDOM_ACCESS";case MAV_DECODER_FAILED:return "DECODER_FAILED";case MAV_OUT_OF_MEMORY:return "OUT_OF_MEMORY";case MAV_REENTRANT_CALL:return "REENTRANT_CALL";case MAV_CLOSED:return "CLOSED";case MAV_TIMEOUT:return "TIMEOUT";case MAV_API_UNAVAILABLE:return "API_UNAVAILABLE";}return "UNKNOWN";}
-mav_result mav_query_capability(mav_codec codec,mav_capability* c){if(!c||!tag(c->struct_size,c->version,sizeof(*c))||(codec!=MAV_CODEC_AV1&&codec!=MAV_CODEC_HEVC))return MAV_INVALID_ARGUMENT;return backend_capability(codec,*c);}
+mav_result mav_query_capability(mav_codec codec,mav_capability* c){if(!c||!tag(c->struct_size,c->version,sizeof(*c))||(codec!=MAV_CODEC_AV1&&codec!=MAV_CODEC_HEVC&&codec!=MAV_CODEC_PYROWAVE))return MAV_INVALID_ARGUMENT;return codec==MAV_CODEC_PYROWAVE?pyrowave_capability(*c):backend_capability(codec,*c);}
 mav_result mav_decoder_create(const mav_config* c,mav_decoder** out){
     if(!out)return MAV_INVALID_ARGUMENT;*out=nullptr;
-    if(!c||!tag(c->struct_size,c->version,sizeof(*c))||!c->completion||(c->codec!=MAV_CODEC_AV1&&c->codec!=MAV_CODEC_HEVC)||
+    if(!c||!tag(c->struct_size,c->version,sizeof(*c))||!c->completion||(c->codec!=MAV_CODEC_AV1&&c->codec!=MAV_CODEC_HEVC&&c->codec!=MAV_CODEC_PYROWAVE)||
        !c->max_frames_in_flight||c->max_frames_in_flight>64||c->pixel_format_count>8||c->hardware_policy>MAV_HARDWARE_PREFERRED||c->hardware_policy<0||
        c->realtime<0||c->realtime>1||c->power_efficiency< -1||c->power_efficiency>1||!valid_color(c->fallback_color)||
        (c->bit_depth&&c->bit_depth!=8&&c->bit_depth!=10)||c->width>65536||c->height>65536)return MAV_INVALID_ARGUMENT;
+    if(c->chroma_format&&c->chroma_format!=1&&c->chroma_format!=3)return MAV_INVALID_ARGUMENT;
+    if(c->codec!=MAV_CODEC_PYROWAVE&&c->chroma_format==3)return MAV_UNSUPPORTED;
     if(c->power_efficiency==1&&c->realtime)return MAV_UNSUPPORTED;
     try{auto d=new mav_decoder(*c);*out=d;return MAV_OK;}catch(const std::bad_alloc&){return MAV_OUT_OF_MEMORY;}catch(...){return MAV_DECODER_FAILED;}
 }
@@ -223,9 +266,13 @@ mav_result mav_decoder_destroy(mav_decoder* d){if(!d)return MAV_OK;return contro
 mav_result mav_decoder_get_metrics(mav_decoder* d,mav_metrics* m){if(!d||!m||!tag(m->struct_size,m->version,sizeof(*m)))return MAV_INVALID_ARGUMENT;std::lock_guard<std::mutex> l(d->state);*m=d->metrics;return MAV_OK;}
 mav_result mav_decoder_wait_for_capacity(mav_decoder* d,uint64_t ns){
     if(!d)return MAV_INVALID_ARGUMENT;if(callback_depth)return MAV_REENTRANT_CALL;
+    auto start=std::chrono::steady_clock::now();
     std::unique_lock<std::mutex> l(d->state);auto pred=[&]{return d->closing||d->pending.size()<d->config.max_frames_in_flight;};
     if(ns==UINT64_MAX)d->capacity.wait(l,pred);
     else if(!d->capacity.wait_for(l,std::chrono::nanoseconds(std::min<uint64_t>(ns,INT64_MAX)),pred))return MAV_TIMEOUT;
-    return d->closing?MAV_CLOSED:MAV_OK;
+    if(d->closing)return MAV_CLOSED;
+    l.unlock();
+    if(ns!=UINT64_MAX){auto elapsed=std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now()-start).count();ns=uint64_t(elapsed)<ns?ns-uint64_t(elapsed):0;}
+    return d->backend->wait_for_capacity(ns);
 }
 }

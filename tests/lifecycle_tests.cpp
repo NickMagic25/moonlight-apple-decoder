@@ -44,9 +44,15 @@ int main(){
         CHECK(submit(s,key)==MAV_OK);CHECK(s.completions.size()==1);auto c=s.completions[0];
         CHECK(c.status==MAV_COMPLETION_OUTPUT);CHECK(c.trace.valid&MAV_TRACE_VT_SUBMIT);CHECK(c.trace.valid&MAV_TRACE_CALLBACK);
         CHECK(!(c.trace.valid&MAV_TRACE_VT_RETURN));CHECK(c.trace.callback_ns>=c.trace.vt_submit_ns);
+        mav_decode_trace stage{};stage.struct_size=sizeof(stage);stage.version=MAV_ABI_VERSION;
+        CHECK(mav_completion_get_decode_trace(&c,&stage)==MAV_OK);
+        CHECK(stage.valid==(MAV_DECODE_TRACE_BACKEND_START|MAV_DECODE_TRACE_BACKEND_SUBMIT));
+        CHECK(stage.backend_start_ns>=c.trace.preparation_end_ns&&stage.backend_submit_ns==c.trace.vt_submit_ns);
+        CHECK(stage.backend_submit_ns>=stage.backend_start_ns&&!stage.backend_return_ns&&!stage.gpu_start_ns);
         CHECK(submit(s,inter,2)==MAV_OK);CHECK(metrics(s).session_creations==1);CHECK(metrics(s).accepted==2);destroy(s);}
     {Sink s;create(s);mav_test::mode(Mode::Inline);CHECK(submit(s,mav_test::av1_sequence())==MAV_OK);
         CHECK(s.completions.size()==1&&s.completions[0].status==MAV_COMPLETION_NO_DISPLAY);CHECK(metrics(s).internal_samples==0);
+        CHECK(s.completions[0].decode_trace.valid==0);
         CHECK(submit(s,inter)==MAV_NEED_RANDOM_ACCESS);CHECK(submit(s,mav_test::av1_frame())==MAV_OK);destroy(s);}
     {Sink s;create(s);mav_test::mode(Mode::Delayed);auto copied=key;
         CHECK(submit(s,copied,10)==MAV_OK);std::fill(copied.begin(),copied.end(),0xff);
@@ -55,7 +61,11 @@ int main(){
         std::thread completion([]{mav_test::finish(true);});
         CHECK(mav_decoder_wait_for_capacity(s.decoder,1000000000)==MAV_OK);completion.join();
         auto m=metrics(s);CHECK(m.accepted==2&&m.completed==2&&m.outstanding==0&&m.peak_outstanding==2&&m.would_block==1);
-        CHECK(s.notifications==2);for(auto& c:s.completions)CHECK(c.trace.valid&MAV_TRACE_VT_RETURN);destroy(s);}
+        CHECK(s.notifications==2);for(auto& c:s.completions){CHECK(c.trace.valid&MAV_TRACE_VT_RETURN);
+            CHECK(c.decode_trace.valid==(MAV_DECODE_TRACE_BACKEND_START|MAV_DECODE_TRACE_BACKEND_SUBMIT|MAV_DECODE_TRACE_BACKEND_RETURN));
+            CHECK(c.decode_trace.backend_submit_ns==c.trace.vt_submit_ns&&c.decode_trace.backend_return_ns==c.trace.vt_return_ns);
+            CHECK(c.decode_trace.backend_return_ns>=c.decode_trace.backend_submit_ns&&c.trace.callback_ns>=c.decode_trace.backend_return_ns);
+        }destroy(s);}
     {Sink s;create(s);mav_test::mode(Mode::Delayed);CHECK(submit(s,key)==MAV_OK);CHECK(submit(s,inter,2)==MAV_OK);
         CHECK(mav_decoder_reset(s.decoder)==MAV_OK);CHECK(s.completions.size()==2);
         for(auto& c:s.completions)CHECK(c.status==MAV_COMPLETION_CANCELLED&&c.pixel_buffer==nullptr&&c.generation==1);

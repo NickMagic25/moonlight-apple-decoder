@@ -11,18 +11,19 @@ typedef struct __CVBuffer *mav_pixel_buffer;
 #ifdef __cplusplus
 extern "C" {
 #endif
-#define MAV_ABI_VERSION 1u
+#define MAV_ABI_VERSION 2u
 #define MAV_MAX_ACCESS_UNIT_BYTES (64u * 1024u * 1024u)
 #define MAV_MAX_SPANS 4096u
 typedef struct mav_decoder mav_decoder;
+typedef struct mav_gpu_frame_opaque *mav_gpu_frame;
 typedef enum mav_result {
     MAV_OK=0, MAV_WOULD_BLOCK=1, MAV_INVALID_ARGUMENT=2, MAV_MALFORMED_INPUT=3,
     MAV_UNSUPPORTED=4, MAV_NEED_RANDOM_ACCESS=5, MAV_DECODER_FAILED=6,
     MAV_OUT_OF_MEMORY=7, MAV_REENTRANT_CALL=8, MAV_CLOSED=9, MAV_TIMEOUT=10,
     MAV_API_UNAVAILABLE=11
 } mav_result;
-typedef enum mav_codec { MAV_CODEC_AV1=1, MAV_CODEC_HEVC=2 } mav_codec;
-typedef enum mav_framing { MAV_FRAMING_AV1_LOW_OVERHEAD=1, MAV_FRAMING_HEVC_ANNEX_B=2 } mav_framing;
+typedef enum mav_codec { MAV_CODEC_AV1=1, MAV_CODEC_HEVC=2, MAV_CODEC_PYROWAVE=3 } mav_codec;
+typedef enum mav_framing { MAV_FRAMING_AV1_LOW_OVERHEAD=1, MAV_FRAMING_HEVC_ANNEX_B=2, MAV_FRAMING_PYROWAVE=3 } mav_framing;
 typedef enum mav_hardware_policy { MAV_HARDWARE_REQUIRED=0, MAV_HARDWARE_PREFERRED=1 } mav_hardware_policy;
 typedef enum mav_completion_status {
     MAV_COMPLETION_OUTPUT=0, MAV_COMPLETION_NO_DISPLAY=1, MAV_COMPLETION_FAILED=2,
@@ -42,6 +43,9 @@ typedef struct mav_color {
 } mav_color;
 typedef struct mav_span { const uint8_t *data; size_t size; } mav_span;
 enum { MAV_INPUT_RANDOM_ACCESS=1, MAV_INPUT_DISCONTINUITY=2 };
+enum { MAV_PYROWAVE_FRAGMENT_DATA=0, MAV_PYROWAVE_FRAGMENT_LOST=1,
+       MAV_PYROWAVE_FRAGMENT_RECORD_START=2 };
+typedef struct mav_pyrowave_fragment { uint32_t offset, size, kind; } mav_pyrowave_fragment;
 typedef struct mav_access_unit {
     uint32_t struct_size, version; mav_codec codec; mav_framing framing;
     const mav_span *spans; size_t span_count; uint64_t frame_id; void *caller_context;
@@ -49,6 +53,12 @@ typedef struct mav_access_unit {
     /* Values in mav_monotonic_time_ns domain; zero means unavailable.
      * Do not put host presentation timestamps or unmapped common-c clock here. */
     uint64_t scheduled_arrival_ns, first_packet_ns;
+    /* PyroWave packet payloads, after the transport's short frame header is
+     * removed. If supplied, these ranges must tile all AU bytes in order.
+     * Lost ranges contain placeholders and are never interpreted as records. */
+    const mav_pyrowave_fragment *pyrowave_fragments;
+    size_t pyrowave_fragment_count;
+    uint32_t pyrowave_critical_packets;
 } mav_access_unit;
 enum { MAV_TRACE_PREPARATION=1, MAV_TRACE_VT_SUBMIT=2, MAV_TRACE_VT_RETURN=4,
        MAV_TRACE_CALLBACK=8, MAV_TRACE_ARRIVAL=16, MAV_TRACE_FIRST_PACKET=32 };
@@ -59,6 +69,23 @@ typedef struct mav_trace {
     /* With multiple child samples: first submit to last callback, distinguished
      * by internal_samples. Existing-frame events are not newly decoded frames. */
 } mav_trace;
+enum { MAV_DECODE_TRACE_BACKEND_START=1, MAV_DECODE_TRACE_BACKEND_SUBMIT=2,
+       MAV_DECODE_TRACE_BACKEND_RETURN=4, MAV_DECODE_TRACE_GPU_COMMIT=8,
+       MAV_DECODE_TRACE_GPU_EXECUTION=16 };
+/* Codec-neutral backend stages. CPU and mapped GPU timestamps share the
+ * mav_monotonic_time_ns domain. Preparation/callback/handoff remain in mav_trace.
+ * backend_start is entry to the backend; submit/return bracket its native decode
+ * call (PyroWave CPU upload/Metal encoding, or VT DecodeFrame). gpu_commit is
+ * immediately before Metal commit. GPU start/end are calibrated Metal host times,
+ * read after completion; uncertainty is the half-width of the calibration bracket,
+ * not physical timing accuracy. Unavailable/invalid stages have no validity bit.
+ * With multiple child samples CPU stages span first entry/submit to last return;
+ * internal_samples and show_existing_frame must distinguish those events. */
+typedef struct mav_decode_trace {
+    uint32_t struct_size, version, valid, reserved;
+    uint64_t backend_start_ns, backend_submit_ns, backend_return_ns;
+    uint64_t gpu_commit_ns, gpu_start_ns, gpu_end_ns, gpu_clock_uncertainty_ns;
+} mav_decode_trace;
 typedef struct mav_completion {
     uint32_t struct_size, version; uint64_t frame_id, generation; void *caller_context;
     mav_completion_status status; mav_result result; int32_t backend_status;
@@ -66,6 +93,12 @@ typedef struct mav_completion {
     uint32_t width, height, pixel_format, bit_depth, hardware_accelerated;
     uint32_t internal_samples, displayed_outputs, show_existing_frame;
     mav_trace trace;
+    /* PyroWave GPU output, borrowed during the callback. Exactly one of
+     * pixel_buffer and gpu_frame is present on an output completion. */
+    mav_gpu_frame gpu_frame;
+    /* Additive ABI-2 tail. Older callbacks retain the identical existing prefix.
+     * Use mav_completion_get_decode_trace to read this optional size-tagged tail. */
+    mav_decode_trace decode_trace;
 } mav_completion;
 typedef void (*mav_completion_callback)(void *context, const mav_completion *completion);
 typedef void (*mav_capacity_callback)(void *context);
@@ -80,6 +113,10 @@ typedef struct mav_config {
     uint32_t thread_count; /* 0 default, optional diagnostic hint */
     mav_color fallback_color;
     mav_completion_callback completion; mav_capacity_callback capacity_available; void *context;
+    /* 0 infers PyroWave chroma from its sequence header, 1 is 4:2:0, 3 is
+     * 4:4:4. AV1/HEVC currently support 0 or 1. PyroWave's floating point
+     * bitstream has no bit-depth flag: bit_depth chooses R8/R16 UNORM output. */
+    uint32_t chroma_format;
 } mav_config;
 typedef struct mav_metrics {
     uint32_t struct_size, version; uint64_t generation, accepted, completed, displayed;
@@ -117,8 +154,10 @@ mav_result mav_decoder_create(const mav_config *config, mav_decoder **decoder);
  * does not silently discard accepted work).
  *
  * Callbacks may be inline and on different threads. Buffers and completion
- * structs are BORROWED during callback; retain CVPixelBuffer to keep output
- * after callback/reset/destruction. No pixel planes are copied by this core.
+ * structs are BORROWED during callback; retain CVPixelBuffer or mav_gpu_frame
+ * to keep output after callback/reset/destruction. No decoded CPU pixel planes
+ * are copied by this core. PyroWave is an independent frame in either Vibepollo
+ * record or length-prefixed framing. Invalid frames do not require keyframes.
  * User callbacks are never called holding the state mutex. Submit/control
  * operations must be serialized by the caller; concurrent operations return
  * WOULD_BLOCK. Queries and capacity wait may run concurrently. Callback may
@@ -141,6 +180,25 @@ mav_result mav_decoder_drain(mav_decoder *decoder);
 mav_result mav_decoder_reset(mav_decoder *decoder);
 mav_result mav_decoder_destroy(mav_decoder *decoder);
 mav_result mav_decoder_get_metrics(mav_decoder *decoder, mav_metrics *metrics);
+/* Copies the optional codec-neutral stage trace. Initialize out.struct_size and
+ * out.version. An older shorter ABI-2 completion returns MAV_API_UNAVAILABLE;
+ * no tail is read and out is unchanged on failure. Safe during the callback. */
+mav_result mav_completion_get_decode_trace(const mav_completion *completion, mav_decode_trace *out);
+/* Bounded metadata copy for consumers compiled with an extended completion
+ * header. Initialize out.struct_size/version. Copies the known source prefix and
+ * zeroes an unavailable tail, without reading past source.struct_size. Preserves
+ * the producer's size/version so optional getters still report unavailable.
+ * Pixel/GPU pointers remain borrowed: this function does not retain outputs. */
+mav_result mav_completion_copy(const mav_completion *completion, mav_completion *out);
+/* The lease retains three immutable GPU planes independently of the decoder.
+ * Textures cross the plain C ABI as borrowed id<MTLTexture> object pointers.
+ * Keep the frame retained through renderer command completion. PyroWave decode
+ * and render must use the textures' own Metal device. No CPU plane copies occur.
+ * Chroma is 1 (4:2:0) or 3 (4:4:4). */
+void mav_gpu_frame_retain(mav_gpu_frame frame);
+void mav_gpu_frame_release(mav_gpu_frame frame);
+void *mav_gpu_frame_plane(mav_gpu_frame frame, uint32_t plane);
+uint32_t mav_gpu_frame_chroma(mav_gpu_frame frame);
 #ifdef __cplusplus
 }
 #endif

@@ -1,7 +1,8 @@
 # moonlight-apple-video
 
 A reusable C ABI around direct asynchronous Apple VideoToolbox decoding of AV1
-Main 8/10-bit and HEVC Main/Main10. The implementation lives in this
+Main 8/10-bit and HEVC Main/Main10, plus native asynchronous Metal decoding of
+PyroWave 4:2:0/4:4:4 into retained GPU planes. The implementation lives in this
 `moonlight-apple-decoder` repository. Moonlight Qt is an optional consumer and
 compatibility reference. The core has no FFmpeg, Moonlight, Qt, SDL or renderer
 dependency. Native H.264 is not implemented.
@@ -17,7 +18,11 @@ The core supports macOS 11+, iOS/iPadOS 17+, tvOS 17+; AV1 hardware sessions are
 runtime gated (macOS 14+/iOS/tvOS 17+ plus actual hardware support). These are
 library targets, not a change to a consumer application's deployment target.
 
+PyroWave comes from the pinned [fork submodule](Dependencies/pyrowave). Initialize
+it for local builds (including a local SwiftPM path dependency):
+
 ```sh
+git submodule update --init --recursive
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
 cmake --build build -j
 ctest --test-dir build --output-on-failure
@@ -34,7 +39,8 @@ swift run -c release mav-swift-smoke
 ```
 
 The Swift target imports the C Clang module; Swift C++ interoperability is not
-required. See [Swift ownership smoke](examples/swift/main.swift) and the full
+required. See [PyroWave input, GPU ownership and validation](docs/pyrowave.md),
+[Swift ownership smoke](examples/swift/main.swift) and the full
 ownership/concurrency contract in the public header.
 
 See [C++23 and Swift 6.3 validation](docs/toolchain-upgrade.md) for the upgrade's
