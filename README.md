@@ -1,8 +1,14 @@
 # moonlight-apple-video
 
+> **Moved to Swiftlight.** This repository is archived and retained for its Git history. Active development, decoder source, tests, tools, and documentation now live in the [Swiftlight monorepo](https://github.com/NickMagic25/swiftlight), under `Packages/moonlight-apple-decoder`.
+>
+> The migration is available in [Swiftlight merge request #10](https://github.com/NickMagic25/swiftlight/pull/10). Until that request is merged, use the [decoder package on the migration branch](https://github.com/NickMagic25/swiftlight/tree/codex/decoder-monorepo/Packages/moonlight-apple-decoder). After merge, use the [decoder package on Swiftlight main](https://github.com/NickMagic25/swiftlight/tree/main/Packages/moonlight-apple-decoder). Please open new issues and pull requests in Swiftlight.
+>
+> The remaining instructions and validation reports below describe this repository before the move. Refer to the decoder package in Swiftlight for maintained setup and engineering guidance.
+
 A reusable C ABI around direct asynchronous Apple VideoToolbox decoding of AV1
-Main 8/10-bit and HEVC Main/Main10. The implementation lives in this
-`moonlight-apple-decoder` repository. Moonlight Qt is an optional consumer and
+Main 8/10-bit and HEVC Main/Main10. The maintained implementation lives in the
+Swiftlight monorepo; this checkout preserves the pre-migration implementation. Moonlight Qt is an optional consumer and
 compatibility reference. The core has no FFmpeg, Moonlight, Qt, SDL or renderer
 dependency. Native H.264 is not implemented.
 
